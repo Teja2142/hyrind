@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-// Assuming Bootstrap CSS is globally available or imported in the main index.js/App.js
-// import 'bootstrap/dist/css/bootstrap.min.css';
+// Import Link and useNavigate
+import { Link, useNavigate } from 'react-router-dom'; 
 
 // --- Start: Inline SVG Icon Definitions (Lucide Icons used for aesthetics) ---
 
@@ -136,7 +135,8 @@ const TextInput = ({ label, name, type = 'text', value, onChange, error, icon: I
             onBlur={isDate ? (e) => (e.target.type = 'text') : undefined} // Switch back to text on blur
             className={`form-control form-control-lg ${error ? 'is-invalid border-danger' : 'border-start-0'}`}
             required={required}
-            inputMode={type === 'tel' ? 'numeric' : 'text'}
+            // Only set inputMode to numeric for phone field
+            inputMode={name === 'phone' ? 'numeric' : 'text'}
             // For month input, we use a simple text input with a mask to force MM/YYYY
             min={isDate ? "1950-01" : undefined}
             max={isDate ? "2050-12" : undefined}
@@ -150,7 +150,12 @@ const TextInput = ({ label, name, type = 'text', value, onChange, error, icon: I
 
 
 // Main Register Component
-const Register = ({ navigate }) => {
+// FIX APPLIED: Removed { navigate } prop which caused the redeclaration error
+const Register = () => {
+  const navigate = useNavigate(); // This is the correct way to get the function in RRDv6+
+  // Define the target API endpoint
+  const REGISTER_API_URL = "http://127.0.0.1:8000/api/register/";
+  
   const initialFormState = {
     firstName: '',
     lastName: '',
@@ -186,15 +191,23 @@ const Register = ({ navigate }) => {
   // Utility function for validation
   const validate = () => {
     let newErrors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\+1-\d{3}-\d{3}-\d{4}$/; // +1-XXX-XXX-XXXX
+    
+    // Stricter Email Regex: Requires @ and domain part (e.g., example.com)
+    // The user requested checking for '@gamil.com', '@theirdomain.com/.in'. This regex covers that structure generally.
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; 
+    
+    // Name Regex: Only allows letters, spaces, hyphens, and apostrophes
+    const nameRegex = /^[a-zA-Z\s'-]+$/; 
+    
+    // Phone Regex: Exactly 15 chars for the +1-XXX-XXX-XXXX format
+    const phoneRegex = /^\+1-\d{3}-\d{3}-\d{4}$/; 
+    
     const dateRegex = /^\d{4}-\d{2}$/; // YYYY-MM format from input type="month"
     const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
 
     // --- A. Required Fields Check ---
     const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'university', 'degree', 'major', 'visaStatus', 'graduationDate', 'consentToTerms'];
     
-    // Add conditional requirement for OPT End Date
     if (formData.visaStatus === 'F1-OPT') {
       requiredFields.push('optEndDate');
     }
@@ -202,8 +215,6 @@ const Register = ({ navigate }) => {
     requiredFields.forEach(field => {
       if (field === 'consentToTerms') {
         if (!formData[field]) newErrors[field] = 'You must agree to the terms.';
-      } else if (field === 'resumeFile') {
-        if (!formData[field]) newErrors[field] = 'Resume file upload is required.';
       } else if (!formData[field] || (typeof formData[field] === 'string' && formData[field].trim() === '')) {
         newErrors[field] = 'This field is required.';
       }
@@ -215,19 +226,36 @@ const Register = ({ navigate }) => {
 
     // --- B. Specific Format/Length Validations ---
 
-    // Name length
-    if (formData.firstName.length > 50) newErrors.firstName = 'Max 50 characters.';
-    if (formData.lastName.length > 50) newErrors.lastName = 'Max 50 characters.';
-
-    // Email
-    if (formData.email && !emailRegex.test(formData.email)) {
-      newErrors.email = 'Invalid email format (e.g., user@example.com).';
+    // Name Validation
+    if (formData.firstName) {
+        if (!nameRegex.test(formData.firstName.trim())) {
+            newErrors.firstName = 'Name can only contain letters, spaces, hyphens, and apostrophes.';
+        } else if (formData.firstName.length > 50) {
+            newErrors.firstName = 'Max 50 characters.';
+        }
     }
-    // Note: Uniqueness validation would happen server-side
+    if (formData.lastName) {
+        if (!nameRegex.test(formData.lastName.trim())) {
+            newErrors.lastName = 'Name can only contain letters, spaces, hyphens, and apostrophes.';
+        } else if (formData.lastName.length > 50) {
+            newErrors.lastName = 'Max 50 characters.';
+        }
+    }
 
-    // Phone
-    if (formData.phone && !phoneRegex.test(formData.phone)) {
-      newErrors.phone = 'Format must be +1-XXX-XXX-XXXX.';
+    // Email Validation
+    if (formData.email && !emailRegex.test(formData.email)) {
+      newErrors.email = 'Invalid email format (e.g., user@domain.com).';
+    }
+
+    // Phone Validation
+    if (formData.phone) {
+        const digitsOnly = formData.phone.replace(/[^\d]/g, '');
+        if (digitsOnly.length !== 11) { // 1 (for +1) + 10 digits
+            newErrors.phone = 'Phone number must be exactly 10 digits.';
+        } else if (!phoneRegex.test(formData.phone)) {
+            // This is primarily a double-check if the mask logic failed, ensuring final format is correct
+            newErrors.phone = 'Format must be +1-XXX-XXX-XXXX.';
+        }
     }
 
     // University/Major length
@@ -236,7 +264,6 @@ const Register = ({ navigate }) => {
 
     // Date (Checks if the required YYYY-MM format is present after month input)
     if (formData.graduationDate && !dateRegex.test(formData.graduationDate)) {
-      // This error should rarely happen if input is correctly set to 'month' type
       newErrors.graduationDate = 'Date must be in MM/YYYY format.';
     }
     if (formData.visaStatus === 'F1-OPT' && formData.optEndDate && !dateRegex.test(formData.optEndDate)) {
@@ -256,10 +283,10 @@ const Register = ({ navigate }) => {
 
     // URL validation
     if (formData.linkedinUrl && !urlRegex.test(formData.linkedinUrl)) {
-      newErrors.linkedinUrl = 'Invalid URL format.';
+      newErrors.linkedinUrl = 'Invalid URL format (must start with http:// or https://).';
     }
     if (formData.githubUrl && !urlRegex.test(formData.githubUrl)) {
-      newErrors.githubUrl = 'Invalid URL format.';
+      newErrors.githubUrl = 'Invalid URL format (must start with http:// or https://).';
     }
     
     // Notes length
@@ -276,34 +303,35 @@ const Register = ({ navigate }) => {
     const { name, value, type, checked, files } = e.target;
     let newValue = value;
 
-    // Special handling for file input
     if (type === 'file') {
         newValue = files[0];
     } else if (type === 'checkbox') {
         newValue = checked;
     } else if (name === 'phone') {
-        // Enforce +1-XXX-XXX-XXXX format mask logic
-        const digits = value.replace(/[^\d]/g, '');
-        if (digits.length > 10) {
-            newValue = '+1-' + digits.substring(0, 3) + '-' + digits.substring(3, 6) + '-' + digits.substring(6, 10);
-        } else if (digits.length > 6) {
-            newValue = '+1-' + digits.substring(0, 3) + '-' + digits.substring(3, 6) + '-' + digits.substring(6);
-        } else if (digits.length > 3) {
-            newValue = '+1-' + digits.substring(0, 3) + '-' + digits.substring(3);
-        } else if (digits.length > 0) {
-            newValue = '+1-' + digits;
-        } else {
+        // 1. Filter out all non-digit characters. This blocks alphabets.
+        const originalDigits = value.replace(/[^\d]/g, '');
+        // We only care about the last 10 digits the user intends to enter
+        const userDigits = originalDigits.length > 1 ? originalDigits.substring(1) : originalDigits;
+        const tenDigits = userDigits.substring(0, 10);
+
+        // 2. Apply the +1-XXX-XXX-XXXX format mask logic
+        if (tenDigits.length === 0) {
             newValue = '';
-        }
-        // If user is typing, they start at +1- (it's implicit)
-        if (value.startsWith('+1-')) {
-            newValue = value;
-        } else if (value.length > 0) {
-            newValue = '+1-' + value;
+        } else if (tenDigits.length <= 3) {
+            newValue = `+1-${tenDigits}`;
+        } else if (tenDigits.length <= 6) {
+            newValue = `+1-${tenDigits.substring(0, 3)}-${tenDigits.substring(3)}`;
         } else {
-            newValue = '';
+            newValue = `+1-${tenDigits.substring(0, 3)}-${tenDigits.substring(3, 6)}-${tenDigits.substring(6)}`;
         }
+
+    } else if (name === 'firstName' || name === 'lastName') {
+        // Name validation during input (only allow letters, spaces, hyphens, apostrophes)
+        // Note: The stricter check is in the validate() function, this just prevents numbers/symbols from being typed
+        const cleanValue = value.replace(/[^a-zA-Z\s'-]/g, '');
+        newValue = cleanValue;
     }
+
 
     setFormData(prev => ({
       ...prev,
@@ -325,30 +353,74 @@ const Register = ({ navigate }) => {
     setIsSubmitting(true);
     setSubmissionMessage('Submitting registration...');
 
-    // Prepare data for API (excluding the file itself if not strictly needed)
-    const { resumeFile, ...dataToLog } = formData;
-    const logData = {
-      ...dataToLog,
-      // Convert YYYY-MM to MM/YYYY for logging/display
-      graduationDate: formData.graduationDate.split('-').reverse().join('/'),
-      optEndDate: formData.optEndDate ? formData.optEndDate.split('-').reverse().join('/') : undefined,
-      resumeFileName: resumeFile ? resumeFile.name : 'No file',
+    // Prepare data payload for the backend
+    const apiPayload = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        // Remove +1- prefix/masking for clean submission (assuming backend expects 10 digits or E.164)
+        phone_number: formData.phone.replace(/[^\d]/g, ''), 
+        university: formData.university,
+        degree: formData.degree,
+        major: formData.major,
+        visa_status: formData.visaStatus,
+        // Convert YYYY-MM date string to MM/YYYY format if needed, or just send YYYY-MM
+        graduation_date: formData.graduationDate, 
+        opt_end_date: formData.visaStatus === 'F1-OPT' ? formData.optEndDate : null,
+        referral_source: formData.referralSource,
+        linkedin_url: formData.linkedinUrl,
+        github_url: formData.githubUrl,
+        additional_notes: formData.additionalNotes,
+        // consent_to_terms: formData.consentToTerms, // Backend usually confirms this based on submission
+        // Note: File upload requires FormData, but for JSON API, we typically send the metadata and upload the file separately/later.
+        // For this example, we log file name but don't try to upload the binary data via JSON.
+        resume_file_name: formData.resumeFile ? formData.resumeFile.name : null,
     };
 
-    console.log("--- CANDIDATE REGISTRATION SUBMITTED ---");
-    console.log(logData);
-    console.log("----------------------------------------");
+    try {
+        const response = await fetch(REGISTER_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any necessary authorization headers (e.g., 'Authorization': 'Bearer token')
+            },
+            body: JSON.stringify(apiPayload),
+        });
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+        if (response.ok) {
+            const result = await response.json();
+            setIsSubmitting(false);
+            // Assuming the backend returns a helpful message
+            setSubmissionMessage(`Registration successful! ${result.message || ''}`);
+            // Clear the form upon success
+            // setFormData(initialFormState);
+            console.log("API Success:", result);
+            
+        } else {
+            // Handle HTTP error status (e.g., 400 Bad Request, 500 Server Error)
+            const errorData = await response.json();
+            setIsSubmitting(false);
+            let errorMessage = errorData.detail || errorData.error || 'Registration failed due to server error.';
+            
+            // Try to extract validation errors from the backend response and merge with front-end errors
+            if (errorData.errors) {
+                const backendErrors = {};
+                for (const key in errorData.errors) {
+                    backendErrors[key] = errorData.errors[key].join(', ');
+                }
+                setErrors(prev => ({ ...prev, ...backendErrors }));
+                errorMessage = 'Registration failed. Please review the errors.';
+            }
 
-    // Simulate successful registration
-    setIsSubmitting(false);
-    setSubmissionMessage('Registration successful! Redirecting to login...');
-    
-    // In a real app, you would redirect the user
-    // setTimeout(() => navigate('/login'), 1000); 
-    console.log("Redirecting user to login or success page (simulated).");
+            setSubmissionMessage(errorMessage);
+            console.error("API Error:", errorData);
+        }
+    } catch (error) {
+        // Handle network errors (e.g., server offline, CORS issue)
+        setIsSubmitting(false);
+        setSubmissionMessage(`Network error. Could not connect to the backend at ${REGISTER_API_URL}.`);
+        console.error("Network Fetch Error:", error);
+    }
   };
 
   return (
@@ -377,7 +449,7 @@ const Register = ({ navigate }) => {
 
                 {/* Submission Message Area */}
                 {submissionMessage && (
-                    <div className={`alert ${errors && Object.keys(errors).length > 0 ? 'alert-danger' : 'alert-success'} text-center mb-4`}>
+                    <div className={`alert ${isSubmitting ? 'alert-info' : errors && Object.keys(errors).length > 0 ? 'alert-danger' : 'alert-success'} text-center mb-4`}>
                         {submissionMessage}
                     </div>
                 )}
@@ -390,7 +462,7 @@ const Register = ({ navigate }) => {
                     {/* First Name */}
                     <div className="col-md-6">
                       <TextInput
-                        label="First Name (Max 50 chars)"
+                        label="First Name"
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
@@ -405,7 +477,7 @@ const Register = ({ navigate }) => {
                     {/* Last Name */}
                     <div className="col-md-6">
                       <TextInput
-                        label="Last Name (Max 50 chars)"
+                        label="Last Name"
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
@@ -420,7 +492,7 @@ const Register = ({ navigate }) => {
                     {/* Email Address */}
                     <div className="col-md-6">
                       <TextInput
-                        label="Email Address (Unique)"
+                        label="Email Address"
                         name="email"
                         type="email"
                         value={formData.email}
@@ -435,7 +507,7 @@ const Register = ({ navigate }) => {
                     {/* Phone Number */}
                     <div className="col-md-6">
                       <TextInput
-                        label="Phone (+1-XXX-XXX-XXXX)"
+                        label="Phone"
                         name="phone"
                         type="tel"
                         value={formData.phone}
@@ -508,7 +580,7 @@ const Register = ({ navigate }) => {
                     {/* Graduation Date (MM/YYYY) */}
                     <div className="col-md-6">
                       <TextInput
-                        label="Graduation Date (MM/YYYY)"
+                        label="Graduation (MM/YYYY)"
                         name="graduationDate"
                         type="date"
                         value={formData.graduationDate}
@@ -714,7 +786,7 @@ const Register = ({ navigate }) => {
                       {isSubmitting ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          Submitting Application...
+                          {submissionMessage || 'Submitting Application...'}
                         </>
                       ) : (
                         <>

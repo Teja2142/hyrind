@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// Import the useNavigate hook
+import { Link, useNavigate } from 'react-router-dom'; 
 
 // --- Start: Inline SVG Icon Definitions ---
 
@@ -40,6 +41,8 @@ const Mail = (props) => (
 const PasswordInput = ({ label, name, value, onChange, error }) => {
   const [isVisible, setIsVisible] = useState(false);
   const toggleVisibility = () => setIsVisible(prev => !prev);
+  // Color definition for consistent styling
+  const primaryColor = '#4682B4';
 
   return (
     <div className="mb-4">
@@ -60,6 +63,7 @@ const PasswordInput = ({ label, name, value, onChange, error }) => {
           type="button"
           onClick={toggleVisibility}
           className="btn btn-outline-secondary"
+          style={{ borderColor: primaryColor, color: primaryColor }}
           aria-label={isVisible ? 'Hide password' : 'Show password'}
         >
           {isVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -71,34 +75,51 @@ const PasswordInput = ({ label, name, value, onChange, error }) => {
 };
 
 // Text Input Component
-const TextInput = ({ label, name, type = 'text', value, onChange, error, icon: Icon, required = false }) => (
-  <div className="mb-4">
-    <label className="form-label fw-semibold text-dark" htmlFor={name}>
-      {label}
-      {required && <span className="text-danger ms-1">*</span>}
-    </label>
-    <div className="input-group">
-      {Icon && (
-        <span className="input-group-text">
-          <Icon className="h-5 w-5 text-secondary" />
-        </span>
-      )}
-      <input
-        type={type}
-        id={name}
-        name={name}
-        value={value}
-        onChange={onChange}
-        className={`form-control form-control-lg ${error ? 'is-invalid' : ''}`}
-        required={required}
-      />
-      {error && <div className="invalid-feedback d-block">{error}</div>}
+const TextInput = ({ label, name, type = 'text', value, onChange, error, icon: Icon, required = false }) => {
+  // Color definition for consistent styling
+  const primaryColor = '#4682B4';
+  
+  return (
+    <div className="mb-4">
+      <label className="form-label fw-semibold text-dark" htmlFor={name}>
+        {label}
+        {required && <span className="text-danger ms-1">*</span>}
+      </label>
+      <div className="input-group">
+        {Icon && (
+          <span className="input-group-text border-end-0 bg-white" style={{ borderColor: primaryColor }}>
+            <Icon className="h-5 w-5" style={{ color: primaryColor }} />
+          </span>
+        )}
+        <input
+          type={type}
+          id={name}
+          name={name}
+          value={value}
+          onChange={onChange}
+          className={`form-control form-control-lg ${error ? 'is-invalid' : ''}`}
+          required={required}
+          style={{ borderColor: error ? '' : primaryColor }}
+        />
+        {error && <div className="invalid-feedback d-block">{error}</div>}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Main Login Component
-const Login = ({ onNavigate, onLoginSuccess }) => {
+// Removed onNavigate prop to use the hook
+const Login = ({ onLoginSuccess }) => {
+  // Define colors (matching Register.jsx)
+  const primaryColor = '#4682B4'; // Steel Blue
+  const paleBackground = '#F0F8FF'; // Alice Blue
+
+  // Use the hook to get the navigation function
+  const navigate = useNavigate(); 
+  
+  // Define the target API endpoint
+  const LOGIN_API_URL = "http://127.0.0.1:8000/api/login/";
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -106,21 +127,24 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionMessage, setSubmissionMessage] = useState('');
+
 
   const validate = () => {
     let newErrors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Updated Email Regex for better validity check
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     if (!formData.email) {
       newErrors.email = 'Email is required.';
     } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = 'Invalid email format.';
+      newErrors.email = 'Invalid email format (e.g., user@domain.com).';
     }
 
     if (!formData.password) {
       newErrors.password = 'Password is required.';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters.';
+    } else if (formData.password.length < 8) { // Assuming a stronger minimum password length
+      newErrors.password = 'Password must be at least 8 characters.';
     }
 
     setErrors(newErrors);
@@ -135,58 +159,80 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
     }));
     // Clear validation error on change
     setErrors(prev => ({ ...prev, [name]: '' }));
+    setSubmissionMessage(''); // Clear previous message
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+        setSubmissionMessage('Please correct the highlighted errors before signing in.');
+        return;
+    }
 
     setIsSubmitting(true);
+    setSubmissionMessage('Logging In...');
 
-    // Simulate API call for login
-    console.log("--- LOGIN SUBMITTED ---");
-    console.log({
+    const apiPayload = {
       email: formData.email,
-      passwordLength: formData.password.length,
-      rememberMe: formData.rememberMe,
-    });
-    console.log("-----------------------");
+      password: formData.password,
+      remember_me: formData.rememberMe,
+    };
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+        const response = await fetch(LOGIN_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any necessary authorization headers
+            },
+            body: JSON.stringify(apiPayload),
+        });
 
-    // Mock Authentication Logic
-    if (formData.email === 'test@example.com' && formData.password === 'password123') {
-      setIsSubmitting(false);
-      if (onLoginSuccess) {
-        onLoginSuccess(); // Call success callback if provided
-      }
-    } else {
-      // Simulate incorrect credentials
-      setIsSubmitting(false);
-      setErrors({ general: 'Invalid email or password. Please try again.' });
+        if (response.ok) {
+            const result = await response.json();
+            setIsSubmitting(false);
+            setSubmissionMessage(`Sign in successful! Welcome.`);
+            console.log("API Success:", result);
+
+            if (onLoginSuccess) {
+              onLoginSuccess(result.token); // Pass token or user data to success handler
+            }
+            
+        } else {
+            const errorData = await response.json();
+            setIsSubmitting(false);
+            let errorMessage = errorData.detail || errorData.error || 'Invalid email or password.';
+            setErrors({ general: errorMessage });
+            setSubmissionMessage(errorMessage);
+            console.error("API Error:", errorData);
+        }
+    } catch (error) {
+        setIsSubmitting(false);
+        setSubmissionMessage(`Network error. Could not connect to the backend at ${LOGIN_API_URL}.`);
+        setErrors({ general: `Network error. Please check your connection or contact support.` });
+        console.error("Network Fetch Error:", error);
     }
   };
 
   return (
-    <div className="min-vh-100 bg-light d-flex align-items-center justify-content-center py-4">
+    <div className="min-vh-100 d-flex align-items-center justify-content-center py-4" style={{ backgroundColor: paleBackground }}>
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-12 col-lg-8 col-xl-6">
-            <div className="card shadow-lg border-0 rounded-3">
+            <div className="card shadow-lg border-0 rounded-4">
               <div className="card-body p-4 p-md-5">
                 
                 {/* Header */}
                 <div className="text-center mb-5">
                   <div className="d-flex justify-content-center mb-4">
-                    <div className="p-3 bg-primary bg-opacity-10 rounded-3">
-                      <LogIn className="h-8 w-8 text-primary" />
+                    <div className="p-3 rounded-circle" style={{ backgroundColor: primaryColor + '1A' }}>
+                      <LogIn className="h-8 w-8" style={{ color: primaryColor }} />
                     </div>
                   </div>
-                  <h2 className="card-title fw-bold text-primary mb-3">
+                  <h2 className="card-title fw-bold mb-3" style={{ color: primaryColor }}>
                     Candidate Sign In
                   </h2>
-                  <p className="text-muted">
+                  <p className="text-muted lead">
                     Access your profile and track your application status.
                   </p>
                 </div>
@@ -195,16 +241,21 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
                   {/* General Error Alert */}
                   {errors.general && (
                     <div className="alert alert-danger d-flex align-items-center" role="alert">
-                      <div className="flex-shrink-0 me-2">
-                        <svg className="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:">
-                          <use xlinkHref="#exclamation-triangle-fill"/>
-                        </svg>
-                      </div>
+                      {/* Using a simple icon or text instead of complex SVG use/xlinkHref */}
+                      <span className="me-2 fw-bold fs-5">!</span>
                       <div>
                         {errors.general}
                       </div>
                     </div>
                   )}
+
+                  {/* Submission Status Message */}
+                  {submissionMessage && !errors.general && !isSubmitting && (
+                    <div className={`alert alert-success text-center mb-4`}>
+                        {submissionMessage}
+                    </div>
+                  )}
+
 
                   {/* Email Input */}
                   <TextInput
@@ -237,6 +288,7 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
                         checked={formData.rememberMe}
                         onChange={handleChange}
                         className="form-check-input"
+                        style={{ borderColor: primaryColor, color: primaryColor, backgroundColor: formData.rememberMe ? primaryColor : 'white' }}
                       />
                       <label htmlFor="rememberMe" className="form-check-label text-dark">
                         Remember Me
@@ -244,9 +296,14 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
                     </div>
 
                     <div>
-                      <a href="#" className="text-primary text-decoration-none fw-semibold">
+                      <button
+                         type="button"
+                         onClick={() => console.log('Forgot Password functionality triggered.')}
+                         className="btn btn-link text-decoration-none fw-semibold p-0"
+                         style={{ color: primaryColor }}
+                      >
                         Forgot Password?
-                      </a>
+                      </button>
                     </div>
                   </div>
 
@@ -255,12 +312,13 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="btn btn-primary btn-lg py-3 fw-bold"
+                      className="btn btn-lg py-3 fw-bold rounded-pill"
+                      style={{ backgroundColor: primaryColor, borderColor: primaryColor, color: 'white' }}
                     >
                       {isSubmitting ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          Logging In...
+                          {submissionMessage}
                         </>
                       ) : (
                         <>
@@ -277,8 +335,10 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
                       Don't have an account?{' '}
                       <button
                         type="button"
-                        onClick={() => onNavigate && onNavigate('/register')}
-                        className="btn btn-link text-primary fw-semibold text-decoration-none p-0"
+                        // FIX: Use the navigate function from the hook
+                        onClick={() => navigate('/register')}
+                        className="btn btn-link fw-semibold text-decoration-none p-0"
+                        style={{ color: primaryColor }}
                       >
                         Register Here
                       </button>
