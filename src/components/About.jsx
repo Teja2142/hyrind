@@ -158,12 +158,16 @@ const About = () => {
       </section>
 
       <style>{`
-        
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
 
         .about-page {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-          color: #ffffff;
-          background: #0a1929;
+          font-family: Arial, sans-serif;
+          color: #333333;
+          background: #ffffff;
         }
 
         .container {
@@ -174,21 +178,10 @@ const About = () => {
 
         /* Hero Section */
         .hero-section {
-          background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #01579b 100%);
+          background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
           padding: 80px 0;
           position: relative;
-          overflow: hidden;
-        }
-
-        .hero-section::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: radial-gradient(circle at 20% 50%, rgba(33, 150, 243, 0.1) 0%, transparent 50%),
-                      radial-gradient(circle at 80% 80%, rgba(100, 181, 246, 0.1) 0%, transparent 50%);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .hero-content {
@@ -196,62 +189,57 @@ const About = () => {
           grid-template-columns: 1fr;
           gap: 40px;
           align-items: center;
-          position: relative;
-          z-index: 1;
         }
 
         .hero-title {
           font-size: 3.5rem;
-          font-weight: 800;
+          font-weight: bold;
           margin-bottom: 20px;
-          background: linear-gradient(to right, #ffffff, #64b5f6);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          color: #ffffff;
           animation: fadeInUp 0.8s ease-out;
         }
 
         .hero-description {
           font-size: 1.25rem;
           line-height: 1.8;
-          color: #e3f2fd;
+          color: #ffffff;
           animation: fadeInUp 0.8s ease-out 0.2s backwards;
         }
 
         .mission-card {
-          background: rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          border-radius: 20px;
+          background: #ffffff;
+          border: 2px solid #2196f3;
+          border-radius: 15px;
           padding: 30px;
           text-align: center;
-          transition: all 0.4s ease;
+          transition: all 0.3s ease;
           animation: fadeInUp 0.8s ease-out 0.4s backwards;
+          box-shadow: 0 8px 20px rgba(33, 150, 243, 0.3);
         }
 
         .mission-card:hover {
           transform: translateY(-10px);
-          background: rgba(255, 255, 255, 0.15);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+          background: rgba(33, 150, 243, 0.05);
+          box-shadow: 0 20px 40px rgba(33, 150, 243, 0.3);
         }
 
         .mission-title {
           font-size: 1.5rem;
-          font-weight: 700;
+          font-weight: bold;
           margin-bottom: 15px;
-          color: #64b5f6;
+          color: #1976d2;
         }
 
         .mission-text {
           font-size: 1rem;
-          color: #e3f2fd;
+          color: #666666;
           margin: 0;
         }
 
         /* Value Props Section */
         .value-props {
-          padding: 100px 0;
-          background: linear-gradient(180deg, #0a1929 0%, #0d2137 100%);
+          padding: 80px 0;
+          background: #f5f5f5;
         }
 
         .section-header {
@@ -261,14 +249,14 @@ const About = () => {
 
         .section-title {
           font-size: 2.5rem;
-          font-weight: 700;
+          font-weight: bold;
           margin-bottom: 15px;
-          color: #ffffff;
+          color: #1976d2;
         }
 
         .section-subtitle {
           font-size: 1.1rem;
-          color: #90caf9;
+          color: #666666;
         }
 
         .cards-grid {
@@ -282,12 +270,13 @@ const About = () => {
         }
 
         .card-inner {
-          background: linear-gradient(145deg, #1e3a5f 0%, #152b47 100%);
-          border-radius: 20px;
+          background: #ffffff;
+          border-radius: 15px;
           padding: 40px 30px;
           text-align: center;
-          border: 1px solid rgba(100, 181, 246, 0.2);
+          border: 2px solid #e3f2fd;
           transition: all 0.4s ease;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
           position: relative;
           overflow: hidden;
         }
@@ -299,14 +288,14 @@ const About = () => {
           left: -100%;
           width: 100%;
           height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(100, 181, 246, 0.1), transparent);
+          background: linear-gradient(90deg, transparent, rgba(33, 150, 243, 0.1), transparent);
           transition: left 0.5s ease;
         }
 
         .value-card:hover .card-inner {
           transform: translateY(-10px);
-          border-color: #64b5f6;
-          box-shadow: 0 20px 40px rgba(100, 181, 246, 0.2);
+          border-color: #2196f3;
+          box-shadow: 0 20px 40px rgba(33, 150, 243, 0.2);
         }
 
         .value-card:hover .card-inner::before {
@@ -318,11 +307,12 @@ const About = () => {
           height: 80px;
           margin: 0 auto 25px;
           background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-          border-radius: 50%;
+          border-radius: 15px;
           display: flex;
           align-items: center;
           justify-content: center;
           transition: all 0.4s ease;
+          box-shadow: 0 6px 18px rgba(33, 150, 243, 0.4);
         }
 
         .value-card:hover .icon-wrapper {
@@ -338,21 +328,21 @@ const About = () => {
 
         .card-title {
           font-size: 1.3rem;
-          font-weight: 600;
+          font-weight: bold;
           margin-bottom: 15px;
-          color: #64b5f6;
+          color: #1976d2;
         }
 
         .card-text {
           font-size: 1rem;
           line-height: 1.6;
-          color: #b3e5fc;
+          color: #666666;
         }
 
         /* Process Timeline */
         .process-timeline {
-          padding: 100px 0;
-          background: linear-gradient(180deg, #0d2137 0%, #1a2942 100%);
+          padding: 80px 0;
+          background: #ffffff;
         }
 
         .timeline {
@@ -375,19 +365,19 @@ const About = () => {
           top: 70px;
           width: 2px;
           height: calc(100% + 20px);
-          background: linear-gradient(to bottom, #2196f3, transparent);
+          background: #bbdefb;
         }
 
         .step-number {
           width: 60px;
           height: 60px;
           background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-          border-radius: 50%;
+          border-radius: 15px;
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 1.5rem;
-          font-weight: 700;
+          font-weight: bold;
           color: white;
           flex-shrink: 0;
           box-shadow: 0 5px 20px rgba(33, 150, 243, 0.4);
@@ -406,52 +396,52 @@ const About = () => {
 
         .step-title {
           font-size: 1.4rem;
-          font-weight: 600;
+          font-weight: bold;
           margin-bottom: 10px;
-          color: #64b5f6;
+          color: #1976d2;
         }
 
         .step-text {
           font-size: 1rem;
           line-height: 1.6;
-          color: #b3e5fc;
+          color: #666666;
         }
 
         /* Company Description */
         .company-description {
-          padding: 100px 0;
-          background: linear-gradient(180deg, #1a2942 0%, #0a1929 100%);
+          padding: 80px 0;
+          background: #f5f5f5;
         }
 
         .company-content {
           max-width: 900px;
           margin: 0 auto;
-          background: rgba(30, 58, 95, 0.4);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(100, 181, 246, 0.2);
-          border-radius: 20px;
+          background: #ffffff;
+          border: 2px solid #e3f2fd;
+          border-radius: 15px;
           padding: 50px;
-          transition: all 0.4s ease;
+          transition: all 0.3s ease;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
 
         .company-content:hover {
           transform: translateY(-5px);
-          border-color: #64b5f6;
-          box-shadow: 0 20px 40px rgba(100, 181, 246, 0.2);
+          border-color: #2196f3;
+          box-shadow: 0 8px 25px rgba(33, 150, 243, 0.2);
         }
 
         .company-title {
           font-size: 2rem;
-          font-weight: 700;
+          font-weight: bold;
           margin-bottom: 30px;
-          color: #64b5f6;
+          color: #1976d2;
           text-align: center;
         }
 
         .company-text {
           font-size: 1.1rem;
           line-height: 1.8;
-          color: #e3f2fd;
+          color: #666666;
           margin-bottom: 25px;
         }
 
@@ -461,31 +451,17 @@ const About = () => {
 
         /* CTA Section */
         .cta-section {
-          padding: 100px 0;
-          background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #01579b 100%);
-          position: relative;
-          overflow: hidden;
-        }
-
-        .cta-section::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: radial-gradient(circle at 50% 50%, rgba(33, 150, 243, 0.1) 0%, transparent 70%);
+          padding: 80px 0;
+          background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
         }
 
         .cta-content {
           text-align: center;
-          position: relative;
-          z-index: 1;
         }
 
         .cta-title {
           font-size: 2.5rem;
-          font-weight: 700;
+          font-weight: bold;
           margin-bottom: 20px;
           color: #ffffff;
         }
@@ -493,7 +469,7 @@ const About = () => {
         .cta-text {
           font-size: 1.2rem;
           line-height: 1.8;
-          color: #e3f2fd;
+          color: #ffffff;
           margin-bottom: 40px;
           max-width: 700px;
           margin-left: auto;
@@ -503,20 +479,20 @@ const About = () => {
         .cta-button {
           display: inline-block;
           padding: 18px 45px;
-          background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);
-          color: #1a237e;
+          background: #ffffff;
+          color: #1976d2;
           font-size: 1.1rem;
-          font-weight: 700;
+          font-weight: bold;
           text-decoration: none;
-          border-radius: 50px;
-          transition: all 0.4s ease;
-          box-shadow: 0 5px 20px rgba(255, 193, 7, 0.3);
+          border-radius: 15px;
+          transition: all 0.3s ease;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
 
         .cta-button:hover {
           transform: translateY(-3px) scale(1.05);
-          box-shadow: 0 10px 30px rgba(255, 193, 7, 0.5);
-          background: linear-gradient(135deg, #fff176 0%, #ffd54f 100%);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+          background: #e3f2fd;
         }
 
         /* Animations */

@@ -48,23 +48,24 @@ const Home = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        
-        
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
         
         .home-wrapper {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  overflow-x: hidden;
-  background: #0f172a;
-}
-
+          font-family: Arial, sans-serif;
+          overflow-x: hidden;
+          background: #ffffff;
+        }
         
         .hero-section {
-          background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+          background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
           position: relative;
           overflow: hidden;
-          border-bottom: 3px solid rgba(59, 130, 246, 0.3);
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+          padding: 5rem 2rem;
+          box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
         }
         
         .hero-section::before {
@@ -100,18 +101,20 @@ const Home = () => {
           font-weight: 800;
           line-height: 1.2;
           margin-bottom: 1.5rem;
+          color: #ffffff;
         }
         
         .hero-subtitle {
           font-size: clamp(1rem, 2.5vw, 1.25rem);
           line-height: 1.6;
           opacity: 0.95;
+          color: #ffffff;
         }
         
         .btn-custom {
           padding: 1rem 2.5rem;
           font-weight: 600;
-          border-radius: 50px;
+          border-radius: 15px;
           transition: all 0.3s ease;
           text-decoration: none;
           display: inline-block;
@@ -119,9 +122,9 @@ const Home = () => {
         }
         
         .btn-primary-custom {
-          background: white;
-          color: #1e3a8a;
-          box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+          background: #ffffff;
+          color: #1e40af;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
           position: relative;
           overflow: hidden;
         }
@@ -143,14 +146,14 @@ const Home = () => {
         
         .btn-primary-custom:hover {
           transform: translateY(-3px) scale(1.05);
-          box-shadow: 0 15px 40px rgba(255, 255, 255, 0.3);
-          color: #1e3a8a;
+          box-shadow: 0 15px 40px rgba(59, 130, 246, 0.3);
+          color: #1e40af;
         }
         
         .btn-outline-custom {
           background: transparent;
           color: white;
-          border: 2px solid rgba(255, 255, 255, 0.8);
+          border: 2px solid #ffffff;
           position: relative;
           overflow: hidden;
         }
@@ -174,18 +177,23 @@ const Home = () => {
         }
         
         .btn-outline-custom:hover {
-          border-color: white;
+          background: rgba(255, 255, 255, 0.1);
           transform: translateY(-3px) scale(1.05);
           color: white;
-          background: rgba(255, 255, 255, 0.1);
+          border-color: white;
+        }
+        
+        .section-padding {
+          padding: 5rem 2rem;
         }
         
         .section-header {
           margin-bottom: 3rem;
+          text-align: center;
         }
         
         .section-tag {
-          color: #60a5fa;
+          color: #3b82f6;
           font-weight: 700;
           font-size: 0.875rem;
           letter-spacing: 1.5px;
@@ -195,18 +203,23 @@ const Home = () => {
         .section-title {
           font-size: clamp(1.75rem, 4vw, 2.5rem);
           font-weight: 800;
-          color: white;
+          color: #1e40af;
           margin-top: 0.5rem;
         }
         
+        .value-section {
+          background: #f8fafc;
+          padding: 5rem 2rem;
+        }
+        
         .value-card {
-          background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
-          border: 1px solid rgba(59, 130, 246, 0.2);
-          border-radius: 20px;
+          background: #ffffff;
+          border: 2px solid #3b82f6;
+          border-radius: 15px;
           padding: 2rem;
           height: 100%;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
           position: relative;
           overflow: hidden;
         }
@@ -230,21 +243,21 @@ const Home = () => {
         .value-card:hover {
           transform: translateY(-15px) scale(1.02);
           box-shadow: 0 20px 50px rgba(59, 130, 246, 0.3), 0 0 30px rgba(59, 130, 246, 0.2);
-          border-color: rgba(59, 130, 246, 0.5);
+          border-color: #1e40af;
         }
         
         .value-icon {
           width: 80px;
           height: 80px;
-          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-          border-radius: 20px;
+          background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+          border-radius: 15px;
           display: flex;
           align-items: center;
           justify-content: center;
           margin: 0 auto 1.5rem;
           font-size: 2rem;
           color: white;
-          box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
           transition: all 0.4s ease;
         }
         
@@ -256,21 +269,23 @@ const Home = () => {
         .value-title {
           font-size: 1.25rem;
           font-weight: 700;
-          color: white;
+          color: #1e40af;
           margin-bottom: 1rem;
+          text-align: center;
         }
         
         .value-desc {
-          color: #94a3b8;
+          color: #475569;
           line-height: 1.6;
           font-size: 0.95rem;
+          text-align: center;
         }
         
         .process-section {
-          background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-          border-top: 3px solid rgba(59, 130, 246, 0.3);
-          border-bottom: 3px solid rgba(59, 130, 246, 0.3);
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          background: #ffffff;
+          padding: 5rem 2rem;
+          border-top: 2px solid #e2e8f0;
+          border-bottom: 2px solid #e2e8f0;
         }
         
         .step-container {
@@ -278,21 +293,26 @@ const Home = () => {
           align-items: flex-start;
           gap: 1.5rem;
           margin-bottom: 2rem;
+          transition: all 0.3s ease;
+        }
+        
+        .step-container:hover {
+          transform: translateX(10px);
         }
         
         .step-circle {
           width: 80px;
           height: 80px;
           min-width: 80px;
-          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-          border-radius: 50%;
+          background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+          border-radius: 15px;
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 2rem;
           font-weight: 800;
           color: white;
-          box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
           transition: all 0.4s ease;
           position: relative;
         }
@@ -304,7 +324,7 @@ const Home = () => {
           left: 0;
           right: 0;
           bottom: 0;
-          border-radius: 50%;
+          border-radius: 15px;
           border: 3px solid rgba(59, 130, 246, 0.5);
           transform: scale(1);
           opacity: 0;
@@ -328,13 +348,24 @@ const Home = () => {
         .step-title {
           font-size: 1.25rem;
           font-weight: 700;
-          color: white;
+          color: #1e40af;
           margin-bottom: 0.5rem;
+          transition: all 0.3s ease;
+        }
+        
+        .step-container:hover .step-title {
+          color: #3b82f6;
+          transform: translateX(5px);
         }
         
         .step-detail {
-          color: #94a3b8;
+          color: #475569;
           line-height: 1.6;
+          transition: all 0.3s ease;
+        }
+        
+        .step-container:hover .step-detail {
+          color: #1e293b;
         }
         
         .arrow-connector {
@@ -342,6 +373,8 @@ const Home = () => {
           color: #3b82f6;
           opacity: 0.5;
           transition: all 0.3s ease;
+          text-align: center;
+          margin: 1rem 0;
         }
         
         .step-container:hover + div .arrow-connector {
@@ -350,7 +383,9 @@ const Home = () => {
         }
         
         .cta-section {
-          background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
+          background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+          padding: 5rem 2rem;
+          text-align: center;
           position: relative;
           overflow: hidden;
         }
@@ -362,7 +397,7 @@ const Home = () => {
           left: -50%;
           width: 200%;
           height: 200%;
-          background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
           animation: pulse 15s ease-in-out infinite;
         }
         
@@ -385,46 +420,75 @@ const Home = () => {
         
         .cta-subtitle {
           font-size: clamp(1rem, 2.5vw, 1.25rem);
-          color: rgba(255, 255, 255, 0.85);
+          color: rgba(255, 255, 255, 0.9);
           margin-bottom: 2rem;
         }
         
         .btn-success-custom {
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          background: #10b981;
           color: white;
-          box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+          box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
         
         .btn-success-custom:hover {
           transform: translateY(-3px);
-          box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4);
+          box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+          background: #059669;
           color: white;
         }
         
         .blog-section {
-          background: #f8f9fa;
-          padding: 4rem 0;
+          background: #f8fafc;
+          padding: 5rem 2rem;
+          text-align: center;
+        }
+        
+        .blog-title {
+          font-weight: 700;
+          color: #1e40af;
+          margin-bottom: 1rem;
+          font-size: 2rem;
+        }
+        
+        .blog-text {
+          color: #475569;
         }
         
         .footer-section {
-          background: #1a1a2e;
-          color: rgba(255, 255, 255, 0.6);
-          padding: 2rem 0;
+          background: #1e40af;
+          color: rgba(255, 255, 255, 0.8);
+          padding: 2rem;
+          text-align: center;
+        }
+        
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+        
+        .grid-container {
+          display: grid;
+          gridTemplateColumns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 2rem;
         }
         
         @media (max-width: 768px) {
           .hero-section {
-            padding: 3rem 1rem;
+            padding: 3rem 1.5rem;
+          }
+          
+          .section-padding,
+          .value-section,
+          .process-section,
+          .cta-section,
+          .blog-section {
+            padding: 3rem 1.5rem;
           }
           
           .btn-custom {
             padding: 0.875rem 2rem;
             width: 100%;
             margin-bottom: 1rem;
-          }
-          
-          .value-card {
-            margin-bottom: 1.5rem;
           }
           
           .step-container {
@@ -434,27 +498,15 @@ const Home = () => {
           
           .arrow-connector {
             transform: rotate(90deg);
-            margin: 1rem 0;
-          }
-        }
-        
-        @media (min-width: 769px) and (max-width: 1024px) {
-          .hero-title {
-            font-size: 2.5rem;
-          }
-          
-          .section-title {
-            font-size: 2rem;
           }
         }
       `}</style>
 
-      <div>
+      <div className="home-wrapper">
         {/* Hero Section */}
-        <div className="home-wrapper">
-        <section className="hero-section" style={{ padding: '5rem 1rem' }}>
-          <div className="container hero-content" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <div style={{ textAlign: 'center' }}>
+        <section className="hero-section">
+          <div className="container hero-content">
+            <div>
               <h1 className="hero-title">
                 Validate Your Future: <span style={{ color: '#ffd700' }}>F-1 OPT Career Acceleration.</span>
               </h1>
@@ -474,9 +526,9 @@ const Home = () => {
         </section>
 
         {/* Value Propositions */}
-        <section id="services" style={{ padding: '5rem 1rem' }}>
-          <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <div className="section-header" style={{ textAlign: 'center' }}>
+        <section id="services" className="value-section">
+          <div className="container">
+            <div className="section-header">
               <span className="section-tag">Why Hyrind?</span>
               <h2 className="section-title">The Core Pillars of Candidate Success</h2>
             </div>
@@ -488,8 +540,8 @@ const Home = () => {
                     <div className="value-icon">
                       <i className={prop.iconClass}></i>
                     </div>
-                    <h3 className="value-title" style={{ textAlign: 'center' }}>{prop.title}</h3>
-                    <p className="value-desc" style={{ textAlign: 'center' }}>{prop.description}</p>
+                    <h3 className="value-title">{prop.title}</h3>
+                    <p className="value-desc">{prop.description}</p>
                   </div>
                 </div>
               ))}
@@ -498,9 +550,9 @@ const Home = () => {
         </section>
 
         {/* Process Timeline */}
-        <section id="process" className="process-section" style={{ padding: '5rem 1rem' }}>
-          <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <div className="section-header" style={{ textAlign: 'center' }}>
+        <section id="process" className="process-section">
+          <div className="container">
+            <div className="section-header">
               <span className="section-tag">Our Workflow</span>
               <h2 className="section-title">Simple Steps to Career Launch</h2>
             </div>
@@ -516,44 +568,15 @@ const Home = () => {
                     </div>
                   </div>
                   {index < PROCESS_STEPS.length - 1 && (
-                    <div style={{ textAlign: 'center', margin: '1rem 0' }}>
-                      <i className="bi bi-arrow-down arrow-connector"></i>
+                    <div className="arrow-connector">
+                      <i className="bi bi-arrow-down"></i>
                     </div>
                   )}
                 </div>
               ))}
             </div>
           </div>
-        </section>
-
-        {/* Final CTA */}
-        <section id="interest-form" className="cta-section" style={{ padding: '5rem 1rem' }}>
-          <div className="container cta-content" style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-            <h2 className="cta-title">Ready to Accelerate Your Career?</h2>
-            <p className="cta-subtitle">
-              Submit your interest form now and let's get you validated.
-            </p>
-            <a href="#top" className="btn-custom btn-success-custom">
-              <i className="bi bi-person-fill" style={{ marginRight: '0.5rem' }}></i> Submit Interest Form
-            </a>
-          </div>
-        </section>
-        
-        {/* Blog Placeholder */}
-        <section id="blog" className="blog-section">
-          <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-            <h2 style={{ fontWeight: '700', color: '#1a1a2e', marginBottom: '1rem' }}>Blog</h2>
-            <p style={{ color: '#6c757d' }}>Coming soon — updates, stories, and career tips for international students.</p>
-          </div>
-        </section>
-        
-        {/* Footer */}
-        <footer className="footer-section">
-          <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-            <p style={{ margin: 0 }}>&copy; {new Date().getFullYear()} HYRIND. All rights reserved.</p>
-          </div>
-        </footer>
-        </div>
+        </section>    
       </div>
     </>
   );
