@@ -11,6 +11,7 @@ import Login from './Login';
 import Profile from './Profile'; // Assuming you might have this page too
 import PrivacyPolicy from './PrivacyPolicy';
 import TermsConditions from './TermsConditions';
+import Admin from './Admin';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/About" element={<About />} />
           <Route path="/services" element={<Service />} />
           <Route path="/apply" element={<Register />} /> {/* Assuming Apply is Register */}
