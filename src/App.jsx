@@ -12,6 +12,8 @@ import Profile from './Profile'; // Assuming you might have this page too
 import PrivacyPolicy from './PrivacyPolicy';
 import TermsConditions from './TermsConditions';
 import Admin from './Admin';
+import ContactUs from './Contact';
+import HowItWorksFlow from '../HowItWorks';
 
 function App() {
   return (
@@ -32,6 +34,8 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
           <Route path="/TermsConditions" element={<TermsConditions />} />
+          <Route path="/Contact" element={<ContactUs />} />
+          <Route path="/how-it-works" element={<HowItWorksFlow />} />
           <Route path="*" element={<h2>404: Page Not Found</h2>} />
         </Routes>
       </main>
