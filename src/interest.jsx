@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-// Import Link and useNavigate
-import { Link, useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 
-// --- Start: Inline SVG Icon Definitions (Lucide Icons used for aesthetics) ---
+// --- Icons (same style as Register.jsx) ---
 
 const User = (props) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -55,15 +54,6 @@ const LinkIcon = (props) => (
   </svg>
 );
 
-const GitBranch = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="6" y1="3" x2="6" y2="15" />
-    <circle cx="18" cy="6" r="3" />
-    <circle cx="6" cy="18" r="3" />
-    <path d="M18 9a9 9 0 0 1-9 9" />
-  </svg>
-);
-
 const ScrollText = (props) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 2v7h-6v7h-2V7H8V2h12zm-2 2H8v5h4v5h6V9h-4V4z" />
@@ -89,10 +79,8 @@ const LogIn = (props) => (
   </svg>
 );
 
-// --- End: Inline SVG Icon Definitions ---
+// --- Reusable TextInput (same style as Register.jsx, no country dropdown here) ---
 
-
-// Enhanced Generic Input Component
 const TextInput = ({
   label,
   name,
@@ -293,33 +281,39 @@ const TextInput = ({
   );
 };
 
+// --- Interest (Public) Form ---
 
+const Interest = () => {
+  const navigate = useNavigate();
 
-// Main Register Component
-// FIX APPLIED: Removed { navigate } prop which caused the redeclaration error
-const Register = () => {
-  const navigate = useNavigate(); // This is the correct way to get the function in RRDv6+
-  // Define the target API endpoint
-  const REGISTER_API_URL = "http://127.0.0.1:8000/api/register/";
-  
+  const INTEREST_API_URL = "http://127.0.0.1:8000/api/interest/"; // adjust as needed
+
+  const primaryColor = '#4682B4'; // Steel Blue
+  const paleBackground = '#F0F8FF'; // Alice Blue
+
+  const degreeOptions = ["Bachelor's", "Master's", "PhD"];
+  const visaOptions = ['F1-OPT', 'F1-CPT', 'H1B', 'Green Card', 'Citizen', 'Other'];
+  const referralOptions = ['Google', 'LinkedIn', 'Friend', 'University', 'Other'];
+
   const initialFormState = {
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
+    phone: '',              // masked: +1-XXX-XXX-XXXX
     university: '',
     degree: '',
     major: '',
     visaStatus: 'Citizen',
-    graduationDate: '', // MM/YYYY
-    optEndDate: '', // MM/YYYY - Conditional
-    resumeFile: null,
+    graduationDate: '',      // YYYY-MM
+    optEndDate: '',          // YYYY-MM conditional
+    resumeFile: null,        // Optional
     referralSource: 'Google',
+    referralFriendName: '',  // only when Friend
+    referralOther: '',       // only when Other
     consentToTerms: false,
     linkedinUrl: '',
-    githubUrl: '',
     additionalNotes: '',
-    countryCode: '+1', // Default country code
+    countryCode:'+1',
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -327,89 +321,98 @@ const Register = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionMessage, setSubmissionMessage] = useState('');
 
-  const degreeOptions = ['Bachelor\'s', 'Master\'s', 'PhD'];
-  const visaOptions = ['F1-OPT', 'F1-CPT', 'H1B', 'Green Card', 'Citizen', 'Other'];
-  const referralOptions = ['Google', 'LinkedIn', 'Friend', 'University', 'Other'];
-  
-  // Custom pale blue/white theme colors
-  const primaryColor = '#4682B4'; // Steel Blue
-  const paleBackground = '#F0F8FF'; // Alice Blue
+  // --- Validation (similar to Register.jsx) ---
 
-  // Utility function for validation
   const validate = () => {
-    let newErrors = {};
-    
-    // Stricter Email Regex: Requires @ and domain part (e.g., example.com)
-    // The user requested checking for '@gamil.com', '@theirdomain.com/.in'. This regex covers that structure generally.
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; 
-    
-    // Name Regex: Only allows letters, spaces, hyphens, and apostrophes
-    const nameRegex = /^[a-zA-Z\s'-]+$/; 
-    
-    // Phone Regex: Exactly 15 chars for the +1-XXX-XXX-XXXX format
-    const phoneRegex = /^\d{3}-\d{3}-\d{4}$/; 
-    
-    const dateRegex = /^\d{4}-\d{2}$/; // YYYY-MM format from input type="month"
+    const newErrors = {};
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const nameRegex = /^[a-zA-Z\s'-]+$/;
+    const phoneRegex = /^\d{3}-\d{3}-\d{4}$/; // XXX-XXX-XXXX
+    const dateRegex = /^\d{4}-\d{2}$/; // YYYY-MM
     const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
 
-    // --- A. Required Fields Check ---
-    const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'university', 'degree', 'major', 'visaStatus', 'graduationDate', 'consentToTerms'];
-    
+    // Required fields from your spec
+    const requiredFields = [
+      'firstName',
+      'lastName',
+      'email',
+      'phone',
+      'university',
+      'degree',
+      'major',
+      'visaStatus',
+      'graduationDate',
+      'referralSource',
+      'consentToTerms',
+    ];
+
     if (formData.visaStatus === 'F1-OPT') {
       requiredFields.push('optEndDate');
     }
 
-    requiredFields.forEach(field => {
+    requiredFields.forEach((field) => {
       if (field === 'consentToTerms') {
         if (!formData[field]) newErrors[field] = 'You must agree to the terms.';
-      } else if (!formData[field] || (typeof formData[field] === 'string' && formData[field].trim() === '')) {
+      } else if (
+        !formData[field] ||
+        (typeof formData[field] === 'string' && formData[field].trim() === '')
+      ) {
         newErrors[field] = 'This field is required.';
       }
     });
 
-    if (!formData.resumeFile) {
-        newErrors.resumeFile = 'Resume file upload is required.';
+    // If referral source is Friend => require name
+    if (formData.referralSource === 'Friend') {
+      if (!formData.referralFriendName || formData.referralFriendName.trim() === '') {
+        newErrors.referralFriendName = 'Please mention your friend’s name.';
+      }
     }
 
-    // --- B. Specific Format/Length Validations ---
+    // If referral source is Other => require specification
+    if (formData.referralSource === 'Other') {
+      if (!formData.referralOther || formData.referralOther.trim() === '') {
+        newErrors.referralOther = 'Please specify.';
+      }
+    }
 
-    // Name Validation
+    // Name validation
     if (formData.firstName) {
-        if (!nameRegex.test(formData.firstName.trim())) {
-            newErrors.firstName = 'Name can only contain letters, spaces, hyphens, and apostrophes.';
-        } else if (formData.firstName.length > 50) {
-            newErrors.firstName = 'Max 50 characters.';
-        }
-    }
-    if (formData.lastName) {
-        if (!nameRegex.test(formData.lastName.trim())) {
-            newErrors.lastName = 'Name can only contain letters, spaces, hyphens, and apostrophes.';
-        } else if (formData.lastName.length > 50) {
-            newErrors.lastName = 'Max 50 characters.';
-        }
+      if (!nameRegex.test(formData.firstName.trim())) {
+        newErrors.firstName = 'Name can only contain letters, spaces, hyphens, and apostrophes.';
+      } else if (formData.firstName.length > 50) {
+        newErrors.firstName = 'Max 50 characters.';
+      }
     }
 
-    // Email Validation
+    if (formData.lastName) {
+      if (!nameRegex.test(formData.lastName.trim())) {
+        newErrors.lastName = 'Name can only contain letters, spaces, hyphens, and apostrophes.';
+      } else if (formData.lastName.length > 50) {
+        newErrors.lastName = 'Max 50 characters.';
+      }
+    }
+
+    // Email validation
     if (formData.email && !emailRegex.test(formData.email)) {
       newErrors.email = 'Invalid email format (e.g., user@domain.com).';
     }
 
-    // Phone Validation
+    // Phone validation: +1-XXX-XXX-XXXX
     if (formData.phone) {
-        const digitsOnly = formData.phone.replace(/[^\d]/g, '');
-        if (digitsOnly.length !== 10) { // 1 (for +1) + 10 digits
-            newErrors.phone = 'Phone number must be exactly 10 digits.';
-        } else if (!phoneRegex.test(formData.phone)) {
-            // This is primarily a double-check if the mask logic failed, ensuring final format is correct
-            newErrors.phone = 'Format must be +1-XXX-XXX-XXXX.';
-        }
+      const digitsOnly = formData.phone.replace(/[^\d]/g, '');
+      if (digitsOnly.length !== 10) {
+        newErrors.phone = 'Phone number must be exactly 10 digits .';
+      } else if (!phoneRegex.test(formData.phone)) {
+        newErrors.phone = 'Format must be XXX-XXX-XXXX.';
+      }
     }
 
-    // University/Major length
+    // Lengths
     if (formData.university.length > 100) newErrors.university = 'Max 100 characters.';
     if (formData.major.length > 100) newErrors.major = 'Max 100 characters.';
 
-    // Date (Checks if the required YYYY-MM format is present after month input)
+    // Dates
     if (formData.graduationDate && !dateRegex.test(formData.graduationDate)) {
       newErrors.graduationDate = 'Date must be in MM/YYYY format.';
     }
@@ -417,195 +420,195 @@ const Register = () => {
       newErrors.optEndDate = 'Date must be in MM/YYYY format.';
     }
 
-    // File size and type
+    // Resume: optional, but validate if present
     if (formData.resumeFile) {
-      if (formData.resumeFile.size > 5 * 1024 * 1024) { // 5MB limit
+      if (formData.resumeFile.size > 5 * 1024 * 1024) {
         newErrors.resumeFile = 'File size must be max 5MB.';
       }
-      const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'];
+      const allowedTypes = [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/msword',
+      ];
       if (!allowedTypes.includes(formData.resumeFile.type)) {
         newErrors.resumeFile = 'File must be PDF or DOCX/DOC.';
       }
     }
 
-    // URL validation
+    // URL validation (optional)
     if (formData.linkedinUrl && !urlRegex.test(formData.linkedinUrl)) {
       newErrors.linkedinUrl = 'Invalid URL format (must start with http:// or https://).';
     }
-    if (formData.githubUrl && !urlRegex.test(formData.githubUrl)) {
-      newErrors.githubUrl = 'Invalid URL format (must start with http:// or https://).';
-    }
-    
+
     // Notes length
     if (formData.additionalNotes.length > 500) {
       newErrors.additionalNotes = 'Max 500 characters.';
     }
 
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  // --- Change Handler (similar pattern to Register.jsx) ---
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     let newValue = value;
 
     if (type === 'file') {
-        newValue = files[0];
+      newValue = files[0];
     } else if (type === 'checkbox') {
-        newValue = checked;
+      newValue = checked;
     } else if (name === 'phone') {
-        // 1. Filter out all non-digit characters. This blocks alphabets.
-        const originalDigits = value.replace(/[^\d]/g, '');
-        // We only care about the last 10 digits the user intends to enter
-        const tenDigits = originalDigits.substring(0, 10);
+      // +1-XXX-XXX-XXXX mask
+      const originalDigits = value.replace(/[^\d]/g, '');
+      const tenDigits = originalDigits.substring(0, 10);
 
-        // 2. Apply the XXX-XXX-XXXX format mask logic
-        if (tenDigits.length === 0) {
-            newValue = '';
-        } else if (tenDigits.length <= 3) {
-            newValue = `${tenDigits}`;
-        } else if (tenDigits.length <= 6) {
-            newValue = `${tenDigits.substring(0, 3)}-${tenDigits.substring(3)}`;
-        } else {
-            newValue = `${tenDigits.substring(0, 3)}-${tenDigits.substring(3, 6)}-${tenDigits.substring(6)}`;
-        }
-
+      if (tenDigits.length === 0) {
+        newValue = '';
+      } else if (tenDigits.length <= 3) {
+        newValue = `${tenDigits}`;
+      } else if (tenDigits.length <= 6) {
+        newValue = `${tenDigits.substring(0, 3)}-${tenDigits.substring(3)}`;
+      } else {
+        newValue = `${tenDigits.substring(0, 3)}-${tenDigits.substring(3, 6)}-${tenDigits.substring(6)}`;
+      }
     } else if (name === 'firstName' || name === 'lastName') {
-        // Name validation during input (only allow letters, spaces, hyphens, apostrophes)
-        // Note: The stricter check is in the validate() function, this just prevents numbers/symbols from being typed
-        const cleanValue = value.replace(/[^a-zA-Z\s'-]/g, '');
-        newValue = cleanValue;
+      const cleanValue = value.replace(/[^a-zA-Z\s'-]/g, '');
+      newValue = cleanValue;
     }
 
-
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: newValue,
     }));
-    
-    // Clear validation error on change
-    setErrors(prev => ({ ...prev, [name]: '' }));
-    setSubmissionMessage(''); // Clear previous message
+
+    setErrors((prev) => ({ ...prev, [name]: '' }));
+    setSubmissionMessage('');
   };
+
+  // --- Submit Handler ---
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) {
-        setSubmissionMessage('Please correct the highlighted errors before submitting.');
-        return;
+      setSubmissionMessage('Please correct the highlighted errors before submitting.');
+      return;
     }
 
     setIsSubmitting(true);
-    setSubmissionMessage('Submitting registration...');
+    setSubmissionMessage('Submitting interest...');
 
-    // Prepare data payload for the backend
     const apiPayload = {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        email: formData.email,
-        // Remove +1- prefix/masking for clean submission (assuming backend expects 10 digits or E.164)
-        phone_number: formData.phone.replace(/[^\d]/g, ''), 
-        university: formData.university,
-        degree: formData.degree,
-        major: formData.major,
-        visa_status: formData.visaStatus,
-        country_code: formData.countryCode,
-        // Convert YYYY-MM date string to MM/YYYY format if needed, or just send YYYY-MM
-        graduation_date: formData.graduationDate, 
-        opt_end_date: formData.visaStatus === 'F1-OPT' ? formData.optEndDate : null,
-        referral_source: formData.referralSource,
-        linkedin_url: formData.linkedinUrl,
-        github_url: formData.githubUrl,
-        additional_notes: formData.additionalNotes,
-        // consent_to_terms: formData.consentToTerms, // Backend usually confirms this based on submission
-        // Note: File upload requires FormData, but for JSON API, we typically send the metadata and upload the file separately/later.
-        // For this example, we log file name but don't try to upload the binary data via JSON.
-        resume_file_name: formData.resumeFile ? formData.resumeFile.name : null,
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.email,
+      phone_number: formData.phone.replace(/[^\d]/g, ''), // 1 + 10 digits
+      university: formData.university,
+      country_code: formData.countryCode,
+      degree: formData.degree,
+      major: formData.major,
+      visa_status: formData.visaStatus,
+      graduation_date: formData.graduationDate, // YYYY-MM as in Register.jsx
+      opt_end_date: formData.visaStatus === 'F1-OPT' ? formData.optEndDate : null,
+      resume_file_name: formData.resumeFile ? formData.resumeFile.name : null, // optional
+      referral_source: formData.referralSource,
+      referral_friend_name: 
+        formData.referralSource === 'Friend' 
+          ? formData.referralFriendName 
+          : formData.referralSource === 'Other'
+          ? formData.referralOther
+          : null,
+      consent_to_terms: formData.consentToTerms,
+      linkedin_url: formData.linkedinUrl,
+      additional_notes: formData.additionalNotes,
     };
-    console.log("API Payload:", apiPayload);
+
+    console.log('Interest API Payload:', apiPayload);
+
     try {
-        const response = await fetch(REGISTER_API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // Add any necessary authorization headers (e.g., 'Authorization': 'Bearer token')
-            },
-            body: JSON.stringify(apiPayload),
-        });
+      const response = await fetch(INTEREST_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiPayload),
+      });
 
-        if (response.ok) {
-            const result = await response.json();
-            setIsSubmitting(false);
-            // Assuming the backend returns a helpful message
-            setSubmissionMessage(`Registration successful! ${result.message || ''}`);
-            // Clear the form upon success
-            // setFormData(initialFormState);
-            console.log("API Success:", result);
-            
-        } else {
-            // Handle HTTP error status (e.g., 400 Bad Request, 500 Server Error)
-            const errorData = await response.json();
-            setIsSubmitting(false);
-            let errorMessage = errorData.detail || errorData.error || 'Registration failed due to server error.';
-            
-            // Try to extract validation errors from the backend response and merge with front-end errors
-            if (errorData.errors) {
-                const backendErrors = {};
-                for (const key in errorData.errors) {
-                    backendErrors[key] = errorData.errors[key].join(', ');
-                }
-                setErrors(prev => ({ ...prev, ...backendErrors }));
-                errorMessage = 'Registration failed. Please review the errors.';
-            }
-
-            setSubmissionMessage(errorMessage);
-            console.error("API Error:", errorData);
-        }
-    } catch (error) {
-        // Handle network errors (e.g., server offline, CORS issue)
+      if (response.ok) {
+        const result = await response.json();
         setIsSubmitting(false);
-        setSubmissionMessage(`Network error. Could not connect to the backend at ${REGISTER_API_URL}.`);
-        console.error("Network Fetch Error:", error);
+        setSubmissionMessage(result.message || 'Thank you for your interest! We will get back to you.');
+        console.log('Interest API Success:', result);
+        // Optionally reset:
+        // setFormData(initialFormState);
+      } else {
+        const errorData = await response.json();
+        setIsSubmitting(false);
+        let errorMessage = errorData.detail || errorData.error || 'Submission failed due to server error.';
+
+        if (errorData.errors) {
+          const backendErrors = {};
+          for (const key in errorData.errors) {
+            backendErrors[key] = errorData.errors[key].join(', ');
+          }
+          setErrors((prev) => ({ ...prev, ...backendErrors }));
+          errorMessage = 'Submission failed. Please review the errors.';
+        }
+
+        setSubmissionMessage(errorMessage);
+        console.error('Interest API Error:', errorData);
+      }
+    } catch (error) {
+      setIsSubmitting(false);
+      setSubmissionMessage(`Network error. Could not connect to the backend at ${INTEREST_API_URL}.`);
+      console.error('Interest Network Error:', error);
     }
   };
 
   return (
-    // Pale Blue/White Background Theme
-    <div className="min-vh-100 d-flex align-items-center justify-content-center py-4" style={{ backgroundColor: paleBackground }}>
+    <div
+      className="min-vh-100 d-flex align-items-center justify-content-center py-4"
+      style={{ backgroundColor: paleBackground }}
+    >
       <div className="container my-5">
         <div className="row justify-content-center">
           <div className="col-12 col-lg-10 col-xl-9">
             <div className="card shadow-lg border-0 rounded-4">
               <div className="card-body p-4 p-md-5">
-                
+
                 {/* Header */}
                 <div className="text-center mb-5">
                   <div className="d-flex justify-content-center mb-4">
                     <div className="p-3 rounded-circle" style={{ backgroundColor: primaryColor + '1A' }}>
-                      <GraduationCap className="h-8 w-8" style={{ color: primaryColor }} />
+                      <Users className="h-8 w-8" style={{ color: primaryColor }} />
                     </div>
                   </div>
                   <h2 className="card-title fw-bold mb-2" style={{ color: primaryColor }}>
-                    Candidate Application Form
+                    Interest Form
                   </h2>
                   <p className="text-muted lead">
-                    Please provide your professional and academic details.
+                    Share your interest and basic academic details. We’ll contact you with relevant opportunities.
                   </p>
                 </div>
 
-                {/* Submission Message Area */}
+                {/* Submission Message */}
                 {submissionMessage && (
-                    <div className={`alert ${isSubmitting ? 'alert-info' : errors && Object.keys(errors).length > 0 ? 'alert-danger' : 'alert-success'} text-center mb-4`}>
-                        {submissionMessage}
-                    </div>
+                  <div
+                    className={`alert ${
+                      isSubmitting
+                        ? 'alert-info'
+                        : errors && Object.keys(errors).length > 0
+                        ? 'alert-danger'
+                        : 'alert-success'
+                    } text-center mb-4`}
+                  >
+                    {submissionMessage}
+                  </div>
                 )}
 
                 <form noValidate onSubmit={handleSubmit}>
                   <div className="row g-4">
-                    
-                    {/* --- PERSONAL DETAILS SECTION --- */}
-
                     {/* First Name */}
                     <div className="col-md-6">
                       <TextInput
@@ -636,7 +639,7 @@ const Register = () => {
                       />
                     </div>
 
-                    {/* Email Address */}
+                    {/* Email */}
                     <div className="col-md-6">
                       <TextInput
                         label="Email Address"
@@ -651,7 +654,7 @@ const Register = () => {
                       />
                     </div>
 
-                    {/* Phone Number */}
+                    {/* Phone */}
                     <div className="col-md-6">
                       <TextInput
                         label="Phone"
@@ -662,15 +665,13 @@ const Register = () => {
                         error={errors.phone}
                         icon={Phone}
                         required
+                        placeholder="+1-000-000-0000"
+                        maxLength={15}
                         countryCode={formData.countryCode}
-                        placeholder="000-000-0000"
-                        maxLength={15} // Length of the mask
                       />
                     </div>
-                    
-                    <hr className="my-3"/>
 
-                    {/* --- ACADEMIC DETAILS SECTION --- */}
+                    <hr className="my-3" />
 
                     {/* University */}
                     <div className="col-md-6">
@@ -687,10 +688,10 @@ const Register = () => {
                       />
                     </div>
 
-                    {/* Major */}
+                    {/* Major / Course */}
                     <div className="col-md-6">
                       <TextInput
-                        label="Major (Max 100 chars)"
+                        label="Major / Course (Max 100 chars)"
                         name="major"
                         value={formData.major}
                         onChange={handleChange}
@@ -702,7 +703,7 @@ const Register = () => {
                       />
                     </div>
 
-                    {/* Degree Dropdown */}
+                    {/* Degree */}
                     <div className="col-md-6">
                       <div className="mb-3">
                         <label className="form-label fw-semibold text-dark" htmlFor="degree">
@@ -716,16 +717,20 @@ const Register = () => {
                           className={`form-select form-select-lg ${errors.degree ? 'is-invalid' : ''}`}
                           required
                         >
-                          <option value="" disabled>Select Degree</option>
-                          {degreeOptions.map(degree => (
-                            <option key={degree} value={degree}>{degree}</option>
+                          <option value="" disabled>
+                            Select Degree
+                          </option>
+                          {degreeOptions.map((degree) => (
+                            <option key={degree} value={degree}>
+                              {degree}
+                            </option>
                           ))}
                         </select>
                         {errors.degree && <div className="invalid-feedback d-block">{errors.degree}</div>}
                       </div>
                     </div>
 
-                    {/* Graduation Date (MM/YYYY) */}
+                    {/* Graduation Date */}
                     <div className="col-md-6">
                       <TextInput
                         label="Graduation (MM/YYYY)"
@@ -738,12 +743,8 @@ const Register = () => {
                         required
                       />
                     </div>
-                    
-                    <hr className="my-3"/>
 
-                    {/* --- LEGAL/VISA/RESUME SECTION --- */}
-
-                    {/* Visa Status Dropdown */}
+                    {/* Visa Status */}
                     <div className="col-md-6">
                       <div className="mb-3">
                         <label className="form-label fw-semibold text-dark" htmlFor="visaStatus">
@@ -757,16 +758,20 @@ const Register = () => {
                           className={`form-select form-select-lg ${errors.visaStatus ? 'is-invalid' : ''}`}
                           required
                         >
-                          {visaOptions.map(status => (
-                            <option key={status} value={status}>{status}</option>
+                          {visaOptions.map((status) => (
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
                           ))}
                         </select>
-                        {errors.visaStatus && <div className="invalid-feedback d-block">{errors.visaStatus}</div>}
+                        {errors.visaStatus && (
+                          <div className="invalid-feedback d-block">{errors.visaStatus}</div>
+                        )}
                       </div>
                     </div>
 
-                    {/* OPT End Date (Conditional) */}
-                    {(formData.visaStatus === 'F1-OPT') && (
+                    {/* OPT End Date (conditional) */}
+                    {formData.visaStatus === 'F1-OPT' && (
                       <div className="col-md-6">
                         <TextInput
                           label="OPT End Date (MM/YYYY)"
@@ -776,41 +781,30 @@ const Register = () => {
                           onChange={handleChange}
                           error={errors.optEndDate}
                           icon={Calendar}
-                          required={formData.visaStatus === 'F1-OPT'}
+                          required
                         />
                       </div>
                     )}
-                    
-                    {/* Referral Source Dropdown */}
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <label className="form-label fw-semibold text-dark" htmlFor="referralSource">
-                          Referral Source
-                        </label>
-                        <select
-                          id="referralSource"
-                          name="referralSource"
-                          value={formData.referralSource}
-                          onChange={handleChange}
-                          className={`form-select form-select-lg ${errors.referralSource ? 'is-invalid' : ''}`}
-                        >
-                          {referralOptions.map(source => (
-                            <option key={source} value={source}>{source}</option>
-                          ))}
-                        </select>
-                        {errors.referralSource && <div className="invalid-feedback d-block">{errors.referralSource}</div>}
-                      </div>
-                    </div>
 
-                    {/* Resume Upload */}
+                    {/* Resume Upload (Optional) */}
                     <div className="col-12">
                       <div className="mb-3">
                         <label className="form-label fw-semibold text-dark" htmlFor="resumeFile">
-                          Resume Upload (PDF/DOCX, Max 5MB)<span className="text-danger ms-1">*</span>
+                          Resume Upload (PDF/DOCX, Max 5MB){' '}
+                          <span className="text-muted">(Optional)</span>
                         </label>
-                        <div className={`border rounded-3 p-3 ${errors.resumeFile ? 'border-danger bg-danger bg-opacity-10' : 'border-secondary border-opacity-25'}`}>
+                        <div
+                          className={`border rounded-3 p-3 ${
+                            errors.resumeFile
+                              ? 'border-danger bg-danger bg-opacity-10'
+                              : 'border-secondary border-opacity-25'
+                          }`}
+                        >
                           <div className="d-flex align-items-center">
-                            <div className="p-2 rounded-2 me-3" style={{ backgroundColor: primaryColor + '1A' }}>
+                            <div
+                              className="p-2 rounded-2 me-3"
+                              style={{ backgroundColor: primaryColor + '1A' }}
+                            >
                               <Upload className="h-5 w-5" style={{ color: primaryColor }} />
                             </div>
                             <div className="flex-grow-1">
@@ -821,29 +815,89 @@ const Register = () => {
                                 onChange={handleChange}
                                 className="form-control form-control-lg"
                                 accept=".pdf,.docx,.doc"
-                                required
                               />
                             </div>
                           </div>
                           {formData.resumeFile && (
                             <p className="text-success mt-2 mb-0 d-flex align-items-center fw-semibold">
-                              <span className="me-2" style={{ color: primaryColor }}>&bull;</span>
-                              Selected: {formData.resumeFile.name} ({(formData.resumeFile.size / 1024 / 1024).toFixed(2)} MB)
+                              <span className="me-2" style={{ color: primaryColor }}>
+                                &bull;
+                              </span>
+                              Selected: {formData.resumeFile.name} (
+                              {(formData.resumeFile.size / 1024 / 1024).toFixed(2)} MB)
                             </p>
                           )}
                         </div>
-                        {errors.resumeFile && <div className="invalid-feedback d-block">{errors.resumeFile}</div>}
+                        {errors.resumeFile && (
+                          <div className="invalid-feedback d-block">{errors.resumeFile}</div>
+                        )}
                       </div>
                     </div>
-                    
-                    <hr className="my-3"/>
 
-                    {/* --- OPTIONAL LINKS / NOTES SECTION --- */}
+                    {/* Referral Source */}
+                    <div className="col-md-6">
+                      <div className="mb-3">
+                        <label className="form-label fw-semibold text-dark" htmlFor="referralSource">
+                          Referral Source<span className="text-danger ms-1">*</span>
+                        </label>
+                        <select
+                          id="referralSource"
+                          name="referralSource"
+                          value={formData.referralSource}
+                          onChange={handleChange}
+                          className={`form-select form-select-lg ${
+                            errors.referralSource ? 'is-invalid' : ''
+                          }`}
+                          required
+                        >
+                          {referralOptions.map((source) => (
+                            <option key={source} value={source}>
+                              {source}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.referralSource && (
+                          <div className="invalid-feedback d-block">{errors.referralSource}</div>
+                        )}
+                      </div>
+                    </div>
 
-                    {/* LinkedIn URL */}
+                    {/* Friend name (when referral is Friend) */}
+                    {formData.referralSource === 'Friend' && (
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Friend's Name (who referred you to HYRIND)"
+                          name="referralFriendName"
+                          value={formData.referralFriendName}
+                          onChange={handleChange}
+                          error={errors.referralFriendName}
+                          icon={User}
+                          placeholder="Your friend's full name"
+                          maxLength={100}
+                        />
+                      </div>
+                    )}
+
+                    {/* Other specification (when referral is Other) */}
+                    {formData.referralSource === 'Other' && (
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Please Specify"
+                          name="referralOther"
+                          value={formData.referralOther}
+                          onChange={handleChange}
+                          error={errors.referralOther}
+                          icon={User}
+                          placeholder="How did you hear about us?"
+                          maxLength={100}
+                        />
+                      </div>
+                    )}
+
+                    {/* LinkedIn URL (Optional) */}
                     <div className="col-md-6">
                       <TextInput
-                        label="LinkedIn Profile URL"
+                        label="LinkedIn Profile URL (Optional)"
                         name="linkedinUrl"
                         type="url"
                         value={formData.linkedinUrl}
@@ -854,24 +908,10 @@ const Register = () => {
                       />
                     </div>
 
-                    {/* GitHub URL */}
-                    <div className="col-md-6">
-                      <TextInput
-                        label="GitHub Profile URL"
-                        name="githubUrl"
-                        type="url"
-                        value={formData.githubUrl}
-                        onChange={handleChange}
-                        error={errors.githubUrl}
-                        icon={GitBranch}
-                        placeholder="https://github.com/..."
-                      />
-                    </div>
-
-                    {/* Additional Notes */}
+                    {/* Additional Notes (Optional) */}
                     <div className="col-12">
                       <TextInput
-                        label="Additional Notes (Max 500 chars)"
+                        label="Additional Notes (Max 500 chars) (Optional)"
                         name="additionalNotes"
                         value={formData.additionalNotes}
                         onChange={handleChange}
@@ -879,12 +919,16 @@ const Register = () => {
                         icon={ScrollText}
                         isTextArea
                         maxLength={500}
+                        placeholder="Any extra details you want to share (e.g., interests, preferences, etc.)"
                       />
                     </div>
                   </div>
 
-                  {/* Terms & Conditions Checkbox */}
-                  <div className="mt-4 p-4 rounded-3 border" style={{ backgroundColor: primaryColor + '0A', borderColor: primaryColor + '33' }}>
+                  {/* Terms & Conditions */}
+                  <div
+                    className="mt-4 p-4 rounded-3 border"
+                    style={{ backgroundColor: primaryColor + '0A', borderColor: primaryColor + '33' }}
+                  >
                     <div className="form-check">
                       <input
                         id="consentToTerms"
@@ -892,26 +936,32 @@ const Register = () => {
                         type="checkbox"
                         checked={formData.consentToTerms}
                         onChange={handleChange}
-                        className={`form-check-input ${errors.consentToTerms ? 'is-invalid' : ''}`}
-                        style={{ borderColor: primaryColor, color: primaryColor, backgroundColor: formData.consentToTerms ? primaryColor : 'white' }}
+                        className={`form-check-input ${
+                          errors.consentToTerms ? 'is-invalid' : ''
+                        }`}
+                        style={{
+                          borderColor: primaryColor,
+                          color: primaryColor,
+                          backgroundColor: formData.consentToTerms ? primaryColor : 'white',
+                        }}
                       />
                       <label htmlFor="consentToTerms" className="form-check-label text-dark fw-medium">
-                        I hereby confirm that all information provided is accurate and agree to the{' '}
-                        <a 
-                          href="/TermsConditions" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="text-decoration-none fw-bold" 
+                        I confirm that the information provided is accurate and agree to the{' '}
+                        <a
+                          href="/TermsConditions"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-decoration-none fw-bold"
                           style={{ color: primaryColor }}
                         >
                           Terms of Service
                         </a>{' '}
                         and{' '}
-                        <a 
-                          href="/PrivacyPolicy" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="text-decoration-none fw-bold" 
+                        <a
+                          href="/PrivacyPolicy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-decoration-none fw-bold"
                           style={{ color: primaryColor }}
                         >
                           Privacy Policy
@@ -919,11 +969,13 @@ const Register = () => {
                         .
                         <span className="text-danger ms-1">*</span>
                       </label>
-                      {errors.consentToTerms && <div className="invalid-feedback d-block">{errors.consentToTerms}</div>}
+                      {errors.consentToTerms && (
+                        <div className="invalid-feedback d-block">{errors.consentToTerms}</div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Submit Button */}
+                  {/* Submit */}
                   <div className="mt-5">
                     <button
                       type="submit"
@@ -933,34 +985,39 @@ const Register = () => {
                     >
                       {isSubmitting ? (
                         <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          {submissionMessage || 'Submitting Application...'}
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                            aria-hidden="true"
+                          ></span>
+                          {submissionMessage || 'Submitting...'}
                         </>
                       ) : (
                         <>
                           <Users className="w-6 h-6 me-2" />
-                          Submit Application
+                          Submit Interest
                         </>
                       )}
                     </button>
                   </div>
 
-                  {/* Login Link */}
+                  {/* Link to full registration or login */}
                   <div className="text-center mt-4 pt-4 border-top">
                     <p className="text-muted">
-                      Need to log in instead?{' '}
+                      Want to complete the full application?{' '}
                       <button
                         type="button"
-                        onClick={() => navigate('/login')}
+                        onClick={() => navigate('/register')}
                         className="btn btn-link fw-bold text-decoration-none p-0"
                         style={{ color: primaryColor }}
                       >
                         <LogIn className="w-4 h-4 me-1" />
-                        Sign In Here
+                        Go to Candidate Application
                       </button>
                     </p>
                   </div>
                 </form>
+
               </div>
             </div>
           </div>
@@ -970,4 +1027,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Interest;

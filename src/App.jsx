@@ -14,7 +14,8 @@ import TermsConditions from './TermsConditions';
 import Admin from './Admin';
 import ContactUs from './Contact';
 import HowItWorksFlow from '../HowItWorks';
-
+import Interest from './interest';
+import RecruiterDashboard from './recruiterdashboard';
 function App() {
   return (
     // Use Router wrapper
@@ -31,6 +32,8 @@ function App() {
           <Route path="/apply" element={<Register />} /> {/* Assuming Apply is Register */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/recruiterdashboard" element={<RecruiterDashboard/>} />
+          <Route path="/interest" element={<Interest/>} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
           <Route path="/TermsConditions" element={<TermsConditions />} />

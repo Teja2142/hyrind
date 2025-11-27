@@ -61,6 +61,18 @@ const Navbar = () => {
                 Register
               </Link>
             </li>
+                        {/* Interest */}
+            <li className="nav-item">
+              <Link className="nav-link" to="/Interest">
+                Interest
+              </Link>
+            </li>
+            {/* Recruiter Dashboard */}
+            <li className="nav-item">
+              <Link className="nav-link" to="/recruiterdashboard">
+                Recruiter Dashboard
+              </Link>
+            </li>
             {/* Login */}
             <li className="nav-item">
               <Link className="nav-link" to="/login">
