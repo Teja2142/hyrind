@@ -16,6 +16,8 @@ import Admin from './Admin';
 import ContactUs from './Contact';
 import HowItWorksFlow from './HowItWorks';
 import ReviewsPage from './ReviewsPage';
+import RecruiterDashboard from './RecruiterDashboard';
+import Interest from './Intrest';
 import Footer from './Footer';
 
 
@@ -52,6 +54,8 @@ function App() {
           <Route path="/Contact" element={<ContactUs />} />
           <Route path="/how-it-works" element={<HowItWorksFlow />} />
           <Route path="/reviews" element={<ReviewsPage />} />
+          <Route path="/recruiter-dashboard" element={<RecruiterDashboard />} />
+          <Route path="/interest" element={<Interest />} />
           <Route path="*" element={<h2>404: Page Not Found</h2>} />
         </Routes>
       </main>
