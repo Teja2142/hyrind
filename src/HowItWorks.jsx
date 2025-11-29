@@ -113,6 +113,7 @@ export default function HowItWorksFlow() {
           background: #ffffff;
           min-height: 100vh;
           padding: 60px 20px;
+          marginTop: 40px;
           position: relative;
         }
 

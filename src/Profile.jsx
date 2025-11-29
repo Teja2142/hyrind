@@ -1,475 +1,303 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, Home, Calendar, MapPin, Edit2, Save, X, Upload } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-// Text Input Component
-const TextInput = ({ label, name, type = 'text', value, onChange, error, icon: Icon, required = false, disabled = false }) => (
-  <div className="space-y-2">
-    <label className="text-sm font-semibold text-gray-800 block" htmlFor={name}>
-      {label}
-      {required && <span className="text-red-500 ml-1">*</span>}
-    </label>
-    <div className="relative">
-      {Icon && (
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <Icon className="h-5 w-5 text-gray-500" />
+// --- START: Inline SVG Icon Definitions ---
+
+const LogOut = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
+);
+
+const User = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
+const Mail = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="2" />
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+  </svg>
+);
+
+const Phone = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.08 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+  </svg>
+);
+
+const GraduationCap = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 10v6M12 15V7M2 10l10-5 10 5" />
+    <path d="M6 12v6M18 12v6M2 10l10 5 10-5M12 15l10-5M2 10l10-5 10 5" />
+  </svg>
+);
+
+const LinkIcon = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </svg>
+);
+
+const GitBranch = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="6" y1="3" x2="6" y2="15" />
+    <circle cx="18" cy="6" r="3" />
+    <circle cx="6" cy="18" r="3" />
+    <path d="M18 9a9 9 0 0 1-9 9" />
+  </svg>
+);
+
+// --- END: Inline SVG Icon Definitions ---
+
+// Helper component for displaying profile field data
+const ProfileField = ({ icon: Icon, label, value }) => (
+    <div className="d-flex align-items-center mb-3">
+        <div className="p-2 me-3 rounded-circle" style={{ backgroundColor: '#4682B41A' }}>
+            <Icon className="w-5 h-5 text-secondary" style={{ color: '#4682B4' }} />
         </div>
-      )}
-      <input
-        type={type}
-        id={name}
-        name={name}
-        value={value || ''}
-        onChange={onChange}
-        disabled={disabled}
-        className={`w-full p-4 bg-white text-gray-900 rounded-xl border-2 focus:ring-2 transition-all duration-200
-          ${Icon ? 'pl-12' : ''}
-          ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}
-          ${error 
-            ? 'border-red-500 focus:ring-red-500/30 focus:border-red-500' 
-            : 'border-gray-200 focus:ring-blue-500/30 focus:border-blue-500 hover:border-gray-300'
-          }
-        `}
-        required={required}
-      />
+        <div>
+            <p className="text-muted mb-0 small fw-semibold">{label}</p>
+            <p className="fw-bold mb-0 text-dark">{value || 'N/A'}</p>
+        </div>
     </div>
-    {error && <p className="text-sm text-red-600 font-medium mt-1">{error}</p>}
-  </div>
 );
 
-// Select Input Component
-const SelectInput = ({ label, name, value, onChange, error, options, required = false, disabled = false }) => (
-  <div className="space-y-2">
-    <label className="text-sm font-semibold text-gray-800 block" htmlFor={name}>
-      {label}
-      {required && <span className="text-red-500 ml-1">*</span>}
-    </label>
-    <select
-      id={name}
-      name={name}
-      value={value || ''}
-      onChange={onChange}
-      disabled={disabled}
-      className={`w-full p-4 border-2 bg-white text-gray-900 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 ${
-        disabled ? 'bg-gray-100 cursor-not-allowed' : ''
-      } ${
-        error ? 'border-red-500' : 'border-gray-200 hover:border-gray-300'
-      }`}
-      required={required}
-    >
-      <option value="">Select {label}</option>
-      {options.map(option => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
-    {error && <p className="text-sm text-red-600 font-medium mt-1">{error}</p>}
-  </div>
-);
-
+// Main Profile Component
 const Profile = () => {
-  const [profileData, setProfileData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    university: '',
-    degree: '',
-    major: '',
-    visaStatus: '',
-    graduationDate: '',
-    location: '',
-    bio: '',
-    resume: null
-  });
+  const navigate = useNavigate();
+  const primaryColor = '#4682B4'; // Steel Blue
+  const paleBackground = '#F0F8FF'; // Alice Blue
+  
+  // API URL for fetching profile data
+  const PROFILE_API_URL = "http://127.0.0.1:8000/api/users/profiles/"; 
 
-  const [originalData, setOriginalData] = useState({});
-  const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [message, setMessage] = useState({ type: '', text: '' });
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const visaOptions = [
-    { value: 'F-1 OPT', label: 'F-1 OPT' },
-    { value: 'H-1B', label: 'H-1B' },
-    { value: 'Citizen', label: 'Citizen' },
-    { value: 'Other', label: 'Other' }
-  ];
-
-  // Fetch profile data
-  const fetchProfile = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('http://127.0.0.1:8000/api/profile', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setProfileData(data);
-        setOriginalData(data);
-      } else {
-        throw new Error('Failed to fetch profile');
-      }
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      setMessage({ type: 'error', text: 'Failed to load profile data' });
-      
-      // Mock data for demonstration
-      const mockData = {
-        fullName: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: '1234567890',
-        university: 'University of Example',
-        degree: 'Bachelor of Science',
-        major: 'Computer Science',
-        visaStatus: 'F-1 OPT',
-        graduationDate: '2024-05-15',
-        location: 'New York, NY',
-        bio: 'Passionate software developer with experience in React and Node.js.',
-        resume: null
-      };
-      setProfileData(mockData);
-      setOriginalData(mockData);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Check for token and fetch data on mount
   useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const validate = () => {
-    let newErrors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!profileData.fullName) {
-      newErrors.fullName = 'Full name is required.';
-    }
-
-    if (!profileData.email) {
-      newErrors.email = 'Email is required.';
-    } else if (!emailRegex.test(profileData.email)) {
-      newErrors.email = 'Invalid email address.';
-    }
-
-    if (profileData.phone && !/^\d{10}$/.test(profileData.phone.replace(/\D/g, ''))) {
-      newErrors.phone = 'Phone number must be 10 digits.';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, files } = e.target;
-    setProfileData(prev => ({
-      ...prev,
-      [name]: type === 'file' ? files[0] : value,
-    }));
-    setErrors(prev => ({ ...prev, [name]: '' }));
-  };
-
-  const handleSave = async () => {
-    if (!validate()) return;
-
-    setIsSaving(true);
-    setMessage({ type: '', text: '' });
-
-    try {
-      const formData = new FormData();
+    const fetchProfile = async () => {
+      const token = localStorage.getItem('accessToken');
       
-      // Append all profile data to FormData
-      Object.keys(profileData).forEach(key => {
-        if (key === 'resume' && profileData[key] instanceof File) {
-          formData.append('resume', profileData[key]);
-        } else if (profileData[key] !== null) {
-          formData.append(key, profileData[key]);
-        }
-      });
-
-      const response = await fetch('http://127.0.0.1:8000/api/profile', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData
-      });
-
-      if (response.ok) {
-        const updatedData = await response.json();
-        setProfileData(updatedData);
-        setOriginalData(updatedData);
-        setIsEditing(false);
-        setMessage({ type: 'success', text: 'Profile updated successfully!' });
-      } else {
-        throw new Error('Failed to update profile');
+      if (!token) {
+        setError("You are not logged in. Redirecting to login...");
+        setLoading(false);
+        setTimeout(() => navigate('/login'), 2000);
+        return;
       }
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      setMessage({ type: 'error', text: 'Failed to update profile. Please try again.' });
-    } finally {
-      setIsSaving(false);
-    }
+      
+      try {
+        const response = await fetch(PROFILE_API_URL, {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            // --- AUTHORIZATION HEADER USING BEARER TOKEN ---
+            'Authorization': `Bearer ${token}`, 
+            // Note: X-CSRFTOKEN is typically not needed for GET requests with Bearer tokens
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Assuming the API returns an array, and we need the first item (the user's profile)
+          if (Array.isArray(data) && data.length > 0) {
+            setProfileData(data[0]);
+          } else {
+            setError("Profile data is empty or malformed.");
+          }
+        } else {
+          // Handle 401 Unauthorized, 403 Forbidden etc.
+          const errorData = await response.json();
+          const message = errorData.detail || "Failed to fetch profile. Your session may have expired.";
+          setError(message);
+          
+          // Clear token and redirect if unauthorized
+          if (response.status === 401 || response.status === 403) {
+            handleLogout();
+          }
+        }
+      } catch (err) {
+        setError(`Network error: Could not connect to the profile service.`);
+        console.error("Fetch Profile Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [navigate]);
+
+  // Logout function
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    navigate('/login');
   };
 
-  const handleCancel = () => {
-    setProfileData(originalData);
-    setErrors({});
-    setIsEditing(false);
-  };
-
-  const handleEdit = () => {
-    setIsEditing(true);
-    setMessage({ type: '', text: '' });
-  };
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading profile...</p>
+        <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: paleBackground }}>
+            <div className="text-center">
+                <div className="spinner-border text-primary" role="status" style={{ color: primaryColor }}>
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+                <p className="mt-3 text-muted">Loading your profile data...</p>
+            </div>
         </div>
-      </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-white/20">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center space-x-4 mb-4 md:mb-0">
-              <div className="p-3 bg-blue-100 rounded-2xl">
-                <User className="h-8 w-8 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Candidate Profile</h1>
-                <p className="text-gray-600">Manage your personal and educational information</p>
-              </div>
-            </div>
-            
-            <div className="flex space-x-3">
-              {!isEditing ? (
-                <button
-                  onClick={handleEdit}
-                  className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 font-semibold"
+  if (error) {
+    return (
+        <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: paleBackground }}>
+            <div className="alert alert-danger p-4 shadow-lg rounded-3">
+                <h4 className="alert-heading">Access Denied!</h4>
+                <p>{error}</p>
+                <button 
+                    onClick={handleLogout} 
+                    className="btn btn-sm btn-outline-danger mt-2"
                 >
-                  <Edit2 className="w-5 h-5 mr-2" />
-                  Edit Profile
+                    <LogOut className="w-4 h-4 me-1" /> Go to Login
                 </button>
-              ) : (
-                <>
-                  <button
-                    onClick={handleCancel}
-                    className="flex items-center px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors duration-200 font-semibold"
-                  >
-                    <X className="w-5 h-5 mr-2" />
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="flex items-center px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors duration-200 font-semibold disabled:opacity-50"
-                  >
-                    {isSaving ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-5 h-5 mr-2" />
-                        Save Changes
-                      </>
-                    )}
-                  </button>
-                </>
-              )}
             </div>
-          </div>
         </div>
+    );
+  }
 
-        {/* Message Alert */}
-        {message.text && (
-          <div className={`p-4 rounded-xl mb-6 ${
-            message.type === 'success' 
-              ? 'bg-green-100 text-green-800 border border-green-200' 
-              : 'bg-red-100 text-red-800 border border-red-200'
-          }`}>
-            {message.text}
-          </div>
-        )}
+  const profile = profileData;
+  if (!profile) return null; // Should be caught by error state, but safety first
 
-        {/* Profile Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-white/20">
-          <form className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Personal Information */}
-              <TextInput
-                label="Full Name"
-                name="fullName"
-                value={profileData.fullName}
-                onChange={handleChange}
-                error={errors.fullName}
-                icon={User}
-                required
-                disabled={!isEditing}
-              />
-              
-              <TextInput
-                label="Email Address"
-                name="email"
-                type="email"
-                value={profileData.email}
-                onChange={handleChange}
-                error={errors.email}
-                icon={Mail}
-                required
-                disabled={!isEditing}
-              />
-              
-              <TextInput
-                label="Phone Number"
-                name="phone"
-                type="tel"
-                value={profileData.phone}
-                onChange={handleChange}
-                error={errors.phone}
-                icon={Phone}
-                disabled={!isEditing}
-              />
-              
-              <TextInput
-                label="Location"
-                name="location"
-                value={profileData.location}
-                onChange={handleChange}
-                icon={MapPin}
-                disabled={!isEditing}
-              />
-
-              {/* Education Information */}
-              <TextInput
-                label="University"
-                name="university"
-                value={profileData.university}
-                onChange={handleChange}
-                error={errors.university}
-                icon={Home}
-                disabled={!isEditing}
-              />
-              
-              <TextInput
-                label="Degree"
-                name="degree"
-                value={profileData.degree}
-                onChange={handleChange}
-                error={errors.degree}
-                disabled={!isEditing}
-              />
-              
-              <TextInput
-                label="Major"
-                name="major"
-                value={profileData.major}
-                onChange={handleChange}
-                error={errors.major}
-                disabled={!isEditing}
-              />
-              
-              <SelectInput
-                label="Visa Status"
-                name="visaStatus"
-                value={profileData.visaStatus}
-                onChange={handleChange}
-                error={errors.visaStatus}
-                options={visaOptions}
-                disabled={!isEditing}
-              />
-
-              <TextInput
-                label="Graduation Date"
-                name="graduationDate"
-                type="date"
-                value={profileData.graduationDate}
-                onChange={handleChange}
-                error={errors.graduationDate}
-                icon={Calendar}
-                disabled={!isEditing}
-              />
-
-              {/* Bio */}
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-sm font-semibold text-gray-800 block" htmlFor="bio">
-                  Bio
-                </label>
-                <textarea
-                  id="bio"
-                  name="bio"
-                  value={profileData.bio || ''}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  rows={4}
-                  className={`w-full p-4 bg-white text-gray-900 rounded-xl border-2 focus:ring-2 transition-all duration-200 resize-none
-                    ${!isEditing ? 'bg-gray-100 cursor-not-allowed' : ''}
-                    ${errors.bio 
-                      ? 'border-red-500 focus:ring-red-500/30 focus:border-red-500' 
-                      : 'border-gray-200 focus:ring-blue-500/30 focus:border-blue-500 hover:border-gray-300'
-                    }
-                  `}
-                />
-                {errors.bio && <p className="text-sm text-red-600 font-medium mt-1">{errors.bio}</p>}
-              </div>
-
-              {/* Resume Upload */}
-              {isEditing && (
-                <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-semibold text-gray-800 block" htmlFor="resume">
-                    Update Resume (PDF/DOCX)
-                  </label>
-                  <div className={`p-4 border-2 rounded-xl transition-all duration-200 ${
-                    errors.resume ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}>
-                    <div className="flex items-center space-x-4">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <Upload className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <input
-                          type="file"
-                          id="resume"
-                          name="resume"
-                          onChange={handleChange}
-                          className="block w-full text-sm text-gray-600
-                            file:mr-4 file:py-2 file:px-4
-                            file:rounded-lg file:border-0
-                            file:text-sm file:font-semibold
-                            file:bg-blue-500 file:text-white
-                            hover:file:bg-blue-600 cursor-pointer transition-colors"
-                          accept=".pdf,.docx,.doc"
-                        />
-                      </div>
-                    </div>
-                    {profileData.resume && (
-                      <p className="text-sm text-blue-600 font-medium mt-2 flex items-center">
-                        <Upload className="h-4 w-4 mr-2" />
-                        {profileData.resume instanceof File ? `Selected: ${profileData.resume.name}` : `Current: ${profileData.resume}`}
-                      </p>
-                    )}
-                  </div>
-                  {errors.resume && <p className="text-sm text-red-600 font-medium mt-1">{errors.resume}</p>}
+  return (
+    <div className="min-vh-100 d-flex align-items-center justify-content-center py-4" style={{ backgroundColor: paleBackground }}>
+      <div className="container my-5">
+        <div className="row justify-content-center">
+          <div className="col-12 col-lg-8 col-xl-7">
+            <div className="card shadow-lg border-0 rounded-4">
+              <div className="card-body p-4 p-md-5">
+                
+                {/* Header and Logout */}
+                <div className="d-flex justify-content-between align-items-center mb-5 border-bottom pb-3">
+                  <h2 className="card-title fw-bold" style={{ color: primaryColor }}>
+                    User Profile
+                  </h2>
+                  <button 
+                    onClick={handleLogout} 
+                    className="btn btn-sm btn-outline-danger"
+                  >
+                    <LogOut className="w-4 h-4 me-1" /> Logout
+                  </button>
                 </div>
-              )}
+                
+                {/* Profile Photo Placeholder (optional, added for visual appeal) */}
+                <div className="text-center mb-5">
+                    <div 
+                        className="mx-auto rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                        style={{ width: '100px', height: '100px', backgroundColor: primaryColor + '33' }}
+                    >
+                        <User className="w-10 h-10" style={{ color: primaryColor }} />
+                    </div>
+                    <h3 className="mt-3 fw-bold text-dark">{profile.first_name} {profile.last_name}</h3>
+                    <p className="text-muted">{profile.email}</p>
+                </div>
+
+                {/* Profile Details Grid */}
+                <div className="row g-4">
+                    <div className="col-md-6">
+                        <ProfileField 
+                            icon={User} 
+                            label="Full Name" 
+                            value={`${profile.first_name} ${profile.last_name}`} 
+                        />
+                    </div>
+                    <div className="col-md-6">
+                        <ProfileField 
+                            icon={Mail} 
+                            label="Email" 
+                            value={profile.email} 
+                        />
+                    </div>
+                    <div className="col-md-6">
+                        <ProfileField 
+                            icon={Phone} 
+                            label="Phone" 
+                            value={profile.phone} 
+                        />
+                    </div>
+                    <div className="col-md-6">
+                        <ProfileField 
+                            icon={GraduationCap} 
+                            label="University" 
+                            value={profile.university} 
+                        />
+                    </div>
+                    <div className="col-md-6">
+                        <ProfileField 
+                            icon={GraduationCap} 
+                            label="Degree" 
+                            value={`${profile.degree} in ${profile.major}`} 
+                        />
+                    </div>
+                    <div className="col-md-6">
+                        <ProfileField 
+                            icon={GraduationCap} 
+                            label="Visa Status" 
+                            value={profile.visa_status} 
+                        />
+                    </div>
+                    <div className="col-md-6">
+                        <ProfileField 
+                            icon={LinkIcon} 
+                            label="LinkedIn" 
+                            value={profile.linkedin_url ? 
+                                <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" style={{color: primaryColor}}>View Profile</a> 
+                                : 'N/A'
+                            } 
+                        />
+                    </div>
+                    <div className="col-md-6">
+                        <ProfileField 
+                            icon={GitBranch} 
+                            label="GitHub" 
+                            value={profile.github_url ? 
+                                <a href={profile.github_url} target="_blank" rel="noopener noreferrer" style={{color: primaryColor}}>View Profile</a> 
+                                : 'N/A'
+                            } 
+                        />
+                    </div>
+                </div>
+
+                {/* Resume and Notes */}
+                <div className="mt-4 pt-4 border-top">
+                    <h4 className="fw-semibold text-dark">Additional Information</h4>
+                    <div className="row mt-3">
+                        <div className="col-md-6">
+                             <p className="text-muted mb-1 small fw-semibold">Resume File</p>
+                            {profile.resume_file ? (
+                                <a href={profile.resume_file} target="_blank" rel="noopener noreferrer" className="btn btn-sm" style={{backgroundColor: primaryColor + '1A', color: primaryColor}}>
+                                    View Uploaded Resume
+                                </a>
+                            ) : (
+                                <span className="text-danger">No File Uploaded</span>
+                            )}
+                        </div>
+                        <div className="col-md-6">
+                             <p className="text-muted mb-1 small fw-semibold">Notes</p>
+                             <p className="text-dark small border p-2 rounded-3" style={{ whiteSpace: 'pre-wrap', minHeight: '50px' }}>
+                                {profile.additional_notes || 'No additional notes provided.'}
+                             </p>
+                        </div>
+                    </div>
+                </div>
+              </div>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>

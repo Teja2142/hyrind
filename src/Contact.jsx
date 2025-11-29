@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function ContactUs() {
+export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', phone: '', message: '' });
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState('');
@@ -25,7 +25,6 @@ export default function ContactUs() {
     const v = validate();
     setErrors(v);
     if (Object.keys(v).length === 0) {
-      // Simulate submission - replace with fetch/axios to send to your backend
       console.log('Submitting', form);
       setStatus('Message sent — thank you!');
       setForm({ name: '', email: '', subject: '', phone: '', message: '' });
@@ -38,36 +37,153 @@ export default function ContactUs() {
   return (
     <div className="contact-us-root" aria-live="polite">
       <style>{`
-        .contact-us-root{font-family: Inter, Roboto, system-ui, -apple-system, 'Segoe UI', Arial;max-width:1080px;margin:32px auto;padding:20px}
-        .contact-grid{display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:start}
-        @media (max-width:880px){.contact-grid{grid-template-columns:1fr;}}
+        .contact-us-root {
+          font-family: Inter, Roboto, system-ui, -apple-system, 'Segoe UI', Arial;
+          max-width: 1080px;
+          margin: 0 auto;
+          padding: 120px 20px 60px;
+          background: white;
+        }
+        .contact-grid { 
+          display:grid; 
+          grid-template-columns:1fr 420px; 
+          gap:28px; 
+          align-items:start;
+        }
+        @media (max-width:880px){ 
+          .contact-grid{ 
+            grid-template-columns:1fr;
+          }
+          .contact-us-root {
+            padding: 80px 16px 40px;
+          }
+        }
+        @media (max-width:480px){
+          .contact-us-root {
+            padding: 60px 12px 30px;
+          }
+        }
 
-        .card{background:#ffffff;border-radius:12px;padding:20px;box-shadow:0 6px 18px rgba(13,38,59,0.06)}
-        .lead{font-size:20px;margin-bottom:6px;color:#0b2540}
-        .sub{color:#475569;margin-bottom:18px}
+        .card{ 
+          background:#ffffff; 
+          border-radius:12px; 
+          padding:32px; 
+          box-shadow:0 6px 18px rgba(13,38,59,0.06);
+          background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&q=80');
+          background-size: cover;
+          background-position: center;
+          background-blend-mode: overlay;
+          background-color: rgba(255, 255, 255, 0.97);
+        }
+        @media (max-width:880px){
+          .card {
+            padding: 24px;
+          }
+        }
+        @media (max-width:480px){
+          .card {
+            padding: 20px;
+          }
+        }
+        .lead{ 
+          font-size:24px; 
+          margin-bottom:8px; 
+          color:#0b2540;
+          font-weight: 700;
+        }
+        @media (max-width:480px){
+          .lead {
+            font-size: 20px;
+          }
+        }
+        .sub{ 
+          color:#475569; 
+          margin-bottom:18px;
+          font-size: 15px;
+        }
+        @media (max-width:480px){
+          .sub {
+            font-size: 14px;
+          }
+        }
 
-        form .row{display:flex;gap:12px}
-        form .row .field{flex:1}
-        label{display:block;font-size:13px;margin-bottom:6px;color:#0b2440}
-        input[type=text], input[type=email], textarea{width:100%;padding:10px 12px;border:1px solid #e6eaf0;border-radius:8px;font-size:14px;outline:none}
-        input:focus, textarea:focus{box-shadow:0 0 0 4px rgba(59,130,246,0.08);border-color:#3b82f6}
-        textarea{min-height:140px;resize:vertical}
-        .small{font-size:13px;color:#64748b;margin-top:8px}
+        label{ 
+          display:block; 
+          font-size:13px; 
+          margin-bottom:6px; 
+          color:#0b2440;
+          font-weight: 500;
+        }
+        input[type=text], input[type=email], textarea{
+          width:100%; 
+          padding:10px 12px; 
+          border:1px solid #e6eaf0; 
+          border-radius:8px; 
+          font-size:14px; 
+          outline:none;
+          background: white;
+          transition: all 0.2s ease;
+        }
+        input::placeholder, textarea::placeholder {
+          color: #94a3b8;
+        }
+        input:focus, textarea:focus{ 
+          box-shadow:0 0 0 4px rgba(59,130,246,0.08); 
+          border-color:#3b82f6;
+        }
+        textarea{ 
+          min-height:140px; 
+          resize:vertical;
+          font-family: inherit;
+        }
+        @media (max-width:480px){
+          input[type=text], input[type=email], textarea {
+            font-size: 16px; /* Prevents iOS zoom */
+          }
+          textarea {
+            min-height: 120px;
+          }
+        }
 
-        .error{color:#b91c1c;font-size:13px;margin-top:6px}
-        .actions{display:flex;gap:12px;align-items:center;margin-top:12px}
-        .btn{background:#0b72ff;color:white;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
-        .btn[disabled]{opacity:0.6;cursor:not-allowed}
+        .error{ 
+          color:#b91c1c; 
+          font-size:13px; 
+          margin-top:6px;
+        }
+        .btn{ 
+          background:#0b72ff; 
+          color:white; 
+          padding:12px 16px; 
+          border-radius:10px; 
+          border:none; 
+          cursor:pointer; 
+          font-weight:600;
+          font-size: 14px;
+          transition: all 0.2s ease;
+        }
+        .btn:hover {
+          background: #0960df;
+          transform: translateY(-1px);
+        }
+        .btn:active {
+          transform: translateY(0);
+        }
+        @media (max-width:480px){
+          .btn {
+            padding: 14px 16px;
+            font-size: 15px;
+          }
+        }
+        .status{ 
+          margin-top:12px; 
+          font-size:14px; 
+          color:#065f46;
+          font-weight: 500;
+        }
 
-        .info-stack{display:flex;flex-direction:column;gap:12px}
-        .contact-item{display:flex;gap:12px;align-items:flex-start}
-        .avatar{width:44px;height:44px;border-radius:10px;display:inline-grid;place-items:center;background:linear-gradient(135deg,#eef2ff,#e0f2fe);font-weight:700;color:#0b2540}
-        .meta{font-size:14px}
-        .meta strong{display:block}
-
-        .map-placeholder{height:200px;border-radius:10px;background:linear-gradient(180deg,#f8fafc,#eef2ff);display:flex;align-items:center;justify-content:center;color:#475569}
-
-        .status{margin-left:8px;font-size:14px;color:#065f46}
+        .map-placeholder iframe{
+          width:100%; height:260px; border:0; border-radius:10px;
+        }
       `}</style>
 
       <div className="contact-grid">
@@ -78,43 +194,44 @@ export default function ContactUs() {
           <form onSubmit={handleSubmit} noValidate>
             <div style={{marginTop:12}}>
               <label htmlFor="name">Full name</label>
-              <input id="name" name="name" type="text" value={form.name} onChange={handleChange} />
+              <input id="name" name="name" type="text" value={form.name} onChange={handleChange} placeholder="John Doe" />
+              {errors.name && <div className="error">{errors.name}</div>}
             </div>
 
             <div style={{marginTop:12}}>
               <label htmlFor="email">Email</label>
-              <input id="email" name="email" type="email" value={form.email} onChange={handleChange} />
+              <input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="john@example.com" />
+              {errors.email && <div className="error">{errors.email}</div>}
             </div>
 
             <div style={{marginTop:12}}>
               <label htmlFor="phone">Phone</label>
-              <input id="phone" name="phone" type="text" value={form.phone} onChange={handleChange} />
+              <input id="phone" name="phone" type="text" value={form.phone} onChange={handleChange} placeholder="+91 98765 43210" />
+              {errors.phone && <div className="error">{errors.phone}</div>}
             </div>
 
             <div style={{marginTop:12}}>
               <label htmlFor="message">Message</label>
-              <textarea id="message" name="message" value={form.message} onChange={handleChange} />
+              <textarea id="message" name="message" value={form.message} onChange={handleChange} placeholder="Tell us how we can help you..." />
+              {errors.message && <div className="error">{errors.message}</div>}
             </div>
 
             <button type="submit" className="btn" style={{marginTop:18}}>Send Message</button>
-            <div style={{marginTop:12}} className="status">{status}</div>
+            <div className="status">{status}</div>
           </form>
 
           <button className="btn" style={{width:'100%',marginTop:16}}>Book Free Call</button>
         </div>
 
         <aside className="card">
-          <h3 className="lead">Visit & Connect</h3>
+          <h3 className="lead">Visit Us</h3>
 
           <div className="map-placeholder" style={{marginTop:12}}>
-            Map / Location here
-          </div>
-
-          <div style={{marginTop:18}}>
-            <h4 style={{marginBottom:6}}>Calendly / Google Calendar</h4>
-            <div style={{borderRadius:10,overflow:'hidden',height:420}}>
-              <iframe src="https://calendly.com/" style={{border:0,width:'100%',height:'100%'}}></iframe>
-            </div>
+            {/* 🔁 Replace this link with your real office location */}
+            <iframe 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3456.9278428885073!2d77.10252371491806!3d28.450266982497503!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce3e6f0aa2a3b%3A0x3b83381d1a01c4ad!2sDLF%20CyberHub%2C%20Gurugram!5e0!3m2!1sen!2sin!4v1709274551128"
+              allowFullScreen loading="lazy"
+            ></iframe>
           </div>
 
           <div style={{marginTop:18,fontSize:15}}>

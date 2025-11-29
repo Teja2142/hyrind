@@ -18,6 +18,14 @@ const Mail = (props) => (
   </svg>
 );
 
+const Lock = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+
+
 const Phone = (props) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.08 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
@@ -93,22 +101,50 @@ const LogIn = (props) => (
 
 
 // Enhanced Generic Input Component
-const TextInput = ({ label, name, type = 'text', value, onChange, error, icon: Icon, required = false, placeholder, maxLength, isTextArea = false }) => {
+const TextInput = ({
+  label,
+  name,
+  type = 'text',
+  value,
+  onChange,
+  error,
+  icon: Icon,
+  required = false,
+  placeholder,
+  maxLength,
+  isTextArea = false,
+  countryCode,
+}) => {
   const isDate = type === 'date';
 
+  // Simplified country codes for visual/select purposes
+  const countryCodes = [
+    { name: "USA", code: "+1", iso: "us" },
+    { name: "India", code: "+91", iso: "in" },
+    { name: "Canada", code: "+1", iso: "ca" },
+    { name: "UK", code: "+44", iso: "gb" },
+    { name: "Mexico", code: "+52", iso: "mx" },
+  ];
+  
   return (
     <div className="mb-3">
       <label className="form-label fw-semibold text-dark" htmlFor={name}>
         {label}
         {required && <span className="text-danger ms-1">*</span>}
-        {maxLength && isTextArea && <span className="text-muted ms-2 text-sm">({maxLength - (value?.length || 0)} chars left)</span>}
+        {maxLength && isTextArea && (
+          <span className="text-muted ms-2 text-sm">
+            ({maxLength - (value?.length || 0)} chars left)
+          </span>
+        )}
       </label>
-      <div className="input-group">
+
+      <div className={`input-group ${name ==='phone'?'flex-nowrap':''}`}>
         {Icon && (
           <span className="input-group-text bg-white border-end-0">
             <Icon className="h-5 w-5 text-primary opacity-75" />
           </span>
         )}
+
         {isTextArea ? (
           <textarea
             id={name}
@@ -121,58 +157,108 @@ const TextInput = ({ label, name, type = 'text', value, onChange, error, icon: I
             required={required}
             placeholder={placeholder}
           />
+        ) : name === 'phone' ? (
+          <>
+          <div className="row w-100">
+            {/* Country code select - Not used in curl, but good practice */}
+            <div className="col-4">
+              <select
+              className="form-select form-select-lg border-start-0 border-end-0 w-100"
+              aria-label="Country Code"
+              name='countryCode'
+              value={countryCode} // Controlled by parent state
+              onChange={onChange}
+              required
+            >
+              {countryCodes.map((country) => (
+                // Only showing the code for brevity in the select
+                <option key={`${country.iso}-${country.code}`} value={country.code}>
+                   {country.code}
+                </option>
+              ))}
+            </select>
+            </div>
+
+            {/* Phone number input (10 digits expected by curl) */}
+         <div className="col-8">
+             <input
+              type='tel'
+              id={name}
+              name={name}
+              value={value}
+              onChange={onChange}
+              maxLength={maxLength}
+              placeholder={placeholder}
+              className={`form-control form-control-lg col-9 ${
+                error ? 'is-invalid border-danger' : 'border-start-0'
+              }`}
+              required={required}
+              inputMode="numeric"
+            />
+         </div>
+            </div>
+          </>
         ) : (
           <input
-            type={isDate ? 'text' : type} // Treat date as text input to allow MM/YYYY mask
+            // Date input type is handled here using type='month' to get YYYY-MM
+            type={isDate ? 'month' : type}
             id={name}
             name={name}
             value={value}
             onChange={onChange}
             maxLength={maxLength}
-            // Add a placeholder to guide the user for date input format
-            placeholder={isDate ? 'MM/YYYY' : placeholder}
-            onFocus={isDate ? (e) => (e.target.type = 'month') : undefined} // Switch to month picker on focus
-            onBlur={isDate ? (e) => (e.target.type = 'text') : undefined} // Switch back to text on blur
-            className={`form-control form-control-lg ${error ? 'is-invalid border-danger' : 'border-start-0'}`}
+            placeholder={placeholder}
+            className={`form-control form-control-lg ${
+              error ? 'is-invalid border-danger' : 'border-start-0'
+            }`}
             required={required}
-            // Only set inputMode to numeric for phone field
-            inputMode={name === 'phone' ? 'numeric' : 'text'}
-            // For month input, we use a simple text input with a mask to force MM/YYYY
-            min={isDate ? "1950-01" : undefined}
-            max={isDate ? "2050-12" : undefined}
+            // For password fields, 'password' type keeps the input secure
+            inputMode={type === 'password' ? 'text' : 'text'} 
+            min={isDate ? '1950-01' : undefined}
+            max={isDate ? '2050-12' : undefined}
           />
         )}
-        {error && <div className="invalid-feedback d-block">{error}</div>}
       </div>
+      {error && <div className="invalid-feedback d-block">{error}</div>}
     </div>
   );
 };
 
 
+// Utility function to convert YYYY-MM format from type='month' input to MM/YYYY format
+const formatDateToMMYYYY = (dateString) => {
+    if (!dateString || dateString.length !== 7 || dateString.indexOf('-') !== 4) return dateString;
+    const [year, month] = dateString.split('-');
+    return `${month}/${year}`;
+};
+
+
 // Main Register Component
-// FIX APPLIED: Removed { navigate } prop which caused the redeclaration error
 const Register = () => {
-  const navigate = useNavigate(); // This is the correct way to get the function in RRDv6+
-  // Define the target API endpoint
-  const REGISTER_API_URL = "http://127.0.0.1:8000/api/register/";
+  const navigate = useNavigate(); 
+  // CORRECTED API endpoint to match user's curl request
+  const REGISTER_API_URL = "http://127.0.0.1:8000/api/users/register/"; 
   
   const initialFormState = {
     firstName: '',
     lastName: '',
     email: '',
+    password: '', // NEW: Added password field
+    confirmPassword: '', // NEW: Added confirm_password field (camelCase in state)
     phone: '',
     university: '',
     degree: '',
     major: '',
     visaStatus: 'Citizen',
-    graduationDate: '', // MM/YYYY
-    optEndDate: '', // MM/YYYY - Conditional
+    graduationDate: '', // YYYY-MM from input, converted to MM/YYYY for API
+    optEndDate: '', // YYYY-MM from input, converted to MM/YYYY for API - Conditional
     resumeFile: null,
     referralSource: 'Google',
     consentToTerms: false,
     linkedinUrl: '',
     githubUrl: '',
     additionalNotes: '',
+    countryCode: '+1', // Default country code (for select)
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -192,21 +278,18 @@ const Register = () => {
   const validate = () => {
     let newErrors = {};
     
-    // Stricter Email Regex: Requires @ and domain part (e.g., example.com)
-    // The user requested checking for '@gamil.com', '@theirdomain.com/.in'. This regex covers that structure generally.
+    // Regex Definitions
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; 
-    
-    // Name Regex: Only allows letters, spaces, hyphens, and apostrophes
     const nameRegex = /^[a-zA-Z\s'-]+$/; 
-    
-    // Phone Regex: Exactly 15 chars for the +1-XXX-XXX-XXXX format
-    const phoneRegex = /^\+1-\d{3}-\d{3}-\d{4}$/; 
-    
     const dateRegex = /^\d{4}-\d{2}$/; // YYYY-MM format from input type="month"
     const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
 
     // --- A. Required Fields Check ---
-    const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'university', 'degree', 'major', 'visaStatus', 'graduationDate', 'consentToTerms'];
+    const requiredFields = [
+        'firstName', 'lastName', 'email', 'phone', 'university', 'degree', 
+        'major', 'visaStatus', 'graduationDate', 'consentToTerms', 
+        'password', 'confirmPassword' // NEW: Added password fields
+    ];
     
     if (formData.visaStatus === 'F1-OPT') {
       requiredFields.push('optEndDate');
@@ -227,19 +310,11 @@ const Register = () => {
     // --- B. Specific Format/Length Validations ---
 
     // Name Validation
-    if (formData.firstName) {
-        if (!nameRegex.test(formData.firstName.trim())) {
-            newErrors.firstName = 'Name can only contain letters, spaces, hyphens, and apostrophes.';
-        } else if (formData.firstName.length > 50) {
-            newErrors.firstName = 'Max 50 characters.';
-        }
+    if (formData.firstName && (!nameRegex.test(formData.firstName.trim()) || formData.firstName.length > 50)) {
+        newErrors.firstName = 'Invalid name or max 50 characters.';
     }
-    if (formData.lastName) {
-        if (!nameRegex.test(formData.lastName.trim())) {
-            newErrors.lastName = 'Name can only contain letters, spaces, hyphens, and apostrophes.';
-        } else if (formData.lastName.length > 50) {
-            newErrors.lastName = 'Max 50 characters.';
-        }
+    if (formData.lastName && (!nameRegex.test(formData.lastName.trim()) || formData.lastName.length > 50)) {
+        newErrors.lastName = 'Invalid name or max 50 characters.';
     }
 
     // Email Validation
@@ -247,14 +322,26 @@ const Register = () => {
       newErrors.email = 'Invalid email format (e.g., user@domain.com).';
     }
 
-    // Phone Validation
+    // Password Validation (must match curl requirements: Naveen@2142 suggests special chars and complexity)
+    if (formData.password) {
+        if (formData.password.length < 8) {
+            newErrors.password = 'Password must be at least 8 characters.';
+        }
+        // Check for complexity (optional but good practice, the curl password implies it)
+        if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/.test(formData.password)) {
+            newErrors.password = 'Must contain upper, lower, number, and special character.';
+        }
+    }
+    if (formData.confirmPassword && formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = 'Passwords do not match.';
+    }
+
+
+    // Phone Validation (Expect 10 digits as per curl)
     if (formData.phone) {
         const digitsOnly = formData.phone.replace(/[^\d]/g, '');
-        if (digitsOnly.length !== 11) { // 1 (for +1) + 10 digits
+        if (digitsOnly.length !== 10) { 
             newErrors.phone = 'Phone number must be exactly 10 digits.';
-        } else if (!phoneRegex.test(formData.phone)) {
-            // This is primarily a double-check if the mask logic failed, ensuring final format is correct
-            newErrors.phone = 'Format must be +1-XXX-XXX-XXXX.';
         }
     }
 
@@ -308,26 +395,11 @@ const Register = () => {
     } else if (type === 'checkbox') {
         newValue = checked;
     } else if (name === 'phone') {
-        // 1. Filter out all non-digit characters. This blocks alphabets.
-        const originalDigits = value.replace(/[^\d]/g, '');
-        // We only care about the last 10 digits the user intends to enter
-        const userDigits = originalDigits.length > 1 ? originalDigits.substring(1) : originalDigits;
-        const tenDigits = userDigits.substring(0, 10);
-
-        // 2. Apply the +1-XXX-XXX-XXXX format mask logic
-        if (tenDigits.length === 0) {
-            newValue = '';
-        } else if (tenDigits.length <= 3) {
-            newValue = `+1-${tenDigits}`;
-        } else if (tenDigits.length <= 6) {
-            newValue = `+1-${tenDigits.substring(0, 3)}-${tenDigits.substring(3)}`;
-        } else {
-            newValue = `+1-${tenDigits.substring(0, 3)}-${tenDigits.substring(3, 6)}-${tenDigits.substring(6)}`;
-        }
-
+        // Only allow digits for phone input
+        const digitsOnly = value.replace(/[^\d]/g, '');
+        newValue = digitsOnly.substring(0, 10); // Limit to 10 digits
     } else if (name === 'firstName' || name === 'lastName') {
-        // Name validation during input (only allow letters, spaces, hyphens, apostrophes)
-        // Note: The stricter check is in the validate() function, this just prevents numbers/symbols from being typed
+        // Name validation during input
         const cleanValue = value.replace(/[^a-zA-Z\s'-]/g, '');
         newValue = cleanValue;
     }
@@ -353,63 +425,111 @@ const Register = () => {
     setIsSubmitting(true);
     setSubmissionMessage('Submitting registration...');
 
-    // Prepare data payload for the backend
-    const apiPayload = {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        email: formData.email,
-        // Remove +1- prefix/masking for clean submission (assuming backend expects 10 digits or E.164)
-        phone_number: formData.phone.replace(/[^\d]/g, ''), 
-        university: formData.university,
-        degree: formData.degree,
-        major: formData.major,
-        visa_status: formData.visaStatus,
-        // Convert YYYY-MM date string to MM/YYYY format if needed, or just send YYYY-MM
-        graduation_date: formData.graduationDate, 
-        opt_end_date: formData.visaStatus === 'F1-OPT' ? formData.optEndDate : null,
-        referral_source: formData.referralSource,
-        linkedin_url: formData.linkedinUrl,
-        github_url: formData.githubUrl,
-        additional_notes: formData.additionalNotes,
-        // consent_to_terms: formData.consentToTerms, // Backend usually confirms this based on submission
-        // Note: File upload requires FormData, but for JSON API, we typically send the metadata and upload the file separately/later.
-        // For this example, we log file name but don't try to upload the binary data via JSON.
-        resume_file_name: formData.resumeFile ? formData.resumeFile.name : null,
+    // --- PREPARE FOR MULTIPART/FORM-DATA SUBMISSION ---
+    // This matches the structure and file upload of your curl command.
+    const data = new FormData();
+
+    // Mapping object for camelCase (React state) to snake_case (API/curl)
+    const fieldMap = {
+        firstName: 'first_name',
+        lastName: 'last_name',
+        email: 'email',
+        password: 'password', // Matching curl field
+        confirmPassword: 'confirm_password', // Matching curl field
+        phone: 'phone', // Matching curl field
+        university: 'university',
+        degree: 'degree',
+        major: 'major',
+        visaStatus: 'visa_status',
+        graduationDate: 'graduation_date',
+        optEndDate: 'opt_end_date',
+        referralSource: 'referral_source',
+        // consentToTerms is handled explicitly below to send 'true'/'false'
+        consentToTerms: 'consent_to_terms',
+        // LinkedIn and Github URLs were not in the curl but included in the form/logic, keeping them as optional
+        linkedinUrl: 'linkedin_url', 
+        githubUrl: 'github_url', 
+        additionalNotes: 'additional_notes',
     };
 
+    for (const [stateKey, apiKey] of Object.entries(fieldMap)) {
+        let value = formData[stateKey];
+        
+        // Handle phone (strip mask/non-digits before sending to match curl 10-digit format)
+        if (stateKey === 'phone') {
+            value = value.replace(/[^\d]/g, ''); 
+        } 
+        
+        // Handle dates (convert YYYY-MM to MM/YYYY to match curl format)
+        else if (stateKey === 'graduationDate' || stateKey === 'optEndDate') {
+            value = formatDateToMMYYYY(value);
+        }
+        
+        // Handle optional optEndDate
+        if (stateKey === 'optEndDate' && formData.visaStatus !== 'F1-OPT') {
+            continue; // Skip if not F1-OPT
+        }
+
+        // Handle boolean (FormData requires string representation 'true'/'false')
+        if (typeof value === 'boolean') {
+            value = value ? 'true' : 'false';
+        }
+        
+        if (value !== null && value !== '') {
+            data.append(apiKey, value);
+        }
+    }
+    
+    // Mandatory: Append the actual resume file with the correct key 'resume_file'
+    if (formData.resumeFile) {
+        // The curl uses 'resume_file' as the key and expects the file data
+        data.append('resume_file', formData.resumeFile, formData.resumeFile.name);
+    }
+    
+    console.log("FormData Payload ready for API.");
+
     try {
+        // Use an empty string for the CSRF token since we are running in an iframe, 
+        // the actual token might need to be retrieved via another API call or cookie, 
+        // but for a public registration endpoint, it might not be required.
+        const csrfToken = ''; 
+        
         const response = await fetch(REGISTER_API_URL, {
             method: 'POST',
+            // IMPORTANT: Do NOT set Content-Type header when using FormData. 
+            // Fetch sets the correct 'multipart/form-data' boundary automatically.
             headers: {
-                'Content-Type': 'application/json',
-                // Add any necessary authorization headers (e.g., 'Authorization': 'Bearer token')
+                // If a CSRF token is required, you must include it here. 
+                // Using a placeholder based on the curl request, though typically this would be dynamic.
+                // 'X-CSRFTOKEN': csrfToken, 
             },
-            body: JSON.stringify(apiPayload),
+            body: data, 
         });
 
         if (response.ok) {
             const result = await response.json();
             setIsSubmitting(false);
-            // Assuming the backend returns a helpful message
-            setSubmissionMessage(`Registration successful! ${result.message || ''}`);
-            // Clear the form upon success
-            // setFormData(initialFormState);
+            setSubmissionMessage(`Registration successful! ${result.message || 'Check your email for confirmation.'}`);
             console.log("API Success:", result);
+            // Optionally clear the form or redirect
+            // setFormData(initialFormState); 
             
         } else {
-            // Handle HTTP error status (e.g., 400 Bad Request, 500 Server Error)
+            // Handle HTTP error status (e.g., 400 Bad Request)
             const errorData = await response.json();
             setIsSubmitting(false);
             let errorMessage = errorData.detail || errorData.error || 'Registration failed due to server error.';
             
-            // Try to extract validation errors from the backend response and merge with front-end errors
-            if (errorData.errors) {
+            // Try to extract validation errors from the backend response
+            if (errorData) {
                 const backendErrors = {};
-                for (const key in errorData.errors) {
-                    backendErrors[key] = errorData.errors[key].join(', ');
+                for (const key in errorData) {
+                    // Try to map backend snake_case keys back to camelCase state keys if possible
+                    const frontendKey = Object.keys(fieldMap).find(k => fieldMap[k] === key) || key; 
+                    backendErrors[frontendKey] = Array.isArray(errorData[key]) ? errorData[key].join(', ') : errorData[key];
                 }
                 setErrors(prev => ({ ...prev, ...backendErrors }));
-                errorMessage = 'Registration failed. Please review the errors.';
+                errorMessage = errorData.detail || 'Registration failed. Please review the errors.';
             }
 
             setSubmissionMessage(errorMessage);
@@ -454,10 +574,10 @@ const Register = () => {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit}>
+                <form noValidate onSubmit={handleSubmit}>
                   <div className="row g-4">
                     
-                    {/* --- PERSONAL DETAILS SECTION --- */}
+                    {/* --- ACCOUNT AND PERSONAL DETAILS SECTION --- */}
 
                     {/* First Name */}
                     <div className="col-md-6">
@@ -507,7 +627,7 @@ const Register = () => {
                     {/* Phone Number */}
                     <div className="col-md-6">
                       <TextInput
-                        label="Phone"
+                        label="Phone (10 Digits)"
                         name="phone"
                         type="tel"
                         value={formData.phone}
@@ -515,11 +635,42 @@ const Register = () => {
                         error={errors.phone}
                         icon={Phone}
                         required
-                        placeholder="+1-000-000-0000"
-                        maxLength={15} // Length of the mask
+                        countryCode={formData.countryCode}
+                        placeholder="0000000000"
+                        maxLength={10} // Display/input limit
                       />
                     </div>
                     
+                    {/* Password */}
+                    <div className="col-md-6">
+                      <TextInput
+                        label="Password"
+                        name="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        error={errors.password}
+                        icon={Lock}
+                        required
+                        placeholder="Secure Password (Min 8 chars)"
+                      />
+                    </div>
+                    
+                    {/* Confirm Password */}
+                    <div className="col-md-6">
+                      <TextInput
+                        label="Confirm Password"
+                        name="confirmPassword"
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        error={errors.confirmPassword}
+                        icon={Lock}
+                        required
+                        placeholder="Confirm Secure Password"
+                      />
+                    </div>
+
                     <hr className="my-3"/>
 
                     {/* --- ACADEMIC DETAILS SECTION --- */}
@@ -582,7 +733,7 @@ const Register = () => {
                       <TextInput
                         label="Graduation (MM/YYYY)"
                         name="graduationDate"
-                        type="date"
+                        type="date" // This uses type='month' for YYYY-MM which is converted in handleSubmit
                         value={formData.graduationDate}
                         onChange={handleChange}
                         error={errors.graduationDate}
@@ -623,7 +774,7 @@ const Register = () => {
                         <TextInput
                           label="OPT End Date (MM/YYYY)"
                           name="optEndDate"
-                          type="date"
+                          type="date" // This uses type='month' for YYYY-MM which is converted in handleSubmit
                           value={formData.optEndDate}
                           onChange={handleChange}
                           error={errors.optEndDate}
@@ -695,7 +846,7 @@ const Register = () => {
                     {/* LinkedIn URL */}
                     <div className="col-md-6">
                       <TextInput
-                        label="LinkedIn Profile URL"
+                        label="LinkedIn Profile URL (Optional)"
                         name="linkedinUrl"
                         type="url"
                         value={formData.linkedinUrl}
@@ -709,7 +860,7 @@ const Register = () => {
                     {/* GitHub URL */}
                     <div className="col-md-6">
                       <TextInput
-                        label="GitHub Profile URL"
+                        label="GitHub Profile URL (Optional)"
                         name="githubUrl"
                         type="url"
                         value={formData.githubUrl}
@@ -723,7 +874,7 @@ const Register = () => {
                     {/* Additional Notes */}
                     <div className="col-12">
                       <TextInput
-                        label="Additional Notes (Max 500 chars)"
+                        label="Additional Notes (Max 500 chars, Optional)"
                         name="additionalNotes"
                         value={formData.additionalNotes}
                         onChange={handleChange}

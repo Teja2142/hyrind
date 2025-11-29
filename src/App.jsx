@@ -1,6 +1,7 @@
-import React from 'react';
+import React , { useEffect } from 'react';
 // Import BrowserRouter, Routes, and Route
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; 
+import { BrowserRouter as Router, Routes, Route , useLocation } from 'react-router-dom'; 
+
 
 import Navbar from './Navbar'; 
 import Home from './Home';
@@ -13,12 +14,26 @@ import PrivacyPolicy from './PrivacyPolicy';
 import TermsConditions from './TermsConditions';
 import Admin from './Admin';
 import ContactUs from './Contact';
-import HowItWorksFlow from '../HowItWorks';
+import HowItWorksFlow from './HowItWorks';
+import ReviewsPage from './ReviewsPage';
+import Footer from './Footer';
+
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 function App() {
   return (
     // Use Router wrapper
     <Router>
+      <ScrollToTop />
       <Navbar />
       <main>
         {/* Define routes */}
@@ -36,9 +51,11 @@ function App() {
           <Route path="/TermsConditions" element={<TermsConditions />} />
           <Route path="/Contact" element={<ContactUs />} />
           <Route path="/how-it-works" element={<HowItWorksFlow />} />
+          <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="*" element={<h2>404: Page Not Found</h2>} />
         </Routes>
       </main>
+      <Footer />
     </Router>
   );
 }
