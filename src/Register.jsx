@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // Import Link and useNavigate
 import { Link, useNavigate } from 'react-router-dom'; 
 
@@ -493,14 +493,12 @@ const Register = () => {
         // the actual token might need to be retrieved via another API call or cookie, 
         // but for a public registration endpoint, it might not be required.
         const csrfToken = ''; 
-        
         const response = await fetch(REGISTER_API_URL, {
             method: 'POST',
             // IMPORTANT: Do NOT set Content-Type header when using FormData. 
             // Fetch sets the correct 'multipart/form-data' boundary automatically.
             headers: {
-                // If a CSRF token is required, you must include it here. 
-                // Using a placeholder based on the curl request, though typically this would be dynamic.
+                'Accept': 'application/json',
                 // 'X-CSRFTOKEN': csrfToken, 
             },
             body: data, 
@@ -511,6 +509,7 @@ const Register = () => {
             setIsSubmitting(false);
             setSubmissionMessage(`Registration successful! ${result.message || 'Check your email for confirmation.'}`);
             console.log("API Success:", result);
+            resetForm();  
             // Optionally clear the form or redirect
             // setFormData(initialFormState); 
             
@@ -543,8 +542,85 @@ const Register = () => {
     }
   };
 
+  const resetForm = () => {
+    setFormData(initialFormState);
+    setErrors({});
+    setSubmissionMessage('');
+    setIsSubmitting(false);
+    navigate('/login');
+  };
+
+  // Auto-dismiss toast message
+  useEffect(() => {
+    if (submissionMessage) {
+      const timer = setTimeout(() => {
+        setSubmissionMessage('');
+      }, 3000); // Disappear after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [submissionMessage]);
+
   return (
     // Pale Blue/White Background Theme
+    <>
+    <style>
+      {
+        `
+        /* Base toast style */
+.toast-alert {
+  top: 70px;                 /* below navbar */
+  right: 20px;               /* right side on larger screens */
+  z-index: 2000;
+  min-width: 280px;
+  max-width: 460px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  animation: fadeSlideIn 0.35s ease-out forwards;
+  text-align: center;
+}
+
+/* Small screens: prevent overflow & improve readability */
+@media (max-width: 576px) {
+  .toast-alert {
+    top: calc(60px + env(safe-area-inset-top, 0)); /* safer for notches */
+    right: 10px;
+    left: 10px;                 /* stretch between left & right */
+    min-width: auto;
+    max-width: 100%;
+    font-size: 0.9rem;          /* slightly smaller text */
+  }
+}
+
+/* Animation for toast */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+`
+      }
+    </style>
+{/* Submission Message Area - Toast Style */}
+{submissionMessage && (
+  <div
+    className={`alert ${
+      isSubmitting
+        ? "alert-info"
+        : errors && Object.keys(errors).length > 0
+        ? "alert-danger"
+        : "alert-success"
+    } toast-alert shadow-sm position-fixed`}
+    role="alert"
+  >
+    {submissionMessage}
+  </div>
+)}
+
+
     <div className="min-vh-100 d-flex align-items-center justify-content-center py-4" style={{ backgroundColor: paleBackground }}>
       <div className="container my-5">
         <div className="row justify-content-center">
@@ -567,12 +643,7 @@ const Register = () => {
                   </p>
                 </div>
 
-                {/* Submission Message Area */}
-                {submissionMessage && (
-                    <div className={`alert ${isSubmitting ? 'alert-info' : errors && Object.keys(errors).length > 0 ? 'alert-danger' : 'alert-success'} text-center mb-4`}>
-                        {submissionMessage}
-                    </div>
-                )}
+               
 
                 <form noValidate onSubmit={handleSubmit}>
                   <div className="row g-4">
@@ -742,6 +813,21 @@ const Register = () => {
                       />
                     </div>
                     
+                    {/* Graduation Date (MM/YYYY)
+                    <div className="col-md-6">
+                      <TextInput
+                        label="End Date (MM/YYYY)"
+                        name="optEndDate"
+                        type="date" // This uses type='month' for YYYY-MM which is converted in handleSubmit
+                        value={formData.optEndDate}
+                        onChange={handleChange}
+                        error={errors.optEndDate}
+                        icon={Calendar}
+                        required
+                      />
+                    </div>
+                     */}
+                    
                     <hr className="my-3"/>
 
                     {/* --- LEGAL/VISA/RESUME SECTION --- */}
@@ -826,6 +912,13 @@ const Register = () => {
                                 accept=".pdf,.docx,.doc"
                                 required
                               />
+                            </div>
+                            <div className="ms-3">
+                              {formData.resumeFile ? (
+                                <span className="badge bg-success rounded-pill px-3 py-2">Uploaded</span>
+                              ) : (
+                                <span className="badge bg-secondary rounded-pill px-3 py-2">Pending</span>
+                              )}
                             </div>
                           </div>
                           {formData.resumeFile && (
@@ -970,6 +1063,7 @@ const Register = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState } from 'react';
 // Import the useNavigate hook
 import { Link, useNavigate } from 'react-router-dom'; 
 
@@ -110,9 +110,11 @@ const Login = ({ onLoginSuccess }) => {
   const primaryColor = '#4682B4'; // Steel Blue
   const paleBackground = '#F0F8FF'; // Alice Blue
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+
+  const [isRecruiter, setIsRecruiter] = useState(false);
   
-  const LOGIN_API_URL = "http://127.0.0.1:8000/api/users/login/";
+  const LOGIN_API_URL = isRecruiter==false ? "http://127.0.0.1:8000/api/login/" : "http://127.0.0.1:8000/api/recruiter-login/";
 
   const [formData, setFormData] = useState({
     email: '',
@@ -173,7 +175,6 @@ const Login = ({ onLoginSuccess }) => {
         const response = await fetch(LOGIN_API_URL, {
             method: 'POST',
             headers: {
-              'accept': 'application/json',
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(apiPayload),
@@ -184,20 +185,9 @@ const Login = ({ onLoginSuccess }) => {
             setIsSubmitting(false);
             setSubmissionMessage(`Sign in successful! Welcome.`);
             console.log("API Success:", result);
-            localStorage.setItem('accessToken', result.access);
-            localStorage.setItem('refreshToken', result.refresh);
-            
-            const navigateToProfile = async ()=>{
-              if(localStorage.getItem('accessToken'))
-              {
-                await navigate('/profile');
-              }
-              
-              };
-              navigateToProfile();
+
             if (onLoginSuccess) {
-              onLoginSuccess(result.access);
-              
+              onLoginSuccess(result.token);
             }
             
         } else {
@@ -215,75 +205,8 @@ const Login = ({ onLoginSuccess }) => {
         console.error("Network Fetch Error:", error);
     }
   };
-    // Auto-dismiss toast message
-    useEffect(() => {
-      if (submissionMessage) {
-        const timer = setTimeout(() => {
-          setSubmissionMessage('');
-        }, 3000); // Disappear after 3 seconds
-        return () => clearTimeout(timer);
-      }
-    }, [submissionMessage]);
-  
 
   return (
-    <>
-        <style>
-      {
-        `
-        /* Base toast style */
-.toast-alert {
-  top: 70px;                 /* below navbar */
-  right: 20px;               /* right side on larger screens */
-  z-index: 2000;
-  min-width: 280px;
-  max-width: 460px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  animation: fadeSlideIn 0.35s ease-out forwards;
-  text-align: center;
-}
-
-/* Small screens: prevent overflow & improve readability */
-@media (max-width: 576px) {
-  .toast-alert {
-    top: calc(60px + env(safe-area-inset-top, 0)); /* safer for notches */
-    right: 10px;
-    left: 10px;                 /* stretch between left & right */
-    min-width: auto;
-    max-width: 100%;
-    font-size: 0.9rem;          /* slightly smaller text */
-  }
-}
-
-/* Animation for toast */
-@keyframes fadeSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-`
-      }
-    </style>
-{/* Submission Message Area - Toast Style */}
-{submissionMessage && (
-  <div
-    className={`alert ${
-      isSubmitting
-        ? "alert-info"
-        : errors && Object.keys(errors).length > 0
-        ? "alert-danger"
-        : "alert-success"
-    } toast-alert shadow-sm position-fixed`}
-    role="alert"
-  >
-    {submissionMessage}
-  </div>
-)}
     <div className="min-vh-100 d-flex align-items-center justify-content-center py-4" style={{ backgroundColor: paleBackground }}>
       <div className="container">
         <div className="row justify-content-center">
@@ -299,7 +222,7 @@ const Login = ({ onLoginSuccess }) => {
                     </div>
                   </div>
                   <h2 className="card-title fw-bold mb-3" style={{ color: primaryColor }}>
-                    Candidate Sign In
+                    {isRecruiter==false ? "Recruiter Sign In" : "Candidate Sign In"}
                   </h2>
                   <p className="text-muted lead">
                     Access your profile and track your application status.
@@ -317,7 +240,12 @@ const Login = ({ onLoginSuccess }) => {
                     </div>
                   )}
 
-              
+                  {/* Submission Status Message */}
+                  {submissionMessage && !errors.general && !isSubmitting && (
+                    <div className={`alert alert-success text-center mb-4`}>
+                        {submissionMessage}
+                    </div>
+                  )}
 
                   {/* Email Input */}
                   <TextInput
@@ -391,18 +319,17 @@ const Login = ({ onLoginSuccess }) => {
                     </button>
                   </div>
 
-                  {/* Admin Login Link (replaces recruiter button) 
-                  <div className="text-center mb-4">
+                  {/* NEW: Login as Recruiter Button */}
+                  <div className="d-grid mb-4">
                     <button
                       type="button"
-                      onClick={() => navigate('/admin')}  // adjust route if needed
-                      className="btn btn-link fw-semibold text-decoration-none p-0"
-                      style={{ color: primaryColor }}
+                      onClick={() => isRecruiter==false? setIsRecruiter(true):setIsRecruiter(false)} // change this path if needed
+                      className="btn btn-lg py-2 fw-semibold rounded-pill"
+                      style={{ borderColor: primaryColor, color: primaryColor }}
                     >
-                      Admin
+                      Login as {isRecruiter==false? "Candidate": "Recruiter"}
                     </button>
                   </div>
-                  */}
 
                   {/* Registration Link */}
                   <div className="text-center pt-3 border-top">
@@ -426,8 +353,6 @@ const Login = ({ onLoginSuccess }) => {
         </div>
       </div>
     </div>
-</>
-
   );
 };
 
