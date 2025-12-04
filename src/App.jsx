@@ -19,6 +19,8 @@ import ReviewsPage from './ReviewsPage';
 import RecruiterDashboard from './RecruiterDashboard';
 import Interest from './Intrest';
 import Footer from './Footer';
+import RecruiterRegister from './RecruiterRegister';
+import RecruiterLogin from './RecruiterLogin';
 
 
 function ScrollToTop() {
@@ -56,6 +58,8 @@ function App() {
           <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="/recruiter-dashboard" element={<RecruiterDashboard />} />
           <Route path="/interest" element={<Interest />} />
+          <Route path="/recruiter-register" element={<RecruiterRegister />} />
+          <Route path="/recruiter-login" element={<RecruiterLogin />} />
           <Route path="*" element={<h2>404: Page Not Found</h2>} />
         </Routes>
       </main>
