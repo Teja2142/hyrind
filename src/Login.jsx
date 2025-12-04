@@ -424,6 +424,20 @@ const Login = ({ onLoginSuccess }) => {
                       </button>
                     </p>
                   </div>
+                  {/* Login as Recruiter */}
+                  <div className="text-center pt-3 border-top">
+                    <p className="text-muted mb-0">
+                      Are you a recruiter?{' '} 
+                      <button
+                        type="button"
+                        onClick={() => navigate('/recruiter-login')}
+                        className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
+                        style={{ color: primaryColor }}
+                      >
+                        Login Here
+                      </button>
+                    </p>
+                  </div>
                 </form>
 
               </div>
