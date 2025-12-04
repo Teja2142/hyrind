@@ -155,9 +155,10 @@ const Login = ({ onLoginSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validate()) {
-        setSubmissionMessage('Please correct the highlighted errors before signing in.');
-        return;
+      setSubmissionMessage('Please correct the highlighted errors before signing in.');
+      return;
     }
 
     setIsSubmitting(true);
@@ -170,51 +171,56 @@ const Login = ({ onLoginSuccess }) => {
     };
 
     try {
-        const response = await fetch(LOGIN_API_URL, {
-            method: 'POST',
-            headers: {
-              'accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(apiPayload),
-        });
+      const response = await fetch(LOGIN_API_URL, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiPayload),
+      });
 
-        if (response.ok) {
-            const result = await response.json();
-            setIsSubmitting(false);
-            setSubmissionMessage(`Sign in successful! Welcome.`);
-            console.log("API Success:", result);
-            localStorage.setItem('accessToken', result.access);
-            localStorage.setItem('refreshToken', result.refresh);
-            
-            const navigateToProfile = async ()=>{
-              if(localStorage.getItem('accessToken'))
-              {
-                await navigate('/profile');
-              }
-              
-              };
-              navigateToProfile();
-            if (onLoginSuccess) {
-              onLoginSuccess(result.access);
-              
-            }
-            
-        } else {
-            const errorData = await response.json();
-            setIsSubmitting(false);
-            let errorMessage = errorData.detail || errorData.error || 'Invalid email or password.';
-            setErrors({ general: errorMessage });
-            setSubmissionMessage(errorMessage);
-            console.error("API Error:", errorData);
-        }
-    } catch (error) {
+      if (response.ok) {
+        const result = await response.json();
         setIsSubmitting(false);
-        setSubmissionMessage(`Network error. Could not connect to the backend at ${LOGIN_API_URL}.`);
-        setErrors({ general: `Network error. Please check your connection or contact support.` });
-        console.error("Network Fetch Error:", error);
+        setSubmissionMessage(`Sign in successful! Welcome.`);
+
+        console.log("API Success:", result);
+
+        // ✅ Save tokens properly
+        if (result.access) {
+          localStorage.setItem('accessToken', result.access);
+        }
+        if (result.refresh) {
+          localStorage.setItem('refreshToken', result.refresh);
+        }
+
+        // ✅ Redirect to profile
+        navigate('/profile');
+
+        // Optional success callback
+        if (onLoginSuccess) {
+          onLoginSuccess(result.access);
+        }
+
+      } else {
+        const errorData = await response.json();
+        setIsSubmitting(false);
+
+        let errorMessage = errorData.detail || errorData.error || 'Invalid email or password.';
+        setErrors({ general: errorMessage });
+        setSubmissionMessage(errorMessage);
+        console.error("API Error:", errorData);
+      }
+
+    } catch (error) {
+      setIsSubmitting(false);
+      setSubmissionMessage(`Network error. Could not connect to the backend at ${LOGIN_API_URL}.`);
+      setErrors({ general: `Network error. Please check your connection or contact support.` });
+      console.error("Network Fetch Error:", error);
     }
   };
+
     // Auto-dismiss toast message
     useEffect(() => {
       if (submissionMessage) {

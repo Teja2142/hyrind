@@ -294,62 +294,85 @@ const Profile = () => {
 
       // We assume the initial fetch to the base URL returns the single logged-in user's profile
       // or an array containing it. We'll use the ID from this response for future PATCH/GET calls.
-      try {
-        const response = await fetch(BASE_API_URL, {
-          method: 'GET',
-          headers: {
-            'accept': 'application/json',
-            'Authorization': `Bearer ${token}`, 
-          },
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          let profile = data;
-
-          if (Array.isArray(data)) {
-            profile = data[0]; // Assume first profile is the current user
-          }
-
-          if (profile && profile.id) {
-            setProfileData(profile);
-            setProfileId(profile.id);
-            // Prepare formData for editing, converting dates to input format
-            setFormData({
-                firstName: profile.first_name,
-                lastName: profile.last_name,
-                email: profile.email,
-                phone: profile.phone,
-                university: profile.university,
-                degree: profile.degree,
-                major: profile.major,
-                visaStatus: profile.visa_status,
-                // Convert MM/YYYY (API) to YYYY-MM (Input type='month')
-                graduationDate: formatDateToInput(profile.graduation_date), 
-                optEndDate: formatDateToInput(profile.opt_end_date), 
-                // resumeFile remains null as we don't load file objects from API
-                consentToTerms: profile.consent_to_terms,
-                referralSource: profile.referral_source,
-                linkedinUrl: profile.linkedin_url,
-                githubUrl: profile.github_url,
-                additionalNotes: profile.additional_notes,
-            });
-          } else {
-            setError("Profile data is empty or missing ID.");
-          }
-        } else {
-          const errorData = await response.json();
-          const message = errorData.detail || "Failed to fetch profile. Your session may have expired.";
-          setError(message);
-          if (response.status === 401 || response.status === 403) {
-            handleLogout();
-          }
+      // --- Decode JWT to extract user_id ---
+      function parseJwt (token) {
+        try {
+          return JSON.parse(atob(token.split('.')[1]));
+        } catch (e) {
+          return null;
         }
+      }
+
+      try {
+          const storedToken = localStorage.getItem("accessToken");
+
+          if (!storedToken) {
+              setError("Not logged in.");
+              navigate("/login");
+              return;
+          }
+
+          // Decode JWT to get user_id
+          const parseJwt = (token) => {
+              try {
+                  return JSON.parse(atob(token.split(".")[1]));
+              } catch (e) {
+                  return null;
+              }
+          };
+
+          const decoded = parseJwt(storedToken);
+          const userId = decoded?.user_id;
+
+          // STEP 1 — Get all profiles
+          const response = await fetch(BASE_API_URL, {
+              method: "GET",
+              headers: {
+                  accept: "application/json",
+                  Authorization: `Bearer ${storedToken}`,
+              },
+          });
+
+          if (!response.ok) throw new Error("Failed to load profiles");
+
+          const profiles = await response.json();
+
+          // STEP 2 — Find the profile tied to logged-in user
+          // 🔥 THIS IS THE ONLY CORRECT MATCHING LINE
+          const profile = profiles.find((p) => p.user.id === Number(userId));
+
+          if (!profile) {
+              setError("Profile not found for current user.");
+              return;
+          }
+
+          // STEP 3 — Set states
+          setProfileData(profile);
+          setProfileId(profile.id);
+
+          setFormData({
+              firstName: profile.first_name,
+              lastName: profile.last_name,
+              email: profile.email,
+              phone: profile.phone,
+              university: profile.university,
+              degree: profile.degree,
+              major: profile.major,
+              visaStatus: profile.visa_status,
+              graduationDate: formatDateToInput(profile.graduation_date),
+              optEndDate: formatDateToInput(profile.opt_end_date),
+              consentToTerms: profile.consent_to_terms,
+              referralSource: profile.referral_source,
+              linkedinUrl: profile.linkedin_url,
+              githubUrl: profile.github_url,
+              additionalNotes: profile.additional_notes,
+          });
+
       } catch (err) {
-        setError(`Network error: Could not connect to the profile service.`);
-        console.error("Fetch Profile Error:", err);
+          setError("Failed to fetch profile.");
+          console.error("Fetch Profile Error:", err);
       } finally {
-        setLoading(false);
+          setLoading(false);
       }
     };
 
