@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// --- START: Inline SVG Icon Definitions (Expanded for Edit Form) ---
+// --- START: Inline SVG Icon Definitions ---
 
 const LogOut = (props) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -92,28 +92,194 @@ const Target = (props) => (
     <circle cx="12" cy="12" r="2" />
   </svg>
 );
-
+const Delete = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    <line x1="10" y1="11" x2="10" y2="17" />
+    <line x1="14" y1="11" x2="14" y2="17" />
+  </svg>
+);
 // --- END: Inline SVG Icon Definitions ---
 
-// Utility to convert MM/YYYY date format (from API) to YYYY-MM (for input type='month')
+// --- Admin Dashboard Layout Styles ---
+const styles = `
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  background-color: #f3f4f6;
+}
+.admin-container {
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  display: flex;
+  flex-direction: column;
+}
+.admin-main-content {
+  flex: 1;
+  padding: 0;
+  overflow-y: auto;
+}
+.admin-content-wrapper {
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  min-height: calc(100vh - 64px);
+  padding: 1.5rem;
+}
+.admin-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  background-color: #4f46e5;
+  color: white;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  gap: 2rem;
+}
+.admin-profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #4338ca;
+}
+.admin-profile-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid #a5b4fc;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+.admin-profile-name {
+  margin-top: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+}
+.admin-profile-welcome {
+  font-size: 0.75rem;
+  color: #c7d2fe;
+  text-align: center;
+}
+.admin-profile-recruiter {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: white;
+  text-align: center;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.sidebar-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+  background: none;
+  color: inherit;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.sidebar-button-active {
+  background-color: #3730a3;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  color: white;
+}
+.sidebar-button-inactive {
+  color: #e0e7ff;
+  background: none;
+}
+.sidebar-button-inactive:hover {
+  background-color: #3730a3;
+}
+.sidebar-button-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-right: 0.55rem;
+}
+@media (min-width: 768px) {
+  .admin-container {
+    flex-direction: row;
+  }
+  .admin-main-content {
+    padding: 2rem;
+  }
+  .admin-content-wrapper {
+    min-height: calc(100vh - 4rem);
+  }
+  .admin-sidebar {
+    width: 256px;
+  }
+}
+        /* Base toast style */
+.toast-alert {
+  top: 70px;                 /* below navbar */
+  right: 20px;               /* right side on larger screens */
+  z-index: 2000;
+  min-width: 280px;
+  max-width: 460px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  animation: fadeSlideIn 0.35s ease-out forwards;
+  text-align: center;
+}
+
+/* Small screens: prevent overflow & improve readability */
+@media (max-width: 576px) {
+  .toast-alert {
+    top: calc(60px + env(safe-area-inset-top, 0)); /* safer for notches */
+    right: 10px;
+    left: 10px;                 /* stretch between left & right */
+    min-width: auto;
+    max-width: 100%;
+    font-size: 0.9rem;          /* slightly smaller text */
+  }
+}
+
+/* Animation for toast */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+`;
+
+// date helpers
 const formatDateToInput = (dateString) => {
-    if (!dateString) return '';
-    // Expected format: MM/YYYY
-    if (dateString.length === 7 && dateString.indexOf('/') === 2) {
-        const [month, year] = dateString.split('/');
-        return `${year}-${month}`;
-    }
-    return '';
+  if (!dateString) return '';
+  if (dateString.length === 7 && dateString.indexOf('/') === 2) {
+    const [month, year] = dateString.split('/');
+    return `${year}-${month}`;
+  }
+  return '';
 };
 
-// Utility to convert YYYY-MM format (from input) to MM/YYYY (for API)
 const formatDateToApi = (dateString) => {
-    if (!dateString || dateString.length !== 7 || dateString.indexOf('-') !== 4) return dateString;
-    const [year, month] = dateString.split('-');
-    return `${month}/${year}`;
+  if (!dateString || dateString.length !== 7 || dateString.indexOf('-') !== 4) return dateString;
+  const [year, month] = dateString.split('-');
+  return `${month}/${year}`;
 };
 
-// --- Reusable TextInput Component (Adapted from Register.jsx) ---
+// TextInput
 const TextInput = ({
   label,
   name,
@@ -130,7 +296,7 @@ const TextInput = ({
   options = null,
 }) => {
   const isDate = type === 'date';
-  const primaryColor = '#4682B4';
+  const primaryColor = '#4F46E5';
 
   return (
     <div className="mb-3">
@@ -147,7 +313,7 @@ const TextInput = ({
       <div className="input-group">
         {Icon && (
           <span className="input-group-text bg-white border-end-0">
-            <Icon className="h-5 w-5 text-primary opacity-75" style={{ color: primaryColor }} />
+            <Icon className="h-5 w-5" style={{ color: primaryColor }} />
           </span>
         )}
         
@@ -201,40 +367,115 @@ const TextInput = ({
   );
 };
 
-// Helper component for displaying profile field data
+// ProfileField (view mode)
 const ProfileField = ({ icon: Icon, label, value, isLink = false }) => {
-    const primaryColor = '#4682B4';
-    return (
-        <div className="d-flex align-items-center mb-3">
-            <div className="p-2 me-3 rounded-circle" style={{ backgroundColor: primaryColor + '1A' }}>
-                <Icon className="w-5 h-5 text-secondary" style={{ color: primaryColor }} />
-            </div>
-            <div>
-                <p className="text-muted mb-0 small fw-semibold">{label}</p>
-                {isLink && value ? (
-                    <a href={value} target="_blank" rel="noopener noreferrer" className="fw-bold mb-0 text-decoration-none" style={{ color: primaryColor }}>
-                        {value.length > 30 ? value.substring(0, 30) + '...' : value}
-                    </a>
-                ) : (
-                    <p className="fw-bold mb-0 text-dark" style={{ whiteSpace: 'pre-wrap' }}>{value || 'N/A'}</p>
-                )}
-            </div>
-        </div>
-    );
+  const primaryColor = '#4F46E5';
+  return (
+    <div className="d-flex align-items-center mb-3">
+      <div className="p-2 me-3 rounded-circle" style={{ backgroundColor: primaryColor + '1A' }}>
+        <Icon className="w-5 h-5" style={{ color: primaryColor }} />
+      </div>
+      <div>
+        <p className="text-muted mb-0 small fw-semibold">{label}</p>
+        {isLink && value ? (
+          <a
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="fw-bold mb-0 text-decoration-none"
+            style={{ color: primaryColor }}
+          >
+            {value.length > 30 ? value.substring(0, 30) + '...' : value}
+          </a>
+        ) : (
+          <p className="fw-bold mb-0 text-dark" style={{ whiteSpace: 'pre-wrap' }}>
+            {value || 'N/A'}
+          </p>
+        )}
+      </div>
+    </div>
+  );
 };
 
-// Main Profile Component
+// Sidebar buttons
+const SidebarButton = ({ Icon, label, onClick, variant = 'normal', isEditing }) => {
+  const className =
+    variant === 'primary'
+      ? 'sidebar-button sidebar-button-active'
+      : 'sidebar-button sidebar-button-inactive';
+
+  
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      <Icon className="sidebar-button-icon" />
+      {variant === 'primary' && typeof isEditing === 'boolean'
+        ? isEditing ? 'Cancel Edit' : label
+        : label}
+    </button>
+  );
+};
+
+// AdminSidebar with full name + actions
+const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEditing, onDeleteProfile }) => {
+  const displayName = fullName && fullName.trim().length > 0 ? fullName : 'Candidate Profile';
+
+  return (
+    <div className="admin-sidebar">
+      <div className="admin-profile-card">
+        <div className="admin-profile-image d-flex align-items-center justify-content-center" style={{ backgroundColor: '#4F46E533' }}>
+          <User width={40} height={40} />
+        </div>
+        <h3 className="admin-profile-name">{displayName}</h3>
+        <p className="admin-profile-welcome">
+          Manage your HYRIND registration & interest details.
+        </p>
+        <p className="admin-profile-recruiter"> Assigned Recruiter: {'Not assigned yet'}</p>
+      </div>
+
+      <nav className="sidebar-nav">
+        {/* Update Profile toggle */}
+        <SidebarButton
+          Icon={Edit}
+          label="Update Profile"
+          onClick={onToggleEdit}
+          variant="primary"
+          isEditing={isEditing}
+        />
+        {/* Interest Form */}
+        <SidebarButton
+          Icon={Target}
+          label="Interest Form"
+          onClick={onInterestForm}
+          variant="normal"
+        />
+        {/* Delete Profile */}
+        <SidebarButton
+          Icon={Delete}
+          label="Delete Profile"
+          onClick={onDeleteProfile}
+          variant="normal"
+        />
+        {/* Logout */}
+        <SidebarButton
+          Icon={LogOut}
+          label="Logout"
+          onClick={onLogout}
+          variant="normal"
+        />
+      </nav>
+    </div>
+  );
+};
+
+// --- Main Profile Component with admin dashboard layout ---
 const Profile = () => {
   const navigate = useNavigate();
-  const primaryColor = '#4682B4'; // Steel Blue
-  const paleBackground = '#F0F8FF'; // Alice Blue
-  
-  // API URL for fetching profile data. The base URL suggests an endpoint that returns the logged-in user's profile based on the token.
-  // We assume the non-ID endpoint returns the current user's profile array (which has an ID) or a single object.
+  const primaryColor = '#4F46E5';
+  const paleBackground = '#F0F8FF';
   const BASE_API_URL = "http://127.0.0.1:8000/api/users/profiles/"; 
 
   const [profileData, setProfileData] = useState(null);
-  const [formData, setFormData] = useState({}); // Used for editing
+  const [formData, setFormData] = useState({});
   const [profileId, setProfileId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -242,36 +483,34 @@ const Profile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionMessage, setSubmissionMessage] = useState('');
   const [errors, setErrors] = useState({});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  // Constants for form
-  const degreeOptions = ['Bachelor\'s', 'Master\'s', 'PhD'];
+  const degreeOptions = ["Bachelor's", "Master's", 'PhD'];
   const visaOptions = ['F1-OPT', 'F1-CPT', 'H1B', 'Green Card', 'Citizen', 'Other'];
-  const referralOptions = ['Google', 'LinkedIn', 'Friend', 'University', 'Other'];
 
-  // --- Validation Logic (Minimal for PATCH) ---
+  // validation
   const validate = (data) => {
     let newErrors = {};
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; 
     const nameRegex = /^[a-zA-Z\s'-]+$/; 
     const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
 
-    // Check required fields (Email and Phone must be present in PATCH if user tries to update)
     if (!data.email || data.email.trim() === '') newErrors.email = 'Email is required.';
     if (!data.phone || data.phone.trim() === '') newErrors.phone = 'Phone is required.';
 
     if (data.email && !emailRegex.test(data.email)) newErrors.email = 'Invalid email format.';
     
-    // Simple phone validation (10 digits expected)
     const phoneDigits = (data.phone || '').replace(/[^\d]/g, '');
     if (data.phone && phoneDigits.length !== 10) newErrors.phone = 'Phone must be 10 digits.';
 
-    if (data.firstName && (!nameRegex.test(data.firstName.trim()) || data.firstName.length > 50)) newErrors.firstName = 'Invalid name or max 50 chars.';
-    if (data.lastName && (!nameRegex.test(data.lastName.trim()) || data.lastName.length > 50)) newErrors.lastName = 'Invalid name or max 50 chars.';
+    if (data.firstName && (!nameRegex.test(data.firstName.trim()) || data.firstName.length > 50))
+      newErrors.firstName = 'Invalid name or max 50 chars.';
+    if (data.lastName && (!nameRegex.test(data.lastName.trim()) || data.lastName.length > 50))
+      newErrors.lastName = 'Invalid name or max 50 chars.';
 
     if (data.linkedinUrl && !urlRegex.test(data.linkedinUrl)) newErrors.linkedinUrl = 'Invalid URL format.';
     if (data.githubUrl && !urlRegex.test(data.githubUrl)) newErrors.githubUrl = 'Invalid URL format.';
     
-    // Check conditional required field
     if (data.visaStatus === 'F1-OPT' && (!data.optEndDate || data.optEndDate.trim() === '')) {
       newErrors.optEndDate = 'OPT End Date is required for F1-OPT status.';
     }
@@ -280,11 +519,11 @@ const Profile = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // --- Fetch Profile Data ---
+  // load profile
+
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem('accessToken');
-      
       if (!token) {
         setError("You are not logged in. Redirecting to login...");
         setLoading(false);
@@ -292,102 +531,92 @@ const Profile = () => {
         return;
       }
 
-      // We assume the initial fetch to the base URL returns the single logged-in user's profile
-      // or an array containing it. We'll use the ID from this response for future PATCH/GET calls.
-      // --- Decode JWT to extract user_id ---
-      function parseJwt (token) {
-        try {
-          return JSON.parse(atob(token.split('.')[1]));
-        } catch (e) {
-          return null;
-        }
-      }
-
       try {
-          const storedToken = localStorage.getItem("accessToken");
+        const storedToken = localStorage.getItem("accessToken");
+        if (!storedToken) {
+          setError("Not logged in.");
+          navigate("/login");
+          return;
+        }
 
-          if (!storedToken) {
-              setError("Not logged in.");
-              navigate("/login");
-              return;
+        const parseJwt = (token) => {
+          try {
+            return JSON.parse(atob(token.split(".")[1]));
+          } catch {
+            return null;
           }
+        };
 
-          // Decode JWT to get user_id
-          const parseJwt = (token) => {
-              try {
-                  return JSON.parse(atob(token.split(".")[1]));
-              } catch (e) {
-                  return null;
-              }
-          };
+        const decoded = parseJwt(storedToken);
+        const userId = decoded?.user_id;
 
-          const decoded = parseJwt(storedToken);
-          const userId = decoded?.user_id;
+        const response = await fetch(BASE_API_URL, {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${storedToken}`,
+          },
+        });
 
-          // STEP 1 — Get all profiles
-          const response = await fetch(BASE_API_URL, {
-              method: "GET",
-              headers: {
-                  accept: "application/json",
-                  Authorization: `Bearer ${storedToken}`,
-              },
-          });
+        if (!response.ok) throw new Error("Failed to load profiles");
 
-          if (!response.ok) throw new Error("Failed to load profiles");
+        const profiles = await response.json();
+        const profile = profiles.find((p) => p.user.id === Number(userId));
 
-          const profiles = await response.json();
+        if (!profile) {
+          setError("Profile not found for current user.");
+          return;
+        }
 
-          // STEP 2 — Find the profile tied to logged-in user
-          // 🔥 THIS IS THE ONLY CORRECT MATCHING LINE
-          const profile = profiles.find((p) => p.user.id === Number(userId));
+        setProfileData(profile);
+        setProfileId(profile.id);
 
-          if (!profile) {
-              setError("Profile not found for current user.");
-              return;
-          }
-
-          // STEP 3 — Set states
-          setProfileData(profile);
-          setProfileId(profile.id);
-
-          setFormData({
-              firstName: profile.first_name,
-              lastName: profile.last_name,
-              email: profile.email,
-              phone: profile.phone,
-              university: profile.university,
-              degree: profile.degree,
-              major: profile.major,
-              visaStatus: profile.visa_status,
-              graduationDate: formatDateToInput(profile.graduation_date),
-              optEndDate: formatDateToInput(profile.opt_end_date),
-              consentToTerms: profile.consent_to_terms,
-              referralSource: profile.referral_source,
-              linkedinUrl: profile.linkedin_url,
-              githubUrl: profile.github_url,
-              additionalNotes: profile.additional_notes,
-          });
+        setFormData({
+          firstName: profile.first_name,
+          lastName: profile.last_name,
+          email: profile.email,
+          phone: profile.phone,
+          university: profile.university,
+          degree: profile.degree,
+          major: profile.major,
+          visaStatus: profile.visa_status,
+          graduationDate: formatDateToInput(profile.graduation_date),
+          optEndDate: formatDateToInput(profile.opt_end_date),
+          consentToTerms: profile.consent_to_terms,
+          referralSource: profile.referral_source,
+          linkedinUrl: profile.linkedin_url,
+          githubUrl: profile.github_url,
+          additionalNotes: profile.additional_notes,
+        });
 
       } catch (err) {
-          setError("Failed to fetch profile.");
-          console.error("Fetch Profile Error:", err);
+        setError("Failed to fetch profile.");
+        console.error("Fetch Profile Error:", err);
       } finally {
-          setLoading(false);
+        setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [navigate]);
+  }, [navigate, BASE_API_URL]);
 
-  // --- Handlers ---
-
+  // Auto-dismiss toast message
+    useEffect(() => {
+      if (submissionMessage) {
+        const timer = setTimeout(() => {
+          setSubmissionMessage('');
+        }, 3000); // Disappear after 3 seconds
+        return () => clearTimeout(timer);
+      }
+    }, [submissionMessage]);
+  // actions
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     navigate('/login');
   };
 
   const handleInterestForm = () => {
-    navigate('/interest'); // Assuming the Interest component is at /interest
+    navigate('/interest');
   };
 
   const handleEditChange = (e) => {
@@ -395,46 +624,41 @@ const Profile = () => {
     let newValue = value;
 
     if (type === 'file') {
-        newValue = files[0];
+      newValue = files[0];
     } else if (type === 'checkbox') {
-        newValue = checked;
+      newValue = checked;
     } else if (name === 'phone') {
-        // Only allow digits for phone input
-        const digitsOnly = value.replace(/[^\d]/g, '');
-        newValue = digitsOnly.substring(0, 10); 
+      const digitsOnly = value.replace(/[^\d]/g, '');
+      newValue = digitsOnly.substring(0, 10); 
     }
 
-    setFormData(prev => ({
-      ...prev,
-      [name]: newValue,
-    }));
+    setFormData(prev => ({ ...prev, [name]: newValue }));
     setErrors(prev => ({ ...prev, [name]: '' }));
     setSubmissionMessage('');
   };
 
   const handleToggleEdit = () => {
-    // When switching to edit mode, ensure form data is synchronized with current profile data
-    if (!isEditing) {
-        setFormData({
-            firstName: profileData.first_name,
-            lastName: profileData.last_name,
-            email: profileData.email,
-            phone: profileData.phone,
-            university: profileData.university,
-            degree: profileData.degree,
-            major: profileData.major,
-            visaStatus: profileData.visa_status,
-            graduationDate: formatDateToInput(profileData.graduation_date), 
-            optEndDate: formatDateToInput(profileData.opt_end_date), 
-            resumeFile: null, // Always reset file input
-            consentToTerms: profileData.consent_to_terms,
-            referralSource: profileData.referral_source,
-            linkedinUrl: profileData.linkedin_url,
-            githubUrl: profileData.github_url,
-            additionalNotes: profileData.additional_notes,
-        });
-        setErrors({});
-        setSubmissionMessage('');
+    if (!isEditing && profileData) {
+      setFormData({
+        firstName: profileData.first_name,
+        lastName: profileData.last_name,
+        email: profileData.email,
+        phone: profileData.phone,
+        university: profileData.university,
+        degree: profileData.degree,
+        major: profileData.major,
+        visaStatus: profileData.visa_status,
+        graduationDate: formatDateToInput(profileData.graduation_date),
+        optEndDate: formatDateToInput(profileData.opt_end_date),
+        resumeFile: null,
+        consentToTerms: profileData.consent_to_terms,
+        referralSource: profileData.referral_source,
+        linkedinUrl: profileData.linkedin_url,
+        githubUrl: profileData.github_url,
+        additionalNotes: profileData.additional_notes,
+      });
+      setErrors({});
+      setSubmissionMessage('');
     }
     setIsEditing(prev => !prev);
   };
@@ -442,8 +666,8 @@ const Profile = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     if (!validate(formData)) {
-        setSubmissionMessage('Please correct the highlighted errors.');
-        return;
+      setSubmissionMessage('Please correct the highlighted errors.');
+      return;
     }
 
     setIsSubmitting(true);
@@ -451,403 +675,603 @@ const Profile = () => {
     const token = localStorage.getItem('accessToken');
     const updateUrl = `${BASE_API_URL}${profileId}/`;
 
-    // --- Prepare FormData for PATCH (Multipart/form-data required for file upload) ---
     const data = new FormData();
     const fieldMap = {
-        firstName: 'first_name',
-        lastName: 'last_name',
-        email: 'email',
-        phone: 'phone',
-        university: 'university',
-        degree: 'degree',
-        major: 'major',
-        visaStatus: 'visa_status',
-        graduationDate: 'graduation_date',
-        optEndDate: 'opt_end_date',
-        consentToTerms: 'consent_to_terms',
-        referralSource: 'referral_source',
-        linkedinUrl: 'linkedin_url', 
-        githubUrl: 'github_url', 
-        additionalNotes: 'additional_notes',
+      firstName: 'first_name',
+      lastName: 'last_name',
+      email: 'email',
+      phone: 'phone',
+      university: 'university',
+      degree: 'degree',
+      major: 'major',
+      visaStatus: 'visa_status',
+      graduationDate: 'graduation_date',
+      optEndDate: 'opt_end_date',
+      consentToTerms: 'consent_to_terms',
+      referralSource: 'referral_source',
+      linkedinUrl: 'linkedin_url', 
+      githubUrl: 'github_url', 
+      additionalNotes: 'additional_notes',
     };
 
-    // Only append fields that have changed OR are required and must be sent
     for (const [stateKey, apiKey] of Object.entries(fieldMap)) {
-        let value = formData[stateKey];
-        
-        // Handle phone (strip mask/non-digits before sending)
-        if (stateKey === 'phone') {
-            value = (value || '').replace(/[^\d]/g, ''); 
-        } 
-        
-        // Handle dates (convert YYYY-MM to MM/YYYY for API)
-        else if (stateKey === 'graduationDate' || stateKey === 'optEndDate') {
-            value = formatDateToApi(value);
-        }
-        
-        // Skip OPT End Date if status is not F1-OPT
-        if (stateKey === 'optEndDate' && formData.visaStatus !== 'F1-OPT') {
-            continue;
-        }
-
-        // Handle boolean (FormData requires string representation 'true'/'false')
-        if (typeof value === 'boolean') {
-            value = value ? 'true' : 'false';
-        }
-        
-        // Only append non-null/non-empty values or values different from the original profile data
-        const originalKey = profileData[apiKey];
-        if (value !== null && value !== undefined && value !== '' && value !== originalKey) {
-            data.append(apiKey, value);
-        }
+      let value = formData[stateKey];
+      
+      if (stateKey === 'phone') {
+        value = (value || '').replace(/[^\d]/g, ''); 
+      } else if (stateKey === 'graduationDate' || stateKey === 'optEndDate') {
+        value = formatDateToApi(value);
+      }
+      if (stateKey === 'optEndDate' && formData.visaStatus !== 'F1-OPT') {
+        continue;
+      }
+      if (typeof value === 'boolean') {
+        value = value ? 'true' : 'false';
+      }
+      
+      const originalKey = profileData[apiKey];
+      if (value !== null && value !== undefined && value !== '' && value !== originalKey) {
+        data.append(apiKey, value);
+      }
     }
 
-    // Handle resume file upload separately
     if (formData.resumeFile) {
-        data.append('resume_file', formData.resumeFile, formData.resumeFile.name);
+      data.append('resume_file', formData.resumeFile, formData.resumeFile.name);
     }
     
-    // Check if any fields were actually updated
     let isDataEmpty = true;
     for (const pair of data.entries()) {
-        if (pair[0] !== 'resume_file') { // Count file separately as it's an action, not a data field change
-            isDataEmpty = false;
-            break;
-        }
+      if (pair[0] !== 'resume_file') {
+        isDataEmpty = false;
+        break;
+      }
     }
     
     if (isDataEmpty && !formData.resumeFile) {
-        setIsSubmitting(false);
-        setSubmissionMessage('No changes detected to update.');
-        setIsEditing(false); // Go back to view mode
-        return;
+      setIsSubmitting(false);
+      setSubmissionMessage('No changes detected to update.');
+      setIsEditing(false);
+      return;
     }
 
-
     try {
-        const response = await fetch(updateUrl, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${token}`, 
-            },
-            // Do NOT set 'Content-Type': 'multipart/form-data' - fetch sets it automatically
-            body: data, 
-        });
+      const response = await fetch(updateUrl, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`, 
+        },
+        body: data,
+      });
 
-        if (response.ok) {
-            const updatedProfile = await response.json();
-            setProfileData(updatedProfile); // Update local profile state
-            setIsSubmitting(false);
-            setSubmissionMessage(`Profile updated successfully!`);
-            setIsEditing(false); // Exit edit mode
-            setErrors({});
-        } else {
-            const errorData = await response.json();
-            setIsSubmitting(false);
-            let errorMessage = errorData.detail || 'Update failed due to server error.';
-            
-            if (errorData) {
-                const backendErrors = {};
-                for (const key in errorData) {
-                    // Try to map backend snake_case keys back to camelCase state keys (simplified)
-                    if (key !== 'detail') {
-                         backendErrors[key] = Array.isArray(errorData[key]) ? errorData[key].join(', ') : errorData[key];
-                    }
-                }
-                setErrors(prev => ({ ...prev, ...backendErrors }));
-                errorMessage = errorData.detail || 'Update failed. Please review the errors.';
-            }
-
-            setSubmissionMessage(errorMessage);
-            console.error("API Error:", errorData);
-        }
-    } catch (error) {
+      if (response.ok) {
+        const updatedProfile = await response.json();
+        setProfileData(updatedProfile);
         setIsSubmitting(false);
-        setSubmissionMessage(`Network error. Could not connect to the backend.`);
-        console.error("Network Fetch Error:", error);
+        setSubmissionMessage('Profile updated successfully!');
+        setIsEditing(false);
+        setErrors({});
+      } else {
+        const errorData = await response.json();
+        setIsSubmitting(false);
+        let errorMessage = errorData.detail || 'Update failed due to server error.';
+        
+        if (errorData) {
+          const backendErrors = {};
+          for (const key in errorData) {
+            if (key !== 'detail') {
+              backendErrors[key] = Array.isArray(errorData[key]) ? errorData[key].join(', ') : errorData[key];
+            }
+          }
+          setErrors(prev => ({ ...prev, ...backendErrors }));
+          errorMessage = errorData.detail || 'Update failed. Please review the errors.';
+        }
+
+        setSubmissionMessage(errorMessage);
+        console.error("API Error:", errorData);
+      }
+    } catch (err) {
+      setIsSubmitting(false);
+      setSubmissionMessage('Network error. Could not connect to the backend.');
+      console.error("Network Fetch Error:", err);
     }
   };
 
+  const handleDeleteProfile = () => {
+    // Show the delete confirmation modal
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteProfile = async () => {
+    // Close modal and proceed with deletion
+    setShowDeleteModal(false);
+    setIsSubmitting(true);
+    setSubmissionMessage('Deleting profile...');
+    
+    const token = localStorage.getItem('accessToken');
+    const deleteUrl = `${BASE_API_URL}${profileId}/`;
+    
+    try {
+      const response = await fetch(deleteUrl, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`, 
+        },
+      });
+
+      // DELETE typically returns 204 No Content or 200 OK
+      if (response.ok) {
+        // 204 No Content - successful deletion with no response body
+        if (response.status === 204) {
+          setSubmissionMessage('Profile deleted successfully! Redirecting...');
+          setIsSubmitting(false);
+          
+          // Clear user data and redirect to login
+          localStorage.removeItem('accessToken');
+          setTimeout(() => {
+            navigate('/login');
+          }, 2000);
+        } 
+        // 200 OK - successful deletion with response body
+        else if (response.status === 200) {
+          try {
+            const data = await response.json();
+            setSubmissionMessage(data.message || 'Profile deleted successfully! Redirecting...');
+          } catch {
+            setSubmissionMessage('Profile deleted successfully! Redirecting...');
+          }
+          setIsSubmitting(false);
+          
+          // Clear user data and redirect to login
+          localStorage.removeItem('accessToken');
+          setTimeout(() => {
+            navigate('/login');
+          }, 2000);
+        }
+      } else {
+        // Handle error responses
+        setIsSubmitting(false);
+        try {
+          const errorData = await response.json();
+          const errorMessage = errorData.detail || errorData.message || 'Failed to delete profile.';
+          setSubmissionMessage(errorMessage);
+          console.error("Delete API Error:", errorData);
+        } catch {
+          setSubmissionMessage('Failed to delete profile. Please try again.');
+        }
+      }
+    } catch (err) {
+      setIsSubmitting(false);
+      setSubmissionMessage('Network error. Could not connect to the backend.');
+      console.error("Network Fetch Error:", err);
+    }
+  };
 
   if (loading) {
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: paleBackground }}>
-            <div className="text-center">
-                <div className="spinner-border text-primary" role="status" style={{ color: primaryColor }}>
-                    <span className="visually-hidden">Loading...</span>
-                </div>
-                <p className="mt-3 text-muted">Loading your profile data...</p>
-            </div>
+      <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: paleBackground }}>
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status" style={{ color: primaryColor }}>
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-3 text-muted">Loading profile data...</p>
         </div>
+      </div>
     );
   }
 
   if (error || !profileData) {
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: paleBackground }}>
-            <div className="alert alert-danger p-4 shadow-lg rounded-3">
-                <h4 className="alert-heading">Access Denied!</h4>
-                <p>{error || "Could not load profile data."}</p>
-                <button 
-                    onClick={handleLogout} 
-                    className="btn btn-sm btn-outline-danger mt-2"
-                >
-                    <LogOut className="w-4 h-4 me-1" /> Go to Login
-                </button>
-            </div>
+      <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: paleBackground }}>
+        <div className="alert alert-danger p-4 shadow-lg rounded-3">
+          <h4 className="alert-heading">Access Issue</h4>
+          <p>{error || "Could not load profile data."}</p>
+          <button 
+            onClick={handleLogout} 
+            className="btn btn-sm btn-outline-danger mt-2"
+          >
+            <LogOut className="w-4 h-4 me-1" /> Go to Login
+          </button>
         </div>
+      </div>
     );
   }
 
   const profile = profileData;
+  const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center py-4" style={{ backgroundColor: paleBackground }}>
-      <div className="container my-5">
-        <div className="row justify-content-center">
-          <div className="col-12 col-lg-8 col-xl-7">
-            <div className="card shadow-lg border-0 rounded-4">
-              <div className="card-body p-4 p-md-5">
-                
-                {/* Header and Action Buttons */}
-                <div className="d-flex justify-content-between align-items-start mb-5 border-bottom pb-3 flex-column flex-sm-row">
-                  <h2 className="card-title fw-bold mb-3 mb-sm-0" style={{ color: primaryColor }}>
-                    {isEditing ? 'Edit Profile' : 'User Profile'}
-                  </h2>
-                  <div className="d-flex gap-2 flex-wrap justify-content-end">
-                    
-                    {/* Logout Button */}
-                    <button 
-                      onClick={handleLogout} 
-                      className="btn btn-sm btn-outline-danger fw-semibold"
-                    >
-                      <LogOut className="w-4 h-4 me-1" /> Logout
-                    </button>
+    <>
+      <style>{styles}</style>
+      <div className="admin-container">
+        {/* Messages */}
+        {submissionMessage && (
+          <div className={`alert ${isSubmitting ? 'alert-info' : errors && Object.keys(errors).length > 0 ? 'alert-danger' : 'alert-success'} text-center mb-4 toast-alert shadow-sm position-fixed`}>
+            {submissionMessage}
+          </div>
+        )}
 
-                    {/* Interest Form Button */}
-                    <button 
-                      onClick={handleInterestForm} 
-                      className="btn btn-sm fw-semibold"
-                      style={{backgroundColor: primaryColor + '1A', color: primaryColor}}
-                    >
-                      <Target className="w-4 h-4 me-1" /> Interest Form
-                    </button>
-                    
-                    {/* Update Profile Button / Cancel Button */}
-                    <button 
-                      onClick={handleToggleEdit} 
-                      className={`btn btn-sm fw-semibold ${isEditing ? 'btn-outline-secondary' : 'btn-success'}`}
-                      style={{ backgroundColor: isEditing ? 'white' : '#10B981', color: isEditing ? '#495057' : 'white', borderColor: isEditing ? '#ccc' : '#10B981'}}
-                      disabled={isSubmitting}
-                    >
-                      {isEditing ? (
-                        <>Cancel Edit</>
-                      ) : (
-                        <>
-                          <Edit className="w-4 h-4 me-1" /> Update Profile
-                        </>
-                      )}
-                    </button>
-
-                  </div>
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="position-fixed top-0 start-0 w-100 h-100" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1050 }}>
+            <div className="position-absolute top-50 start-50 translate-middle bg-white rounded-3 shadow-lg p-4" style={{ maxWidth: '500px', width: '90%' }}>
+              <div className="text-center">
+                <div className="mb-3">
+                  <Delete width={48} height={48} style={{ color: '#DC2626' }} />
                 </div>
-                
-                {/* Profile Photo Placeholder */}
-                <div className="text-center mb-5">
-                    <div 
-                        className="mx-auto rounded-circle d-flex align-items-center justify-content-center shadow-sm"
-                        style={{ width: '100px', height: '100px', backgroundColor: primaryColor + '33' }}
-                    >
-                        <User className="w-10 h-10" style={{ color: primaryColor }} />
-                    </div>
-                    <h3 className="mt-3 fw-bold text-dark">{profile.first_name} {profile.last_name}</h3>
-                    <p className="text-muted">Profile ID: {profile.id}</p>
+                <h4 className="fw-bold mb-3" style={{ color: '#1F2937' }}>Delete Profile</h4>
+                <p className="text-muted mb-4">
+                  Are you sure you want to delete your profile? This action cannot be undone.
+                </p>
+                <div className="d-flex gap-3 justify-content-center">
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
+                    className="btn btn-secondary px-4 py-2 fw-semibold"
+                    style={{ minWidth: '100px' }}
+                  >
+                    No
+                  </button>
+                  <button
+                    onClick={confirmDeleteProfile}
+                    className="btn btn-danger px-4 py-2 fw-semibold"
+                    style={{ minWidth: '100px' }}
+                  >
+                    Yes
+                  </button>
                 </div>
-
-                {/* Submission Message Area */}
-                {submissionMessage && (
-                    <div className={`alert ${isSubmitting ? 'alert-info' : errors && Object.keys(errors).length > 0 ? 'alert-danger' : 'alert-success'} text-center mb-4`}>
-                        {submissionMessage}
-                    </div>
-                )}
-                
-                <form onSubmit={handleUpdateProfile} noValidate>
-                    <div className="row g-4">
-                        
-                        {/* Conditional Rendering: View vs. Edit */}
-                        
-                        {isEditing ? (
-                            <>
-                                {/* EDIT MODE FORM */}
-                                <div className="col-md-6">
-                                    <TextInput label="First Name" name="firstName" value={formData.firstName} onChange={handleEditChange} error={errors.firstName} icon={User} required maxLength={50} placeholder="First Name" />
-                                </div>
-                                <div className="col-md-6">
-                                    <TextInput label="Last Name" name="lastName" value={formData.lastName} onChange={handleEditChange} error={errors.lastName} icon={User} required maxLength={50} placeholder="Last Name" />
-                                </div>
-                                <div className="col-md-6">
-                                    {/* Email is often non-editable, but API says it's required for PUT/PATCH */}
-                                    <TextInput label="Email Address" name="email" type="email" value={formData.email} onChange={handleEditChange} error={errors.email} icon={Mail} required placeholder="you@example.com" />
-                                </div>
-                                <div className="col-md-6">
-                                    <TextInput label="Phone (10 Digits)" name="phone" type="tel" value={formData.phone} onChange={handleEditChange} error={errors.phone} icon={Phone} required maxLength={10} placeholder="0000000000" />
-                                </div>
-                                <div className="col-md-6">
-                                    <TextInput label="University" name="university" value={formData.university} onChange={handleEditChange} error={errors.university} icon={GraduationCap} maxLength={100} placeholder="University Name" />
-                                </div>
-                                <div className="col-md-6">
-                                    <TextInput label="Major" name="major" value={formData.major} onChange={handleEditChange} error={errors.major} icon={GraduationCap} maxLength={100} placeholder="Major" />
-                                </div>
-                                <div className="col-md-6">
-                                    <TextInput label="Degree" name="degree" value={formData.degree} onChange={handleEditChange} error={errors.degree} icon={GraduationCap} options={degreeOptions} placeholder="Select Degree" />
-                                </div>
-                                <div className="col-md-6">
-                                    <TextInput label="Graduation (MM/YYYY)" name="graduationDate" type="date" value={formData.graduationDate} onChange={handleEditChange} error={errors.graduationDate} icon={Calendar} placeholder="MM/YYYY" />
-                                </div>
-                                <div className="col-md-6">
-                                    <TextInput label="Visa Status" name="visaStatus" value={formData.visaStatus} onChange={handleEditChange} error={errors.visaStatus} icon={GraduationCap} options={visaOptions} placeholder="Select Status" />
-                                </div>
-                                {formData.visaStatus === 'F1-OPT' && (
-                                    <div className="col-md-6">
-                                        <TextInput label="OPT End Date (MM/YYYY)" name="optEndDate" type="date" value={formData.optEndDate} onChange={handleEditChange} error={errors.optEndDate} icon={Calendar} required={formData.visaStatus === 'F1-OPT'} placeholder="MM/YYYY" />
-                                    </div>
-                                )}
-                                <div className="col-12">
-                                    <TextInput label="Additional Notes" name="additionalNotes" value={formData.additionalNotes} onChange={handleEditChange} error={errors.additionalNotes} isTextArea maxLength={500} placeholder="Enter any additional notes..." />
-                                </div>
-                                <div className="col-md-6">
-                                    <TextInput label="LinkedIn URL" name="linkedinUrl" type="url" value={formData.linkedinUrl} onChange={handleEditChange} error={errors.linkedinUrl} icon={LinkIcon} maxLength={255} placeholder="https://linkedin.com/..." />
-                                </div>
-                                <div className="col-md-6">
-                                    <TextInput label="GitHub URL" name="githubUrl" type="url" value={formData.githubUrl} onChange={handleEditChange} error={errors.githubUrl} icon={GitBranch} maxLength={255} placeholder="https://github.com/..." />
-                                </div>
-                                
-                                {/* Resume File Upload (for PATCH, only new file needs to be sent) */}
-                                <div className="col-12">
-                                    <div className="mb-3">
-                                        <label className="form-label fw-semibold text-dark" htmlFor="resumeFile">
-                                            Update Resume (PDF/DOCX, Max 5MB)
-                                        </label>
-                                        <div className={`border rounded-3 p-3 ${errors.resumeFile ? 'border-danger bg-danger bg-opacity-10' : 'border-secondary border-opacity-25'}`}>
-                                            <div className="d-flex align-items-center">
-                                                <div className="p-2 rounded-2 me-3" style={{ backgroundColor: primaryColor + '1A' }}>
-                                                    <Upload className="h-5 w-5" style={{ color: primaryColor }} />
-                                                </div>
-                                                <div className="flex-grow-1">
-                                                    <input
-                                                        type="file"
-                                                        id="resumeFile"
-                                                        name="resumeFile"
-                                                        onChange={handleEditChange}
-                                                        className="form-control form-control-lg"
-                                                        accept=".pdf,.docx,.doc"
-                                                    />
-                                                </div>
-                                            </div>
-                                            {(formData.resumeFile && formData.resumeFile.name) ? (
-                                                <p className="text-success mt-2 mb-0 d-flex align-items-center fw-semibold">
-                                                  Selected: {formData.resumeFile.name}
-                                                </p>
-                                            ) : profile.resume_file && (
-                                                <p className="text-muted mt-2 mb-0 d-flex align-items-center fw-semibold">
-                                                  Current: <a href={profile.resume_file} target="_blank" rel="noopener noreferrer" style={{ color: primaryColor }}>View File</a>
-                                                </p>
-                                            )}
-                                        </div>
-                                        {errors.resumeFile && <div className="invalid-feedback d-block">{errors.resumeFile}</div>}
-                                    </div>
-                                </div>
-
-                                {/* Save Button */}
-                                <div className="col-12 mt-4">
-                                    <button
-                                        type="submit"
-                                        disabled={isSubmitting}
-                                        className="btn btn-lg w-100 py-3 fw-bold rounded-pill"
-                                        style={{ backgroundColor: '#10B981', borderColor: '#10B981', color: 'white' }}
-                                    >
-                                        {isSubmitting ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                                {submissionMessage || 'Updating...'}
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Save className="w-6 h-6 me-2" />
-                                                Save Changes
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                {/* VIEW MODE DISPLAY */}
-                                <div className="col-md-6">
-                                    <ProfileField icon={User} label="Full Name" value={`${profile.first_name} ${profile.last_name}`} />
-                                </div>
-                                <div className="col-md-6">
-                                    <ProfileField icon={Mail} label="Email" value={profile.email} />
-                                </div>
-                                <div className="col-md-6">
-                                    <ProfileField icon={Phone} label="Phone" value={profile.phone} />
-                                </div>
-                                <div className="col-md-6">
-                                    <ProfileField icon={GraduationCap} label="University" value={profile.university} />
-                                </div>
-                                <div className="col-md-6">
-                                    <ProfileField icon={GraduationCap} label="Degree / Major" value={`${profile.degree} in ${profile.major}`} />
-                                </div>
-                                <div className="col-md-6">
-                                    <ProfileField icon={Calendar} label="Graduation Date" value={profile.graduation_date} />
-                                </div>
-                                <div className="col-md-6">
-                                    <ProfileField icon={GraduationCap} label="Visa Status" value={profile.visa_status} />
-                                </div>
-                                {profile.visa_status === 'F1-OPT' && (
-                                    <div className="col-md-6">
-                                        <ProfileField icon={Calendar} label="OPT End Date" value={profile.opt_end_date} />
-                                    </div>
-                                )}
-                                <div className="col-md-6">
-                                    <ProfileField icon={LinkIcon} label="LinkedIn" value={profile.linkedin_url} isLink />
-                                </div>
-                                <div className="col-md-6">
-                                    <ProfileField icon={GitBranch} label="GitHub" value={profile.github_url} isLink />
-                                </div>
-
-                                {/* Resume and Notes in View Mode */}
-                                <div className="col-12 mt-4 pt-4 border-top">
-                                    <h4 className="fw-semibold text-dark">Additional Information</h4>
-                                    <div className="row mt-3">
-                                        <div className="col-md-6 mb-3 mb-md-0">
-                                            <p className="text-muted mb-1 small fw-semibold">Resume File</p>
-                                            {profile.resume_file ? (
-                                                <a href={profile.resume_file} target="_blank" rel="noopener noreferrer" className="btn btn-sm" style={{backgroundColor: primaryColor + '1A', color: primaryColor}}>
-                                                    View Uploaded Resume
-                                                </a>
-                                            ) : (
-                                                <span className="text-danger">No File Uploaded</span>
-                                            )}
-                                        </div>
-                                        <div className="col-md-6">
-                                            <p className="text-muted mb-1 small fw-semibold">Notes</p>
-                                            <p className="text-dark small border p-2 rounded-3" style={{ whiteSpace: 'pre-wrap', minHeight: '50px' }}>
-                                                {profile.additional_notes || 'No additional notes provided.'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </form>
               </div>
             </div>
           </div>
+        )}
+        {/* Sidebar with full name + actions */}
+        <div>
+          <AdminSidebar
+            fullName={fullName}
+            onLogout={handleLogout}
+            onInterestForm={handleInterestForm}
+            onToggleEdit={handleToggleEdit}
+            isEditing={isEditing}
+            onDeleteProfile={handleDeleteProfile}
+          />
         </div>
+
+        {/* Main content */}
+        <main className="admin-main-content">
+          <div className="admin-content-wrapper">
+            <div className="container-fluid">
+              <div className="row justify-content-center">
+                <div className="col-12 col-xl-10">
+                  {/* Header - only title now */}
+                  <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    <h2 className="fw-bold mb-0" style={{ color: primaryColor }}>
+                      {isEditing ? 'Edit Candidate Profile' : 'Candidate Profile'}
+                    </h2>
+                  </div>
+
+                  {/* Profile summary */}
+                  <div className="text-center mb-4">
+                    <div 
+                      className="mx-auto rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                      style={{ width: '100px', height: '100px', backgroundColor: primaryColor + '33' }}
+                    >
+                      <User className="w-10 h-10" style={{ color: primaryColor }} />
+                    </div>
+                    <h3 className="mt-3 fw-bold text-dark">
+                      {fullName || 'Candidate'}
+                    </h3>
+                    <p className="text-muted mb-1">Profile ID: {profile.id}</p>
+                    <p className="text-muted small">
+                      {profile.degree} • {profile.major} • {profile.university}
+                    </p>
+                    <p className="text-muted small">
+  Assigned Recruiter: { 'Not assigned yet'}
+</p>
+
+                  </div>
+
+
+
+                  {/* Form / View */}
+                  <form onSubmit={handleUpdateProfile} noValidate>
+                    <div className="row g-4">
+                      {isEditing ? (
+                        <>
+                          <div className="col-md-6">
+                            <TextInput
+                              label="First Name"
+                              name="firstName"
+                              value={formData.firstName}
+                              onChange={handleEditChange}
+                              error={errors.firstName}
+                              icon={User}
+                              required
+                              maxLength={50}
+                              placeholder="First Name"
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <TextInput
+                              label="Last Name"
+                              name="lastName"
+                              value={formData.lastName}
+                              onChange={handleEditChange}
+                              error={errors.lastName}
+                              icon={User}
+                              required
+                              maxLength={50}
+                              placeholder="Last Name"
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <TextInput
+                              label="Email Address"
+                              name="email"
+                              type="email"
+                              value={formData.email}
+                              onChange={handleEditChange}
+                              error={errors.email}
+                              icon={Mail}
+                              required
+                              placeholder="you@example.com"
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <TextInput
+                              label="Phone (10 Digits)"
+                              name="phone"
+                              type="tel"
+                              value={formData.phone}
+                              onChange={handleEditChange}
+                              error={errors.phone}
+                              icon={Phone}
+                              required
+                              maxLength={10}
+                              placeholder="0000000000"
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <TextInput
+                              label="University"
+                              name="university"
+                              value={formData.university}
+                              onChange={handleEditChange}
+                              error={errors.university}
+                              icon={GraduationCap}
+                              maxLength={100}
+                              placeholder="University Name"
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <TextInput
+                              label="Major"
+                              name="major"
+                              value={formData.major}
+                              onChange={handleEditChange}
+                              error={errors.major}
+                              icon={GraduationCap}
+                              maxLength={100}
+                              placeholder="Major"
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <TextInput
+                              label="Degree"
+                              name="degree"
+                              value={formData.degree}
+                              onChange={handleEditChange}
+                              error={errors.degree}
+                              icon={GraduationCap}
+                              options={degreeOptions}
+                              placeholder="Select Degree"
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <TextInput
+                              label="Graduation (MM/YYYY)"
+                              name="graduationDate"
+                              type="date"
+                              value={formData.graduationDate}
+                              onChange={handleEditChange}
+                              error={errors.graduationDate}
+                              icon={Calendar}
+                              placeholder="MM/YYYY"
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <TextInput
+                              label="Visa Status"
+                              name="visaStatus"
+                              value={formData.visaStatus}
+                              onChange={handleEditChange}
+                              error={errors.visaStatus}
+                              icon={GraduationCap}
+                              options={visaOptions}
+                              placeholder="Select Status"
+                            />
+                          </div>
+                          {formData.visaStatus === 'F1-OPT' && (
+                            <div className="col-md-6">
+                              <TextInput
+                                label="OPT End Date (MM/YYYY)"
+                                name="optEndDate"
+                                type="date"
+                                value={formData.optEndDate}
+                                onChange={handleEditChange}
+                                error={errors.optEndDate}
+                                icon={Calendar}
+                                required
+                                placeholder="MM/YYYY"
+                              />
+                            </div>
+                          )}
+                          <div className="col-12">
+                            <TextInput
+                              label="Additional Notes"
+                              name="additionalNotes"
+                              value={formData.additionalNotes}
+                              onChange={handleEditChange}
+                              error={errors.additionalNotes}
+                              isTextArea
+                              maxLength={500}
+                              placeholder="Enter any additional notes..."
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <TextInput
+                              label="LinkedIn URL"
+                              name="linkedinUrl"
+                              type="url"
+                              value={formData.linkedinUrl}
+                              onChange={handleEditChange}
+                              error={errors.linkedinUrl}
+                              icon={LinkIcon}
+                              maxLength={255}
+                              placeholder="https://linkedin.com/..."
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <TextInput
+                              label="GitHub URL"
+                              name="githubUrl"
+                              type="url"
+                              value={formData.githubUrl}
+                              onChange={handleEditChange}
+                              error={errors.githubUrl}
+                              icon={GitBranch}
+                              maxLength={255}
+                              placeholder="https://github.com/..."
+                            />
+                          </div>
+
+                          {/* Resume upload */}
+                          <div className="col-12">
+                            <div className="mb-3">
+                              <label className="form-label fw-semibold text-dark" htmlFor="resumeFile">
+                                Update Resume (PDF/DOCX, Max 5MB)
+                              </label>
+                              <div className={`border rounded-3 p-3 ${errors.resumeFile ? 'border-danger bg-danger bg-opacity-10' : 'border-secondary border-opacity-25'}`}>
+                                <div className="d-flex align-items-center">
+                                  <div className="p-2 rounded-2 me-3" style={{ backgroundColor: primaryColor + '1A' }}>
+                                    <Upload className="h-5 w-5" style={{ color: primaryColor }} />
+                                  </div>
+                                  <div className="flex-grow-1">
+                                    <input
+                                      type="file"
+                                      id="resumeFile"
+                                      name="resumeFile"
+                                      onChange={handleEditChange}
+                                      className="form-control form-control-lg"
+                                      accept=".pdf,.docx,.doc"
+                                    />
+                                  </div>
+                                </div>
+                                {(formData.resumeFile && formData.resumeFile.name) ? (
+                                  <p className="text-success mt-2 mb-0 fw-semibold">
+                                    Selected: {formData.resumeFile.name}
+                                  </p>
+                                ) : profile.resume_file && (
+                                  <p className="text-muted mt-2 mb-0 fw-semibold">
+                                    Current: <a href={profile.resume_file} target="_blank" rel="noopener noreferrer" style={{ color: primaryColor }}>View File</a>
+                                  </p>
+                                )}
+                              </div>
+                              {errors.resumeFile && <div className="invalid-feedback d-block">{errors.resumeFile}</div>}
+                            </div>
+                          </div>
+
+                          <div className="col-12 mt-3">
+                            <button
+                              type="submit"
+                              disabled={isSubmitting}
+                              className="btn btn-lg w-100 py-3 fw-bold rounded-pill"
+                              style={{ backgroundColor: '#10B981', borderColor: '#10B981', color: 'white' }}
+                            >
+                              {isSubmitting ? (
+                                <>
+                                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                  {submissionMessage || 'Updating...'}
+                                </>
+                              ) : (
+                                <>
+                                  <Save className="w-6 h-6 me-2" />
+                                  Save Changes
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="col-md-6">
+                            <ProfileField icon={User} label="Full Name" value={fullName} />
+                          </div>
+                          <div className="col-md-6">
+                            <ProfileField icon={Mail} label="Email" value={profile.email} />
+                          </div>
+                          <div className="col-md-6">
+                            <ProfileField icon={Phone} label="Phone" value={profile.phone} />
+                          </div>
+                          <div className="col-md-6">
+                            <ProfileField icon={GraduationCap} label="University" value={profile.university} />
+                          </div>
+                          <div className="col-md-6">
+                            <ProfileField icon={GraduationCap} label="Degree / Major" value={`${profile.degree} in ${profile.major}`} />
+                          </div>
+                          <div className="col-md-6">
+                            <ProfileField icon={Calendar} label="Graduation Date" value={profile.graduation_date} />
+                          </div>
+                          <div className="col-md-6">
+                            <ProfileField icon={GraduationCap} label="Visa Status" value={profile.visa_status} />
+                          </div>
+                          {profile.visa_status === 'F1-OPT' && (
+                            <div className="col-md-6">
+                              <ProfileField icon={Calendar} label="OPT End Date" value={profile.opt_end_date} />
+                            </div>
+                          )}
+                          <div className="col-md-6">
+                            <ProfileField icon={LinkIcon} label="LinkedIn" value={profile.linkedin_url} isLink />
+                          </div>
+                          <div className="col-md-6">
+                            <ProfileField icon={GitBranch} label="GitHub" value={profile.github_url} isLink />
+                          </div>
+
+                          <div className="col-12 mt-4 pt-3 border-top">
+                            <h4 className="fw-semibold text-dark">Additional Information</h4>
+                            <div className="row mt-3">
+                              <div className="col-md-6 mb-3 mb-md-0">
+                                <p className="text-muted mb-1 small fw-semibold">Resume File</p>
+                                {profile.resume_file ? (
+                                  <a
+                                    href={profile.resume_file}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-sm"
+                                    style={{backgroundColor: primaryColor + '1A', color: primaryColor}}
+                                  >
+                                    View Uploaded Resume
+                                  </a>
+                                ) : (
+                                  <span className="text-danger">No File Uploaded</span>
+                                )}
+                              </div>
+                              <div className="col-md-6">
+                                <p className="text-muted mb-1 small fw-semibold">Notes</p>
+                                <p className="text-dark small border p-2 rounded-3" style={{ whiteSpace: 'pre-wrap', minHeight: '50px' }}>
+                                  {profile.additional_notes || 'No additional notes provided.'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
-    </div>
+    </>
   );
 };
 
