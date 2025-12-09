@@ -5,6 +5,12 @@ const About = () => {
     <div className="about-page">
       {/* Hero Section - Who We Are */}
       <section className="hero-section">
+        <img 
+          src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&q=80" 
+          alt="Team collaboration" 
+          className="hero-bg-image"
+        />
+        <div className="hero-overlay"></div>
         <div className="container">
           <div className="hero-content">
             <h1 className="hero-title">Who We Are</h1>
@@ -22,12 +28,33 @@ const About = () => {
           <h2 className="section-title">Who We Serve</h2>
           <div className="serve-grid">
             <div className="serve-card">
+              <div className="serve-image-wrapper">
+                <img 
+                  src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80" 
+                  alt="International students" 
+                  className="serve-image"
+                />
+              </div>
               <h3>F1 / OPT / STEM OPT Students</h3>
             </div>
             <div className="serve-card">
+              <div className="serve-image-wrapper">
+                <img 
+                  src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80" 
+                  alt="Graduates celebrating" 
+                  className="serve-image"
+                />
+              </div>
               <h3>Master's Graduates</h3>
             </div>
             <div className="serve-card">
+              <div className="serve-image-wrapper">
+                <img 
+                  src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80" 
+                  alt="Young professionals" 
+                  className="serve-image"
+                />
+              </div>
               <h3>Early Career Professionals</h3>
             </div>
           </div>
@@ -36,6 +63,12 @@ const About = () => {
 
       {/* Our Mission */}
       <section className="mission-section">
+        <img 
+          src="https://images.unsplash.com/photo-1522071901873-411886a10004?w=1920&q=80" 
+          alt="Team working together" 
+          className="mission-bg-image"
+        />
+        <div className="mission-overlay"></div>
         <div className="container">
           <h2 className="section-title">Our Mission</h2>
           <p className="mission-text">
@@ -99,36 +132,78 @@ const About = () => {
           <h2 className="section-title">Why Choose HYRIND</h2>
           <div className="why-grid">
             <div className="why-card">
+              <div className="why-image-wrapper">
+                <img 
+                  src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80" 
+                  alt="Profile validation" 
+                  className="why-image"
+                />
+              </div>
               <div className="why-number">1</div>
               <h3 className="why-title">Expert Profile Validation</h3>
               <p className="why-text">Admin-approved candidate profiles ensure quality and credibility for employers</p>
             </div>
 
             <div className="why-card">
+              <div className="why-image-wrapper">
+                <img 
+                  src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80" 
+                  alt="Resume building" 
+                  className="why-image"
+                />
+              </div>
               <div className="why-number">2</div>
               <h3 className="why-title">Professional Resume Building</h3>
               <p className="why-text">Customized resumes designed to showcase your strengths and stand out</p>
             </div>
 
             <div className="why-card">
+              <div className="why-image-wrapper">
+                <img 
+                  src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80" 
+                  alt="Marketing campaigns" 
+                  className="why-image"
+                />
+              </div>
               <div className="why-number">3</div>
               <h3 className="why-title">Monthly Marketing Campaigns</h3>
               <p className="why-text">Continuous profile promotion to our network of recruiters and employers</p>
             </div>
 
             <div className="why-card">
+              <div className="why-image-wrapper">
+                <img 
+                  src="https://images.unsplash.com/photo-1553028826-f4804a6dba3b?w=800&q=80" 
+                  alt="Dedicated career mentoring" 
+                  className="why-image"
+                />
+              </div>
               <div className="why-number">4</div>
               <h3 className="why-title">Dedicated Career Support</h3>
               <p className="why-text">One-on-one guidance throughout your entire job search journey</p>
             </div>
 
             <div className="why-card">
+              <div className="why-image-wrapper">
+                <img 
+                  src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80" 
+                  alt="Industry connections" 
+                  className="why-image"
+                />
+              </div>
               <div className="why-number">5</div>
               <h3 className="why-title">Industry Connections</h3>
               <p className="why-text">Access to our established network of hiring managers and companies</p>
             </div>
 
             <div className="why-card">
+              <div className="why-image-wrapper">
+                <img 
+                  src="https://images.unsplash.com/photo-1552581234-26160f608093?w=800&q=80" 
+                  alt="Success rate" 
+                  className="why-image"
+                />
+              </div>
               <div className="why-number">6</div>
               <h3 className="why-title">Proven Success Rate</h3>
               <p className="why-text">Track record of helping international students secure meaningful employment</p>
@@ -170,37 +245,44 @@ const About = () => {
           max-width: 1200px;
           margin: 0 auto;
           padding: 0 20px;
+          position: relative;
+          z-index: 2;
         }
 
         /* Hero Section */
         .hero-section {
-          background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
           padding: 100px 0 80px;
           text-align: center;
           position: relative;
           overflow: hidden;
+          min-height: 500px;
+          display: flex;
+          align-items: center;
         }
 
-        .hero-section::before {
-          content: '';
+        .hero-bg-image {
           position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-          background-size: 50px 50px;
-          animation: heroPattern 20s linear infinite;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          z-index: 0;
         }
 
-        @keyframes heroPattern {
-          0% { transform: translate(0, 0); }
-          100% { transform: translate(50px, 50px); }
+        .hero-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 1;
         }
 
         .hero-content {
           position: relative;
-          z-index: 1;
+          z-index: 2;
         }
 
         .hero-title {
@@ -289,12 +371,30 @@ const About = () => {
           background: #ffffff;
           border: 2px solid #2196f3;
           border-radius: 12px;
-          padding: 40px 30px;
+          padding: 0;
           text-align: center;
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
           position: relative;
           overflow: hidden;
+        }
+
+        .serve-image-wrapper {
+          width: 100%;
+          height: 220px;
+          overflow: hidden;
+          border-radius: 10px 10px 0 0;
+        }
+
+        .serve-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.6s ease;
+        }
+
+        .serve-card:hover .serve-image {
+          transform: scale(1.15);
         }
 
         .serve-card::before {
@@ -325,6 +425,7 @@ const About = () => {
           position: relative;
           z-index: 1;
           transition: all 0.3s ease;
+          padding: 30px 20px;
         }
 
         .serve-card:hover h3 {
@@ -334,9 +435,37 @@ const About = () => {
 
         /* Mission Section */
         .mission-section {
-          padding: 80px 0;
-          background: #ffffff;
+          padding: 100px 0;
           position: relative;
+          overflow: hidden;
+          min-height: 500px;
+          display: flex;
+          align-items: center;
+        }
+
+        .mission-bg-image {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          z-index: 0;
+        }
+
+        .mission-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.5) 100%);
+          z-index: 1;
+        }
+
+        .mission-section .container {
+          position: relative;
+          z-index: 2;
         }
 
         .mission-section::before {
@@ -347,6 +476,7 @@ const About = () => {
           right: 0;
           height: 2px;
           background: linear-gradient(90deg, transparent, #2196f3, transparent);
+          z-index: 2;
         }
 
         .mission-text {
@@ -496,13 +626,32 @@ const About = () => {
         }
 
         .why-card {
-          background: #f5f5f5;
-          border-left: 4px solid #2196f3;
-          border-radius: 8px;
-          padding: 30px;
+          background: #ffffff;
+          border: 2px solid #e0e0e0;
+          border-radius: 12px;
+          padding: 0;
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           position: relative;
           overflow: hidden;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .why-image-wrapper {
+          width: 100%;
+          height: 200px;
+          overflow: hidden;
+          border-radius: 10px 10px 0 0;
+        }
+
+        .why-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.6s ease;
+        }
+
+        .why-card:hover .why-image {
+          transform: scale(1.1);
         }
 
         .why-card::before {
@@ -521,24 +670,23 @@ const About = () => {
         }
 
         .why-card:hover {
-          background: #ffffff;
-          box-shadow: 0 12px 32px rgba(33, 150, 243, 0.2);
-          transform: translateX(8px);
-          border-left-width: 6px;
+          transform: translateY(-12px);
+          box-shadow: 0 16px 40px rgba(33, 150, 243, 0.25);
+          border-color: #2196f3;
         }
 
         .why-number {
-          width: 40px;
-          height: 40px;
+          width: 50px;
+          height: 50px;
           background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
           color: white;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.2rem;
+          font-size: 1.4rem;
           font-weight: 700;
-          margin-bottom: 15px;
+          margin: 20px auto 15px;
           transition: all 0.4s ease;
           box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
           position: relative;
@@ -558,11 +706,12 @@ const About = () => {
           position: relative;
           z-index: 1;
           transition: all 0.3s ease;
+          padding: 0 20px;
+          text-align: center;
         }
 
         .why-card:hover .why-title {
           color: #0d47a1;
-          transform: translateX(5px);
         }
 
         .why-text {
@@ -572,6 +721,8 @@ const About = () => {
           position: relative;
           z-index: 1;
           transition: all 0.3s ease;
+          padding: 0 20px 25px;
+          text-align: center;
         }
 
         .why-card:hover .why-text {

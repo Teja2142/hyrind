@@ -100,6 +100,14 @@ const Delete = (props) => (
     <line x1="14" y1="11" x2="14" y2="17" />
   </svg>
 );
+
+const Upgrade = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+    <path d="M2 17l10 5 10-5" />
+    <path d="M2 12l10 5 10-5" />
+  </svg>
+);
 // --- END: Inline SVG Icon Definitions ---
 
 // --- Admin Dashboard Layout Styles ---
@@ -416,7 +424,7 @@ const SidebarButton = ({ Icon, label, onClick, variant = 'normal', isEditing }) 
 };
 
 // AdminSidebar with full name + actions
-const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEditing, onDeleteProfile }) => {
+const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEditing, onDeleteProfile,onUpgradeProfile }) => {
   const displayName = fullName && fullName.trim().length > 0 ? fullName : 'Candidate Profile';
 
   return (
@@ -446,6 +454,13 @@ const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEdit
           Icon={Target}
           label="Interest Form"
           onClick={onInterestForm}
+          variant="normal"
+        />
+        {/* Upgrade Profile */}
+        <SidebarButton
+          Icon={Upgrade}
+          label="Upgrade Profile"
+          onClick={onUpgradeProfile}
           variant="normal"
         />
         {/* Delete Profile */}
@@ -484,6 +499,11 @@ const Profile = () => {
   const [submissionMessage, setSubmissionMessage] = useState('');
   const [errors, setErrors] = useState({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentData, setPaymentData] = useState({
+    username: '',
+    password: ''
+  });
 
   const degreeOptions = ["Bachelor's", "Master's", 'PhD'];
   const visaOptions = ['F1-OPT', 'F1-CPT', 'H1B', 'Green Card', 'Citizen', 'Other'];
@@ -845,7 +865,42 @@ const Profile = () => {
       console.error("Network Fetch Error:", err);
     }
   };
+const handleUpgradeProfile = () => {
+    setShowPaymentModal(true);
+  };
 
+  const handlePaymentChange = (e) => {
+    const { name, value } = e.target;
+    setPaymentData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePaymentSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!paymentData.username || !paymentData.password) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    // Here you would typically make an API call to process the payment
+    // For now, we'll just show a success message
+    try {
+      setIsSubmitting(true);
+      setSubmissionMessage('Processing payment...');
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setSubmissionMessage('Payment successful! Your profile has been upgraded.');
+      setShowPaymentModal(false);
+      setPaymentData({ username: '', password: '' });
+      setIsSubmitting(false);
+    } catch (err) {
+      setSubmissionMessage('Payment failed. Please try again.');
+      setIsSubmitting(false);
+    }
+  };
   if (loading) {
     return (
       <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: paleBackground }}>
@@ -922,6 +977,98 @@ const Profile = () => {
             </div>
           </div>
         )}
+
+        {/* Payment Modal */}
+        {showPaymentModal && (
+          <div className="position-fixed top-0 start-0 w-100 h-100" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1050 }}>
+            <div className="position-absolute top-50 start-50 translate-middle bg-white rounded-3 shadow-lg p-4" style={{ maxWidth: '500px', width: '90%' }}>
+              <div>
+                <div className="text-center mb-4">
+                  <div className="mb-3">
+                    <Upgrade width={48} height={48} style={{ color: primaryColor }} />
+                  </div>
+                  <h4 className="fw-bold mb-2" style={{ color: '#1F2937' }}>Payment Mode</h4>
+                  <p className="text-muted mb-0">Upgrade your profile for ₹499</p>
+                </div>
+                
+                <form onSubmit={handlePaymentSubmit}>
+                  <div className="mb-3">
+                    <label htmlFor="payment-username" className="form-label fw-semibold">
+                      Username <span className="text-danger">*</span>
+                    </label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white">
+                        <User width={20} height={20} style={{ color: primaryColor }} />
+                      </span>
+                      <input
+                        type="text"
+                        id="payment-username"
+                        name="username"
+                        value={paymentData.username}
+                        onChange={handlePaymentChange}
+                        className="form-control form-control-lg"
+                        placeholder="Enter your username"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <label htmlFor="payment-password" className="form-label fw-semibold">
+                      Password <span className="text-danger">*</span>
+                    </label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: primaryColor }}>
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                      </span>
+                      <input
+                        type="password"
+                        id="payment-password"
+                        name="password"
+                        value={paymentData.password}
+                        onChange={handlePaymentChange}
+                        className="form-control form-control-lg"
+                        placeholder="Enter your password"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="bg-light rounded-3 p-3 mb-4 text-center">
+                    <p className="mb-1 text-muted small">Total Amount</p>
+                    <h3 className="fw-bold mb-0" style={{ color: primaryColor }}>₹499</h3>
+                  </div>
+
+                  <div className="d-flex gap-3 justify-content-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowPaymentModal(false);
+                        setPaymentData({ username: '', password: '' });
+                      }}
+                      className="btn btn-secondary px-4 py-2 fw-semibold"
+                      style={{ minWidth: '120px' }}
+                      disabled={isSubmitting}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn px-4 py-2 fw-semibold text-white"
+                      style={{ minWidth: '120px', backgroundColor: primaryColor, border: 'none' }}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Processing...' : 'Proceed to Pay'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Sidebar with full name + actions */}
         <div>
           <AdminSidebar
@@ -931,6 +1078,7 @@ const Profile = () => {
             onToggleEdit={handleToggleEdit}
             isEditing={isEditing}
             onDeleteProfile={handleDeleteProfile}
+            onUpgradeProfile={handleUpgradeProfile}
           />
         </div>
 

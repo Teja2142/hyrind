@@ -1,5 +1,23 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { Users, Briefcase, CheckCircle, XCircle, UserPlus, Zap, Loader, AlertTriangle, RefreshCw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Users, Briefcase, CheckCircle, XCircle, UserPlus, Zap, Loader, AlertTriangle, RefreshCw, LogOut } from 'lucide-react';
+
+// --- HELPER FUNCTIONS ---
+// date helpers
+const formatDateToInput = (dateString) => {
+  if (!dateString) return '';
+  if (dateString.length === 7 && dateString.indexOf('/') === 2) {
+    const [month, year] = dateString.split('/');
+    return `${year}-${month}`;
+  }
+  return '';
+};
+
+const formatDateToApi = (dateString) => {
+  if (!dateString || dateString.length !== 7 || dateString.indexOf('-') !== 4) return dateString;
+  const [year, month] = dateString.split('-');
+  return `${month}/${year}`;
+};
 
 // --- API CONFIGURATION ---
 // NOTE: Replace these placeholder values with actual dynamic values in a real application.
@@ -91,16 +109,41 @@ const fetchWithRetry = async (url, options, retries = 3) => {
 
 // --- UTILITY COMPONENTS ---
 
-const ActionButton = ({ Icon, label, onClick, className = 'bg-gray-700 hover:bg-gray-600', disabled = false }) => (
-  <button
-    onClick={onClick}
-    disabled={disabled}
-    className={`action-button inline-flex items-center px-3 py-1 text-sm font-medium text-white rounded-full transition duration-150 ease-in-out transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
-  >
-    {Icon && <Icon className="w-4 h-4 mr-1" />}
-    {label}
-  </button>
-);
+const ActionButton = ({ Icon, label, onClick, variant = 'primary', disabled = false, size = 'sm' }) => {
+  const variants = {
+    approve: { bg: '#10B981', hoverBg: '#059669', color: '#FFFFFF' },
+    reject: { bg: '#EF4444', hoverBg: '#DC2626', color: '#FFFFFF' },
+    assign: { bg: '#3B82F6', hoverBg: '#2563EB', color: '#FFFFFF' },
+    primary: { bg: '#4F46E5', hoverBg: '#4338CA', color: '#FFFFFF' },
+    secondary: { bg: '#6B7280', hoverBg: '#4B5563', color: '#FFFFFF' },
+  };
+
+  const style = variants[variant] || variants.primary;
+  const sizeClass = size === 'sm' ? 'px-3 py-1.5' : 'px-4 py-2';
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`btn btn-${size} d-inline-flex align-items-center gap-1 fw-semibold`}
+      style={{
+        backgroundColor: style.bg,
+        color: style.color,
+        border: 'none',
+        borderRadius: '6px',
+        fontSize: size === 'sm' ? '0.875rem' : '1rem',
+        transition: 'all 0.2s ease',
+        opacity: disabled ? 0.5 : 1,
+        cursor: disabled ? 'not-allowed' : 'pointer'
+      }}
+      onMouseOver={(e) => !disabled && (e.currentTarget.style.backgroundColor = style.hoverBg)}
+      onMouseOut={(e) => !disabled && (e.currentTarget.style.backgroundColor = style.bg)}
+    >
+      {Icon && <Icon className="w-4 h-4" style={{ width: '16px', height: '16px' }} />}
+      <span>{label}</span>
+    </button>
+  );
+};
 
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
@@ -152,9 +195,9 @@ const AdminSidebar = ({ activeView, setActiveView, admin }) => (
 const SidebarButton = ({ Icon, label, isActive, onClick }) => (
   <button
     onClick={onClick}
-    className={`sidebar-button flex items-center w-full p-3 font-semibold transition duration-200 rounded-lg hover:bg-indigo-700 ${isActive ? 'bg-indigo-800 text-white shadow-lg' : 'text-indigo-200 hover:text-white'}`}
+    className={`sidebar-button ${isActive ? 'sidebar-button-active' : 'sidebar-button-inactive'}`}
   >
-    <Icon className="w-5 h-5 mr-3" />
+    <Icon className="sidebar-button-icon" />
     {label}
   </button>
 );
@@ -176,10 +219,31 @@ const CandidatesView = ({ candidates, updateCandidateStatus, approvedCandidates,
 
   return (
     <div className="candidates-view">
-      <h2 className="candidates-title flex justify-between items-center">
-        Candidate Queue ({candidates.length})
-        <ActionButton Icon={RefreshCw} label="Refresh" onClick={refetchData} className="bg-gray-500 hover:bg-gray-700" disabled={isLoading} />
-      </h2>
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+          <h2 className="fw-bold mb-1" style={{ color: '#4F46E5', fontSize: '1.75rem' }}>
+            Candidate Queue
+          </h2>
+          <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>Total: {candidates.length} candidates</p>
+        </div>
+        <button 
+          onClick={refetchData} 
+          disabled={isLoading}
+          className="btn btn-sm d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+          style={{ 
+            backgroundColor: '#4F46E5', 
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4338CA'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4F46E5'}
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          {isLoading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
       
       <div className="metrics-grid">
         <MetricCard title="Submitted (New)" value={submittedCount} color="bg-yellow-100 text-yellow-800" Icon={Zap} />
@@ -190,9 +254,13 @@ const CandidatesView = ({ candidates, updateCandidateStatus, approvedCandidates,
       {isLoading && <div className="text-center p-4 text-indigo-600"><Loader className="w-6 h-6 inline-block animate-spin mr-2" /> Loading candidates...</div>}
       {error && <div className="p-4 bg-red-100 text-red-700 rounded-lg flex items-center"><AlertTriangle className="w-5 h-5 mr-2" /> Error loading data: {error}</div>}
 
-      <div className="flex flex-col gap-3">
+      <div className="d-flex flex-column gap-3 mt-4">
         {candidates.length === 0 && !isLoading && !error && (
-            <p className="text-center text-gray-500 italic p-4 bg-gray-50 rounded-lg">No candidates found.</p>
+            <div className="text-center p-5 bg-light rounded-3 border border-2 border-dashed" style={{ borderColor: '#E5E7EB' }}>
+              <Users className="w-12 h-12 mx-auto mb-3 opacity-25" style={{ color: '#6B7280' }} />
+              <p className="text-muted mb-0 fw-semibold">No candidates found</p>
+              <p className="text-muted small mb-0">Candidates will appear here once they register</p>
+            </div>
         )}
         {candidates.map(candidate => (
           <CandidateCard 
@@ -214,52 +282,80 @@ const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters })
   const recruiter = recruiters.find(r => r.id === candidate.recruiterId);
   
   const statusColors = {
-    'submitted': 'bg-yellow-500',
-    'approved': 'bg-green-500',
-    'rejected': 'bg-red-500',
-    'default': 'bg-gray-500',
+    'submitted': { bg: '#FEF3C7', text: '#92400E', border: '#F59E0B' },
+    'approved': { bg: '#D1FAE5', text: '#065F46', border: '#10B981' },
+    'rejected': { bg: '#FEE2E2', text: '#991B1B', border: '#EF4444' },
+    'default': { bg: '#F3F4F6', text: '#374151', border: '#9CA3AF' },
   };
 
+  const statusStyle = statusColors[candidate.status] || statusColors.default;
+
   return (
-    <div className="p-4 bg-white rounded-xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center transition duration-300 hover:shadow-lg border-l-4 border-indigo-500">
-      <div className="flex-1 min-w-0 mb-2 md:mb-0">
-        <p className="text-lg font-semibold text-gray-800 truncate">{candidate.email}</p>
-        <p className="text-sm text-gray-500">User ID: {candidate.id}</p>
-        <p className="text-xs text-indigo-600 font-medium mt-1">Profile ID: {candidate.profile_id || 'N/A'}</p>
-        {candidate.status && (
-          <span className={`px-2 py-0.5 mt-1 text-xs font-semibold text-white rounded-full capitalize ${statusColors[candidate.status] || statusColors.default}`}>
-            {candidate.status}
-          </span>
-        )}
-        {recruiter && <p className="text-sm mt-1 text-blue-600">Assigned to: {recruiter.email}</p>}
-      </div>
+    <div className="card border-0 shadow-sm hover-shadow-lg transition-all" style={{ borderLeft: `4px solid #4F46E5` }}>
+      <div className="card-body p-4">
+        <div className="row align-items-center">
+          <div className="col-md-8 mb-3 mb-md-0">
+            <div className="d-flex align-items-center mb-2">
+              <h5 className="mb-0 fw-bold text-dark me-3">{candidate.email}</h5>
+              {candidate.status && (
+                <span 
+                  className="badge px-3 py-1 fw-semibold text-uppercase" 
+                  style={{ 
+                    backgroundColor: statusStyle.bg, 
+                    color: statusStyle.text,
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  {candidate.status}
+                </span>
+              )}
+            </div>
+            <div className="d-flex flex-wrap gap-3 text-muted small">
+              <span><strong>User ID:</strong> {candidate.id}</span>
+              <span><strong>Profile ID:</strong> {candidate.profile_id || 'N/A'}</span>
+            </div>
+            {recruiter && (
+              <div className="mt-2">
+                <span className="badge bg-primary-subtle text-primary px-2 py-1">
+                  <Briefcase className="w-3 h-3 me-1" style={{ display: 'inline' }} />
+                  Assigned to: {recruiter.email}
+                </span>
+              </div>
+            )}
+          </div>
 
-      <div className="flex flex-wrap gap-2">
-        {isSubmitted && (
-          <>
-            <ActionButton 
-              Icon={CheckCircle} 
-              label="Approve" 
-              onClick={() => updateStatus(candidate, 'approved')}
-              className="bg-green-500 hover:bg-green-600"
-            />
-            <ActionButton 
-              Icon={XCircle} 
-              label="Reject" 
-              onClick={() => updateStatus(candidate, 'rejected')}
-              className="bg-red-500 hover:bg-red-600"
-            />
-          </>
-        )}
+          <div className="col-md-4 d-flex flex-wrap gap-2 justify-content-md-end align-items-start">
+            {isSubmitted && (
+              <>
+                <ActionButton 
+                  Icon={CheckCircle} 
+                  label="Approve" 
+                  onClick={() => updateStatus(candidate, 'approved')}
+                  variant="approve"
+                  size="sm"
+                />
+                <ActionButton 
+                  Icon={XCircle} 
+                  label="Reject" 
+                  onClick={() => updateStatus(candidate, 'rejected')}
+                  variant="reject"
+                  size="sm"
+                />
+              </>
+            )}
 
-        {isApproved && !recruiter && (
-          <ActionButton 
-            Icon={UserPlus} 
-            label="Assign Recruiter" 
-            onClick={() => openAssignModal(candidate)}
-            className="bg-blue-500 hover:bg-blue-600"
-          />
-        )}
+            {isApproved && !recruiter && (
+              <ActionButton 
+                Icon={UserPlus} 
+                label="Assign Recruiter" 
+                onClick={() => openAssignModal(candidate)}
+                variant="assign"
+                size="sm"
+              />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -268,25 +364,53 @@ const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters })
 const RecruitersView = ({ recruiters, candidates, openDetailsModal, isLoading, error, refetchData }) => {
   return (
     <div className="recruiters-view">
-      <h2 className="recruiters-title flex justify-between items-center">
-        Recruiter List ({recruiters.length})
-        <ActionButton Icon={RefreshCw} label="Refresh" onClick={refetchData} className="bg-gray-500 hover:bg-gray-700" disabled={isLoading} />
-      </h2>
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+          <h2 className="fw-bold mb-1" style={{ color: '#4F46E5', fontSize: '1.75rem' }}>
+            Recruiter List
+          </h2>
+          <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>Total: {recruiters.length} recruiters</p>
+        </div>
+        <button 
+          onClick={refetchData} 
+          disabled={isLoading}
+          className="btn btn-sm d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+          style={{ 
+            backgroundColor: '#4F46E5', 
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4338CA'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4F46E5'}
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          {isLoading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
 
       {isLoading && <div className="text-center p-4 text-indigo-600"><Loader className="w-6 h-6 inline-block animate-spin mr-2" /> Loading recruiters...</div>}
       {error && <div className="p-4 bg-red-100 text-red-700 rounded-lg flex items-center"><AlertTriangle className="w-5 h-5 mr-2" /> Error loading data: {error}</div>}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+      <div className="row g-4 mt-2">
         {recruiters.length === 0 && !isLoading && !error && (
-            <p className="text-center text-gray-500 italic p-4 bg-gray-50 rounded-lg col-span-full">No recruiters found.</p>
+            <div className="col-12">
+              <div className="text-center p-5 bg-light rounded-3 border border-2 border-dashed" style={{ borderColor: '#E5E7EB' }}>
+                <Briefcase className="w-12 h-12 mx-auto mb-3 opacity-25" style={{ color: '#6B7280' }} />
+                <p className="text-muted mb-0 fw-semibold">No recruiters found</p>
+                <p className="text-muted small mb-0">Recruiters will appear here once they are added</p>
+              </div>
+            </div>
         )}
         {recruiters.map(recruiter => (
-          <RecruiterCard 
-            key={recruiter.id} 
-            recruiter={recruiter} 
-            candidates={candidates}
-            openDetailsModal={openDetailsModal}
-          />
+          <div key={recruiter.id} className="col-12 col-md-6">
+            <RecruiterCard 
+              recruiter={recruiter} 
+              candidates={candidates}
+              openDetailsModal={openDetailsModal}
+            />
+          </div>
         ))}
       </div>
     </div>
@@ -298,25 +422,48 @@ const RecruiterCard = ({ recruiter, candidates, openDetailsModal }) => {
   const isAssigned = assignedCount > 0;
 
   return (
-    <div className="p-4 bg-white rounded-xl shadow-lg border-l-4 border-purple-500 flex flex-col justify-between">
-      <div className="mb-4">
-        <div className="flex justify-between items-start">
-          <h3 className="text-xl font-bold text-gray-800">{recruiter.email}</h3>
-          <span className={`px-3 py-1 text-xs font-semibold rounded-full ${isAssigned ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-500'}`}>
-            {isAssigned ? `Assigned (${assignedCount})` : 'Unassigned'}
-          </span>
+    <div className="card border-0 shadow-sm h-100" style={{ borderLeft: `4px solid #8B5CF6` }}>
+      <div className="card-body p-4 d-flex flex-column">
+        <div className="flex-grow-1">
+          <div className="d-flex justify-content-between align-items-start mb-3">
+            <div className="flex-grow-1">
+              <h5 className="fw-bold text-dark mb-1">{recruiter.email}</h5>
+              <p className="text-muted small mb-0">User ID: {recruiter.id}</p>
+            </div>
+            <span 
+              className={`badge px-3 py-2 fw-semibold`}
+              style={{
+                backgroundColor: isAssigned ? '#F3E8FF' : '#F3F4F6',
+                color: isAssigned ? '#7C3AED' : '#6B7280',
+                fontSize: '0.75rem'
+              }}
+            >
+              {isAssigned ? `${assignedCount} Assigned` : 'Unassigned'}
+            </span>
+          </div>
+          
+          {isAssigned && (
+            <div className="mb-3">
+              <div className="d-flex align-items-center gap-2 text-muted small">
+                <Users className="w-4 h-4" />
+                <span>{assignedCount} candidate{assignedCount !== 1 ? 's' : ''} assigned</span>
+              </div>
+            </div>
+          )}
         </div>
-        <p className="text-sm text-gray-500 mt-1">User ID: {recruiter.id}</p>
-      </div>
 
-      <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
-        {isAssigned && (
-          <ActionButton 
-            label="View Assignments" 
-            onClick={() => openDetailsModal(recruiter)} 
-            className="bg-blue-500 hover:bg-blue-600"
-          />
-        )}
+        <div className="pt-3 border-top d-flex justify-content-end">
+          {isAssigned && (
+            <button
+              onClick={() => openDetailsModal(recruiter)}
+              className="btn btn-sm btn-primary d-flex align-items-center gap-2 px-3"
+              style={{ backgroundColor: '#4F46E5', border: 'none' }}
+            >
+              <Users className="w-4 h-4" />
+              View Assignments
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -453,6 +600,9 @@ const RecruiterDetailsContent = ({ recruiter, assignedCandidates, onClose }) => 
 // --- MAIN APP COMPONENT ---
 
 export default function Admin() {
+    const primaryColor = '#4F46E5';
+  const paleBackground = '#F0F8FF';
+  const ADMIN_BASE_URL ="http://127.0.0.1:8000/api/users/admin" 
   const [activeView, setActiveView] = useState('candidates');
   const [candidates, setCandidates] = useState(initialCandidates);
   const [recruiters, setRecruiters] = useState(initialRecruiters);
@@ -462,7 +612,105 @@ export default function Admin() {
   const [selectedCandidate, setSelectedCandidate] = useState(null); // Candidate to assign
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);  
+  const navigate = useNavigate();
+  const [profileData, setProfileData] = useState(null);
+const [profileId, setProfileId] = useState(null);
+const [formData, setFormData] = useState({
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  university: '',
+  degree: '',
+  major: '',
+  visaStatus: '',
+  resume: null,
+});
+const [errors, setErrors] = useState({});
+  const [submissionMessage, setSubmissionMessage] = useState('');
 
+useEffect(() => {
+      const fetchProfile = async () => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+          setError("You are not logged in. Redirecting to login...");
+          setLoading(false);
+          setTimeout(() => navigate('/AdminLogin'), 2000);
+          return;
+        }
+  
+        try {
+          const storedToken = localStorage.getItem("accessToken");
+          if (!storedToken) {
+            setError("Not logged in.");
+            navigate("/AdminLogin");
+            return;
+          }
+  
+          const response = await fetch(`${ADMIN_BASE_URL}/profile/`, {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              Authorization: `Bearer ${storedToken}`,
+            },
+          });
+  
+          if (!response.ok) throw new Error("Failed to load profiles");
+  
+          const profile = await response.json();
+  
+          if (!profile) {
+            setError("Profile not found for current user.");
+            return;
+          }
+  
+          setProfileData(profile);
+          console.log(profile);
+          setProfileId(profile.id);
+  
+          setFormData({
+            firstName: profile.first_name,
+            lastName: profile.last_name,
+            email: profile.email,
+            phone: profile.phone,
+            university: profile.university,
+            degree: profile.degree,
+            major: profile.major,
+            visaStatus: profile.visa_status,
+            graduationDate: formatDateToInput(profile.graduation_date),
+            optEndDate: formatDateToInput(profile.opt_end_date),
+            consentToTerms: profile.consent_to_terms,
+            referralSource: profile.referral_source,
+            linkedinUrl: profile.linkedin_url,
+            githubUrl: profile.github_url,
+            additionalNotes: profile.additional_notes,
+          });
+          adminUser.name = profile.first_name + " " + profile.last_name;
+          adminUser.image =`https://placehold.co/100x100/4F46E5/ffffff?text=${profile.first_name[0]}${profile.last_name[0]}`;
+          fetchUsers();
+        } catch (err) {
+          setError("Failed to fetch profile.");
+          console.error("Fetch Profile Error:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchProfile();
+    }, [navigate, ADMIN_BASE_URL]);
+  
+
+      // Auto-dismiss toast message
+        useEffect(() => {
+          if (submissionMessage) {
+            const timer = setTimeout(() => {
+              setSubmissionMessage('');
+            }, 3000); // Disappear after 3 seconds
+            return () => clearTimeout(timer);
+          }
+        }, [submissionMessage]);
+      // actions
   // Filter candidates who are approved and not yet assigned
   const approvedCandidates = useMemo(() => 
     candidates.filter(c => c.status === 'approved' && !c.recruiterId && c.profile_id),
@@ -481,21 +729,24 @@ export default function Admin() {
    * In a real system, you'd use dedicated endpoints for candidates and recruiters.
    */
   const fetchUsers = useCallback(async () => {
+    const storedToken = localStorage.getItem("accessToken");
     setIsLoading(true);
     setError(null);
     try {
-      const url = `${API_BASE_URL}/users/`;
-      const response = await fetchWithRetry(url, {
+      const condidatesUrl = `${API_BASE_URL}/users/`;
+      const response = await fetch(condidatesUrl, {
         method: 'GET',
-        headers: API_HEADERS,
+         headers: {
+              accept: "application/json",
+              Authorization: `Bearer ${storedToken}`,
+            },
       });
-      const data = await response.json();
+      const condidatesData = await response.json();
 
       // Simple classification logic (requires external state/data for 'status')
       const fetchedCandidates = [];
-      const fetchedRecruiters = [];
 
-      data.forEach(user => {
+      condidatesData.forEach(user => {
         // Assume users with a profile_id are potential candidates
         if (user.profile_id) {
             // Merge with existing candidate data to retain 'status' and 'recruiterId'
@@ -521,10 +772,49 @@ export default function Admin() {
         // Assume users with certain characteristics (e.g., admin/staff roles or specific emails) are recruiters
         // For now, let's treat a subset of users as recruiters based on a placeholder list/logic.
         // A better approach would be filtering by a 'is_recruiter' field or hitting a '/recruiters/' endpoint.
-        if (user.id % 2 === 0) { // Simple arbitrary assignment for demonstration
-            fetchedRecruiters.push(user);
-        }
       });
+      const recruitersUrl = `${API_BASE_URL}/recruiters/`;
+      const response1 = await fetch(recruitersUrl, {
+        method: 'GET',
+         headers: {
+              accept: "application/json",
+              Authorization: `Bearer ${storedToken}`,
+            },
+      });
+      const recruitersData = await response1.json();
+
+      // Simple classification logic (requires external state/data for 'status')
+      const fetchedRecruiters = [];
+
+      recruitersData.forEach(user => {
+        // Assume users with a profile_id are potential candidates
+        if (user.profile_id) {
+            // Merge with existing candidate data to retain 'status' and 'recruiterId'
+            const existingCandidate = candidates.find(c => c.id === user.id) || {};
+            
+            // Default to 'submitted' if status is unknown for a new candidate
+            let status = existingCandidate.status || 'submitted';
+            
+            // Simulate status changes if profile_id exists
+            if (user.email.includes('recruit')) {
+                // Heuristic to simulate a recruiter's status/profile association
+                status = 'approved';
+            }
+            
+            fetchedRecruiters.push({
+                ...user,
+                // Assign a placeholder status and recruiterId based on previous state or default
+                status: existingCandidate.status || 'submitted', 
+                recruiterId: existingCandidate.recruiterId || null,
+            });
+        }
+        
+        // Assume users with certain characteristics (e.g., admin/staff roles or specific emails) are recruiters
+        // For now, let's treat a subset of users as recruiters based on a placeholder list/logic.
+        // A better approach would be filtering by a 'is_recruiter' field or hitting a '/recruiters/' endpoint.
+      });
+      
+      
       
       setCandidates(fetchedCandidates);
       setRecruiters(fetchedRecruiters);
@@ -538,9 +828,6 @@ export default function Admin() {
     }
   }, [candidates]); // Dependency on candidates to retain local state data (status, recruiterId)
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
 
   /**
    * Placeholder function to update candidate status (Approve/Reject)
@@ -548,15 +835,13 @@ export default function Admin() {
    * Assuming a PATCH to /candidates/{profile_id}/status/
    */
   const updateCandidateStatus = useCallback(async (candidate, newStatus) => {
-    // You need an endpoint like /candidates/{profile_id}/status/
     const profileId = candidate.profile_id;
     if (!profileId) {
         alert("Cannot update status: Candidate profile ID is missing.");
         return;
     }
     
-    // NOTE: This endpoint is hypothetical based on standard REST practices.
-    const url = `${API_BASE_URL}/candidates/${profileId}/status/`;
+    const url = `${ADMIN_BASE_URL}/candidates/${profileId}/${newStatus=="approved"?"activate":"deactivate"}`;
     
     try {
         // Simulate loading state change
@@ -652,9 +937,79 @@ export default function Admin() {
     setIsDetailsModalOpen(false);
     setSelectedRecruiter(null);
   }, []);
+    const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    navigate('/AdminLogin');
+  };
+  if (loading) {
+    return (
+      <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: paleBackground }}>
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status" style={{ color: primaryColor }}>
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-3 text-muted">Loading profile data...</p>
+        </div>
+      </div>
+    );
+  }
 
+  if (!profileData) {
+    return (
+      <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: paleBackground }}>
+       
+        <div className="alert alert-danger p-4 shadow-lg rounded-3">
+          <h4 className="alert-heading">Access Issue</h4>
+          <p>{"Could not load profile data."}</p>
+          <button 
+            onClick={handleLogout} 
+            className="btn btn-sm btn-outline-danger mt-2"
+          >
+            <LogOut className="w-4 h-4 me-1" /> Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const profile = profileData;
+  const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
   return (
     <>
+    {error && (
+      <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1060 }}>
+        <div className="bg-white rounded-3 shadow-lg p-4 position-relative" style={{ maxWidth: '500px', width: '90%' }}>
+          <button 
+            onClick={() => setError(null)} 
+            className="btn-close position-absolute top-0 end-0 m-3"
+            aria-label="Close"
+          ></button>
+          <div className="text-center mt-3">
+            <div className="mb-3">
+              <AlertTriangle width={48} height={48} style={{ color: '#DC2626' }} />
+            </div>
+            <h4 className="fw-bold mb-3" style={{ color: '#1F2937' }}>Access Issue</h4>
+            <p className="text-muted mb-4">{error}</p>
+            <div className="d-flex gap-3 justify-content-center">
+              <button 
+                onClick={() => setError(null)} 
+                className="btn btn-secondary px-4 py-2 fw-semibold"
+                style={{ minWidth: '100px' }}
+              >
+                Close
+              </button>
+              <button 
+                onClick={handleLogout} 
+                className="btn btn-danger px-4 py-2 fw-semibold"
+                style={{ minWidth: '100px' }}
+              >
+                <LogOut className="w-4 h-4 me-1" /> Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
       <style>{styles}</style>
       <div className="admin-container">
         

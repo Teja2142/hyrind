@@ -7,19 +7,43 @@ const VALUE_PROPS = [
     title: 'Dedicated Recruiter Assigned to You',
     description:
       'A recruiter markets your profile daily, submits applications, and optimizes your resume based on real job descriptions.',
+    image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&q=80' // recruiter/teamwork
   },
   {
     iconClass: 'bi bi-card-checklist',
     title: 'Role-Based Resume & Skills Roadmap',
     description:
       'Your resume, intake sheet, and skill roadmap are built around your exact target roles rather than generic templates.',
+    image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80' // resume/checklist
   },
   {
     iconClass: 'bi bi-mic-fill',
     title: 'Interview & Screening Call Support',
     description:
-      'Mock screening calls, communication improvement, and behavioral + technical prep until you’re fully client-ready.',
+      'Mock screening calls, communication improvement, and behavioral and technical prep until you are fully client-ready.',
+    image: 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=800&q=80' // mic/interview
   },
+];
+
+const SERVICES = [
+  {
+    title: 'Profile Marketing',
+    description: 'Targeted submissions • Recruiter-driven applications • Custom resume & LinkedIn optimization • Progress tracking',
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80', // marketing/analytics
+    link: '/services/profile-marketing'
+  },
+  {
+    title: 'Interview & Screening Call Training',
+    description: 'Mock calls • Voice & communication improvement • Technical prep • Detailed feedback',
+    image: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80', // interview/meeting
+    link: '/services/interview-support'
+  },
+  {
+    title: 'Skills Training Program',
+    description: 'Role-based skill roadmap • Google Drive resources • Trainer sessions • Real project guidance',
+    image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80', // training/learning
+    link: '/services/skills-training'
+  }
 ];
 
 const PROCESS_STEPS = [
@@ -286,6 +310,21 @@ const Home = () => {
           text-align: center;
         }
         
+        .value-image {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+          border-radius: 10px;
+          margin: 1rem 0;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          transition: all 0.4s ease;
+        }
+        
+        .value-card:hover .value-image {
+          transform: scale(1.05);
+          box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+        
         .process-section {
           background: #ffffff;
           padding: 5rem 2rem;
@@ -510,43 +549,40 @@ const Home = () => {
       <div className="home-wrapper">
         {/* Hero Section */}
         <section className="hero-section">
-  <div className="container hero-content">
-    <div>
-      <h1 className="hero-title">
-        Focus on Skills. <span style={{ color: '#ffd700' }}>Let Us Handle the Rest.</span>
-      </h1>
-      <p className="hero-subtitle" style={{ maxWidth: '850px', margin: '0 auto 1.5rem' }}>
-        We Market Your Profile. You Focus on Your Career.
-      </p>
-      <p className="hero-subtitle" style={{ maxWidth: '850px', margin: '0 auto 2.5rem' }}>
-        At HYRIND, we help talented candidates land full-time opportunities without the stress of self-marketing.
-        Our recruiter-led platform manages resume building, job submissions, recruiter connections, screening-call
-        preparation, and complete job search support.
-        Supporting F1 / OPT / STEM OPT, MS Students & Early-Career Professionals through expert profile marketing,
-        role-based training, and real interview preparation.
-      </p>
+          <div className="container hero-content">
+            <div>
+              <h1 className="hero-title">
+                Focus on Skills. <span style={{ color: '#ffd700' }}>Let Us Handle the Rest.</span>
+              </h1>
+              <p className="hero-subtitle" style={{ maxWidth: '850px', margin: '0 auto 1.5rem' }}>
+                We Market Your Profile. You Focus on Your Career.
+              </p>
+              <p className="hero-subtitle" style={{ maxWidth: '850px', margin: '0 auto 2.5rem' }}>
+                At HYRIND, we help talented candidates land full-time opportunities without the stress of self-marketing.
+                Our recruiter-led platform manages resume building, job submissions, recruiter connections, screening-call
+                preparation, and complete job search support.
+                Supporting F1 / OPT / STEM OPT, MS Students & Early-Career Professionals through expert profile marketing,
+                role-based training, and real interview preparation.
+              </p>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem' }}>
-        <a href="#interest-form" className="btn-custom btn-primary-custom">
-          Submit Interest Form
-        </a>
-        <a href="#contact" className="btn-custom btn-outline-custom">
-          Book a Free Consultation <i className="bi bi-arrow-right-short"></i>
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-
-
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem' }}>
+                <a href="#interest-form" className="btn-custom btn-primary-custom">
+                  Submit Interest Form
+                </a>
+                <a href="#contact" className="btn-custom btn-outline-custom">
+                  Book a Free Consultation <i className="bi bi-arrow-right-short"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Value Propositions */}
         <section id="services" className="value-section">
           <div className="container">
             <div className="section-header">
               <span className="section-tag">Why HYRIND</span>
-<h2 className="section-title">Why Candidates Trust HYRIND</h2>
-
+              <h2 className="section-title">Why Candidates Trust HYRIND</h2>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
@@ -557,6 +593,7 @@ const Home = () => {
                       <i className={prop.iconClass}></i>
                     </div>
                     <h3 className="value-title">{prop.title}</h3>
+                    <img src={prop.image} alt={prop.title} className="value-image" />
                     <p className="value-desc">{prop.description}</p>
                   </div>
                 </div>
@@ -566,46 +603,28 @@ const Home = () => {
         </section>
 
         <section className="value-section">
-  <div className="container">
-    <div className="section-header">
-      <span className="section-tag">What We Offer</span>
-      <h2 className="section-title">The Three Services We Provide</h2>
-    </div>
+          <div className="container">
+            <div className="section-header">
+              <span className="section-tag">What We Offer</span>
+              <h2 className="section-title">The Three Services We Provide</h2>
+            </div>
 
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-      <div className="value-card">
-        <h3 className="value-title">Profile Marketing</h3>
-        <p className="value-desc">
-          Targeted submissions • Recruiter-driven applications • Custom resume & LinkedIn optimization • Progress tracking
-        </p>
-        <a href="/services/profile-marketing" className="btn-custom btn-primary-custom" style={{ marginTop: '1rem', display: 'block' }}>
-          Learn More →
-        </a>
-      </div>
-
-      <div className="value-card">
-        <h3 className="value-title">Interview & Screening Call Training</h3>
-        <p className="value-desc">
-          Mock calls • Voice & communication improvement • Technical prep • Detailed feedback
-        </p>
-        <a href="/services/interview-support" className="btn-custom btn-primary-custom" style={{ marginTop: '1rem', display: 'block' }}>
-          Learn More →
-        </a>
-      </div>
-
-      <div className="value-card">
-        <h3 className="value-title">Skills Training Program</h3>
-        <p className="value-desc">
-          Role-based skill roadmap • Google Drive resources • Trainer sessions • Real project guidance
-        </p>
-        <a href="/services/skills-training" className="btn-custom btn-primary-custom" style={{ marginTop: '1rem', display: 'block' }}>
-          Learn More →
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+              {SERVICES.map((service, index) => (
+                <div key={index} className="value-card">
+                  <img src={service.image} alt={service.title} className="value-image" />
+                  <h3 className="value-title">{service.title}</h3>
+                  <p className="value-desc">
+                    {service.description}
+                  </p>
+                  <a href={service.link} className="btn-custom btn-primary-custom" style={{ marginTop: '1rem', display: 'block' }}>
+                    Learn More →
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* Process Timeline */}
         <section id="process" className="process-section">
@@ -637,17 +656,16 @@ const Home = () => {
         </section>  
 
         <section className="cta-section">
-  <div className="cta-content">
-    <h2 className="cta-title">Ready to Get More Interviews?</h2>
-    <p className="cta-subtitle">Join HYRIND and start receiving recruiter calls and real interview opportunities.</p>
+          <div className="cta-content">
+            <h2 className="cta-title">Ready to Get More Interviews?</h2>
+            <p className="cta-subtitle">Join HYRIND and start receiving recruiter calls and real interview opportunities.</p>
 
-    <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-      <a href="#interest-form" className="btn-custom btn-primary-custom">Submit Interest</a>
-      <a href="#contact" className="btn-custom btn-outline-custom">Book a Call</a>
-    </div>
-  </div>
-</section>
-  
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <a href="#interest-form" className="btn-custom btn-primary-custom">Submit Interest</a>
+              <a href="#contact" className="btn-custom btn-outline-custom">Book a Call</a>
+            </div>
+          </div>
+        </section>
       </div>
     </>
   );

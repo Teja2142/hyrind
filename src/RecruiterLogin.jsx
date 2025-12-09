@@ -56,6 +56,7 @@ const RecruiterLogin = () => {
         // Store JWT tokens
         localStorage.setItem("accessToken", result.access);
         localStorage.setItem("refreshToken", result.refresh);
+        localStorage.setItem('profileType', 'Recruiter');
 
         setMessage("Login successful! Redirecting...");
         setIsSubmitting(false);

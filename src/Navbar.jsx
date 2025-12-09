@@ -1,17 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation , useNavigate} from "react-router-dom";
 import image from "./assets/image.png";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
 
   const toggleMenu = () => setOpen(!open);
   const closeMenu = () => setOpen(false);
+  const toggleProfileDropdown = () => setProfileDropdownOpen(!profileDropdownOpen);
+  const closeProfileDropdown = () => setProfileDropdownOpen(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    closeProfileDropdown();
+    navigate("/login");
+  };
 
   const isActive = (path) => location.pathname === path;
+  const accessToken = localStorage.getItem("accessToken");
+
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileDropdownOpen && !event.target.closest('.profile-container')) {
+        closeProfileDropdown();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [profileDropdownOpen]);
 
   return (
     <>
@@ -301,6 +326,209 @@ export default function Navbar() {
         .sidebar::-webkit-scrollbar-thumb:hover {
           background: #1565c0;
         }
+
+        /* Profile Circle Styles */
+        .profile-container {
+          position: relative;
+          margin-left: 16px;
+        }
+
+        .profile-circle {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          border: 3px solid rgba(255, 255, 255, 0.5);
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          font-weight: 600;
+          font-size: 18px;
+          color: #0d47a1;
+          user-select: none;
+        }
+
+        .profile-circle:hover {
+          transform: scale(1.1);
+          border-color: rgba(255, 255, 255, 0.9);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .profile-circle:active {
+          transform: scale(0.95);
+        }
+
+        .profile-dropdown {
+          position: absolute;
+          top: calc(100% + 12px);
+          right: 0;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+          min-width: 200px;
+          overflow: hidden;
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(-10px);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          z-index: 1001;
+        }
+
+        .profile-dropdown.open {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+
+        .profile-dropdown::before {
+          content: '';
+          position: absolute;
+          top: -6px;
+          right: 16px;
+          width: 12px;
+          height: 12px;
+          background: white;
+          transform: rotate(45deg);
+          box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .profile-dropdown-header {
+          padding: 16px 20px;
+          background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+          color: white;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-dropdown-header h4 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+        }
+
+        .profile-dropdown-header p {
+          margin: 4px 0 0 0;
+          font-size: 13px;
+          opacity: 0.9;
+        }
+
+        .profile-dropdown-menu {
+          padding: 8px 0;
+        }
+
+        .profile-dropdown-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 20px;
+          color: #0d47a1;
+          text-decoration: none;
+          font-size: 15px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border: none;
+          background: none;
+          width: 100%;
+          text-align: left;
+        }
+
+        .profile-dropdown-item:hover {
+          background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        }
+
+        .profile-dropdown-item.logout {
+          color: #d32f2f;
+          border-top: 1px solid #e0e0e0;
+        }
+
+        .profile-dropdown-item.logout:hover {
+          background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        }
+
+        .profile-dropdown-item svg {
+          width: 20px;
+          height: 20px;
+        }
+
+        /* Mobile profile styles */
+        @media(max-width: 768px) {
+          .profile-container {
+            margin-left: 12px;
+          }
+
+          .profile-circle {
+            width: 38px;
+            height: 38px;
+            font-size: 16px;
+          }
+
+          .profile-dropdown {
+            min-width: 180px;
+          }
+        }
+
+        /* Mobile navbar controls */
+        .mobile-navbar-controls {
+          display: none;
+          align-items: center;
+          gap: 12px;
+        }
+
+        @media(max-width: 768px) {
+          .mobile-navbar-controls {
+            display: flex;
+          }
+        }
+
+        /* Sidebar profile section */
+        .sidebar-profile-section {
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 2px solid #e0e0e0;
+        }
+
+        .sidebar-profile-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 20px;
+          background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+          border-radius: 10px;
+          margin-bottom: 8px;
+        }
+
+        .sidebar-profile-circle {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: 24px;
+          border: 3px solid rgba(13, 71, 161, 0.3);
+        }
+
+        .sidebar-profile-info h4 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #0d47a1;
+        }
+
+        .sidebar-profile-info p {
+          margin: 4px 0 0 0;
+          font-size: 13px;
+          color: #1565c0;
+        }
+
+        .sidebar .profile-dropdown-item {
+          margin: 4px 0;
+        }
       `}</style>
 
       {/* overlay */}
@@ -326,11 +554,67 @@ export default function Navbar() {
           <Link to="/how-it-works" className={isActive("/how-it-works") ? "active" : ""}>How it works?</Link>
           <Link to="/reviews" className={isActive("/reviews") ? "active" : ""}>Reviews</Link>
           <Link to="/Contact" className={isActive("/Contact") ? "active" : ""}>Contact</Link>
-          <button className="register-button" onClick={() => navigate("/Register")}> Register Now</button>
-        </div>
+          {!accessToken && <button className="register-button" onClick={() => navigate("/Register")}> Register Now</button>}
+          
+          {accessToken && (
+            <div className="profile-container">
+              <div className="profile-circle" onClick={toggleProfileDropdown}>
+                👤
+              </div>
+              <div className={`profile-dropdown ${profileDropdownOpen ? 'open' : ''}`}>
+                <div className="profile-dropdown-header">
+                  <h4>My Account</h4>
+                  <p>Manage your profile</p>
+                </div>
+                <div className="profile-dropdown-menu">
+                  <button 
+                    className="profile-dropdown-item"
+                    onClick={() => {
+                      closeProfileDropdown();
+                      const profileType = localStorage.getItem('profileType');
+                      if(profileType === 'Candidate')
+                      {
+                        navigate('/profile');
+                      }
+                      else if(profileType === 'Recruiter')
+                      {
+                        navigate('/recruiter-profile');
+                      }
+                      else if(profileType === 'Admin')
+                      {
+                        navigate('/admin');
+                      }
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Profile
+                  </button>
+                  <button 
+                    className="profile-dropdown-item logout"
+                    onClick={handleLogout}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>  
 
-        <div className="menu-icon" onClick={toggleMenu}>
-          {open ? "✖" : "☰"}
+        <div className="mobile-navbar-controls">
+          {accessToken && (
+            <div className="profile-circle" onClick={toggleProfileDropdown}>
+              👤
+            </div>
+          )}
+          <div className="menu-icon" onClick={toggleMenu}>
+            {open ? "✖" : "☰"}
+          </div>
         </div>
       </div>
 
@@ -359,7 +643,53 @@ export default function Navbar() {
         <Link to="/Contact" className={isActive("/Contact") ? "active" : ""} onClick={closeMenu}>
           📧 Contact
         </Link>
-        <button className="register-button" onClick={closeMenu}>Register Now</button>
+        
+        {!accessToken && (
+          <button className="register-button" onClick={() => { closeMenu(); navigate("/Register"); }}>Register Now</button>
+        )}
+
+        {accessToken && (
+          <div className="sidebar-profile-section">
+            <div className="sidebar-profile-header">
+              <div className="sidebar-profile-circle">👤</div>
+              <div className="sidebar-profile-info">
+                <h4>My Account</h4>
+                <p>Manage your profile</p>
+              </div>
+            </div>
+            <button 
+              className="profile-dropdown-item"
+              onClick={() => {
+                closeMenu();
+                const profileType = localStorage.getItem('profileType');
+                if(profileType === 'Candidate') {
+                  navigate('/profile');
+                } else if(profileType === 'Recruiter') {
+                  navigate('/recruiter-profile');
+                } else if(profileType === 'Admin') {
+                  navigate('/admin');
+                }
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              Profile
+            </button>
+            <button 
+              className="profile-dropdown-item logout"
+              onClick={() => {
+                closeMenu();
+                handleLogout();
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Logout
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

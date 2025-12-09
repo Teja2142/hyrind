@@ -21,7 +21,7 @@ import Interest from './Intrest';
 import Footer from './Footer';
 import RecruiterRegister from './RecruiterRegister';
 import RecruiterLogin from './RecruiterLogin';
-
+import AdminLogin from './AdminLogin';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -45,6 +45,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/AdminLogin" element={<AdminLogin />} />
           <Route path="/About" element={<About />} />
           <Route path="/services" element={<Service />} />
           <Route path="/apply" element={<Register />} /> {/* Assuming Apply is Register */}
