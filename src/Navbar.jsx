@@ -22,7 +22,6 @@ export default function Navbar() {
   };
 
   const isActive = (path) => location.pathname === path;
-  const accessToken = localStorage.getItem("accessToken");
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
@@ -554,9 +553,9 @@ export default function Navbar() {
           <Link to="/how-it-works" className={isActive("/how-it-works") ? "active" : ""}>How it works?</Link>
           <Link to="/reviews" className={isActive("/reviews") ? "active" : ""}>Reviews</Link>
           <Link to="/Contact" className={isActive("/Contact") ? "active" : ""}>Contact</Link>
-          {!accessToken && <button className="register-button" onClick={() => navigate("/Register")}> Register Now</button>}
+          {!localStorage.getItem("accessToken")&& <button className="register-button" onClick={() => navigate("/Register")}> Register Now</button>}
           
-          {accessToken && (
+          {localStorage.getItem("accessToken") && (
             <div className="profile-container">
               <div className="profile-circle" onClick={toggleProfileDropdown}>
                 👤
@@ -578,7 +577,7 @@ export default function Navbar() {
                       }
                       else if(profileType === 'Recruiter')
                       {
-                        navigate('/recruiter-profile');
+                        navigate('/recruiter-dashboard');
                       }
                       else if(profileType === 'Admin')
                       {
@@ -607,7 +606,7 @@ export default function Navbar() {
         </div>  
 
         <div className="mobile-navbar-controls">
-          {accessToken && (
+          {localStorage.getItem("accessToken") && (
             <div className="profile-circle" onClick={toggleProfileDropdown}>
               👤
             </div>
@@ -644,11 +643,11 @@ export default function Navbar() {
           📧 Contact
         </Link>
         
-        {!accessToken && (
+        {!localStorage.getItem("accessToken") && (
           <button className="register-button" onClick={() => { closeMenu(); navigate("/Register"); }}>Register Now</button>
         )}
 
-        {accessToken && (
+        {localStorage.getItem("accessToken") && (
           <div className="sidebar-profile-section">
             <div className="sidebar-profile-header">
               <div className="sidebar-profile-circle">👤</div>

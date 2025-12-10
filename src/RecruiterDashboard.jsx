@@ -535,7 +535,7 @@ const CandidatesTable = ({ candidates, page, setPage, pageSize = 10 }) => {
 const RecruiterDashboard = () => {
   const navigate = useNavigate();
   const primaryColor = '#4F46E5';
-  const BASE_API_URL = "http://127.0.0.1:8000/api/recruiters/";
+  const BASE_API_URL = "http://127.0.0.1:8000/api/recruiters/me";
   const CANDIDATES_API_URL = "http://127.0.0.1:8000/api/users/profiles/";
 
   // State Management
@@ -602,12 +602,13 @@ const RecruiterDashboard = () => {
         });
 
         if (!response.ok) throw new Error("Failed to load profiles");
-
-        const profiles = await response.json();
-        const profile = profiles[0];
+        const profile =  await response.json();
 
         if (!profile) {
           setError("Profile not found.");
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('profileId');
           return;
         }
 
@@ -624,6 +625,9 @@ const RecruiterDashboard = () => {
       } catch (err) {
         setError("Failed to fetch profile.");
         console.error("Fetch Profile Error:", err);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('profileId');
       } finally {
         setLoading(false);
       }
@@ -750,7 +754,7 @@ const RecruiterDashboard = () => {
     setSubmissionMessage('Saving changes...');
     
     const token = localStorage.getItem('accessToken');
-    const updateUrl = `${BASE_API_URL}${profileId}/`;
+    const updateUrl = `${BASE_API_URL}${profileId}`;
     const data = new FormData();
 
     const fieldMap = {

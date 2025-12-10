@@ -132,9 +132,10 @@ const AdminLogin = ({ onLoginSuccess }) => {
 
     if (!formData.password) {
       newErrors.password = 'Password is required.';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters.';
-    }
+    } 
+    // else if (formData.password.length < 8) {
+    //   newErrors.password = 'Password must be at least 8 characters.';
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

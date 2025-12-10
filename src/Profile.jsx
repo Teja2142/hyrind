@@ -570,7 +570,7 @@ const Profile = () => {
         const decoded = parseJwt(storedToken);
         const userId = decoded?.user_id;
 
-        const response = await fetch(BASE_API_URL, {
+        const response = await fetch(`${BASE_API_URL}`, {
           method: "GET",
           headers: {
             accept: "application/json",

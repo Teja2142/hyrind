@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Briefcase, CheckCircle, XCircle, UserPlus, Zap, Loader, AlertTriangle, RefreshCw, LogOut } from 'lucide-react';
 
@@ -629,8 +629,12 @@ const [formData, setFormData] = useState({
 });
 const [errors, setErrors] = useState({});
   const [submissionMessage, setSubmissionMessage] = useState('');
+  const hasFetchedRef = useRef(false);
 
 useEffect(() => {
+      // Prevent double fetch in React Strict Mode
+      if (hasFetchedRef.current) return;
+      
       const fetchProfile = async () => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
@@ -697,8 +701,9 @@ useEffect(() => {
         }
       };
   
+      hasFetchedRef.current = true;
       fetchProfile();
-    }, [navigate, ADMIN_BASE_URL]);
+    }, [navigate]);
   
 
       // Auto-dismiss toast message
@@ -749,29 +754,15 @@ useEffect(() => {
       condidatesData.forEach(user => {
         // Assume users with a profile_id are potential candidates
         if (user.profile_id) {
-            // Merge with existing candidate data to retain 'status' and 'recruiterId'
-            const existingCandidate = candidates.find(c => c.id === user.id) || {};
-            
-            // Default to 'submitted' if status is unknown for a new candidate
-            let status = existingCandidate.status || 'submitted';
-            
-            // Simulate status changes if profile_id exists
-            if (user.email.includes('recruit')) {
-                // Heuristic to simulate a recruiter's status/profile association
-                status = 'approved';
-            }
-            
+            // Use functional update to access current candidates state
+            // This will be handled below using setCandidates with a callback
             fetchedCandidates.push({
                 ...user,
-                // Assign a placeholder status and recruiterId based on previous state or default
-                status: existingCandidate.status || 'submitted', 
-                recruiterId: existingCandidate.recruiterId || null,
+                // Assign default status and recruiterId, will merge with existing state below
+                status: 'submitted', 
+                recruiterId: null,
             });
         }
-        
-        // Assume users with certain characteristics (e.g., admin/staff roles or specific emails) are recruiters
-        // For now, let's treat a subset of users as recruiters based on a placeholder list/logic.
-        // A better approach would be filtering by a 'is_recruiter' field or hitting a '/recruiters/' endpoint.
       });
       const recruitersUrl = `${API_BASE_URL}/recruiters/`;
       const response1 = await fetch(recruitersUrl, {
@@ -788,35 +779,24 @@ useEffect(() => {
 
       recruitersData.forEach(user => {
         // Assume users with a profile_id are potential candidates
-        if (user.profile_id) {
-            // Merge with existing candidate data to retain 'status' and 'recruiterId'
-            const existingCandidate = candidates.find(c => c.id === user.id) || {};
-            
-            // Default to 'submitted' if status is unknown for a new candidate
-            let status = existingCandidate.status || 'submitted';
-            
-            // Simulate status changes if profile_id exists
-            if (user.email.includes('recruit')) {
-                // Heuristic to simulate a recruiter's status/profile association
-                status = 'approved';
-            }
-            
+        if (user.id) {
             fetchedRecruiters.push({
                 ...user,
-                // Assign a placeholder status and recruiterId based on previous state or default
-                status: existingCandidate.status || 'submitted', 
-                recruiterId: existingCandidate.recruiterId || null,
+                // Assign default status and recruiterId
+                status: 'submitted', 
+                recruiterId: null,
             });
         }
-        
-        // Assume users with certain characteristics (e.g., admin/staff roles or specific emails) are recruiters
-        // For now, let's treat a subset of users as recruiters based on a placeholder list/logic.
-        // A better approach would be filtering by a 'is_recruiter' field or hitting a '/recruiters/' endpoint.
       });
       
+      // Use functional updates to merge with existing state
+      setCandidates(prevCandidates => {
+        return fetchedCandidates.map(fetched => {
+          const existing = prevCandidates.find(c => c.id === fetched.id);
+          return existing ? { ...fetched, status: existing.status, recruiterId: existing.recruiterId } : fetched;
+        });
+      });
       
-      
-      setCandidates(fetchedCandidates);
       setRecruiters(fetchedRecruiters);
 
     } catch (err) {
@@ -826,7 +806,7 @@ useEffect(() => {
     } finally {
       setIsLoading(false);
     }
-  }, [candidates]); // Dependency on candidates to retain local state data (status, recruiterId)
+  }, []); // Dependency on candidates to retain local state data (status, recruiterId)
 
 
   /**
