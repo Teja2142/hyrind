@@ -14,6 +14,11 @@ const RecruiterRegister = () => {
     company_name: "",
     phone: "",
     linkedin_url: "",
+    employee_id: "",
+    date_of_joining: "",
+    department: "it_staffing",
+    specialization: "general_it",
+    max_clients: 3,
   });
 
   const [errors, setErrors] = useState({});
@@ -40,6 +45,13 @@ const RecruiterRegister = () => {
 
     if (!formData.first_name.trim()) err.first_name = "First name is required";
     if (!formData.last_name.trim()) err.last_name = "Last name is required";
+    
+    if (!formData.employee_id.trim()) err.employee_id = "Employee ID is required";
+    if (!formData.date_of_joining) err.date_of_joining = "Date of joining is required";
+    
+    if (!formData.department) err.department = "Department is required";
+    if (!formData.specialization) err.specialization = "Specialization is required";
+    if (!formData.max_clients || formData.max_clients < 1) err.max_clients = "Max clients must be at least 1";
 
     setErrors(err);
     return Object.keys(err).length === 0;
@@ -203,6 +215,114 @@ const RecruiterRegister = () => {
                   onChange={handleChange}
                   placeholder="https://linkedin.com"
                 />
+              </div>
+
+              {/* EMPLOYEE ID */}
+              <div className="mb-3">
+                <label className="form-label fw-semibold">Employee ID</label>
+                <input
+                  type="text"
+                  name="employee_id"
+                  className={`form-control ${
+                    errors.employee_id ? "is-invalid" : ""
+                  }`}
+                  value={formData.employee_id}
+                  onChange={handleChange}
+                  placeholder="Enter your employee ID"
+                />
+                {errors.employee_id && (
+                  <small className="text-danger">{errors.employee_id}</small>
+                )}
+              </div>
+
+              {/* DATE OF JOINING */}
+              <div className="mb-3">
+                <label className="form-label fw-semibold">Date of Joining</label>
+                <input
+                  type="date"
+                  name="date_of_joining"
+                  className={`form-control ${
+                    errors.date_of_joining ? "is-invalid" : ""
+                  }`}
+                  value={formData.date_of_joining}
+                  onChange={handleChange}
+                />
+                {errors.date_of_joining && (
+                  <small className="text-danger">{errors.date_of_joining}</small>
+                )}
+              </div>
+
+              {/* DEPARTMENT */}
+              <div className="mb-3">
+                <label className="form-label fw-semibold">Department</label>
+                <select
+                  name="department"
+                  className={`form-control ${
+                    errors.department ? "is-invalid" : ""
+                  }`}
+                  value={formData.department}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Department</option>
+                  <option value="it_staffing">IT Staffing</option>
+                  <option value="healthcare">Healthcare</option>
+                  <option value="finance">Finance</option>
+                  <option value="engineering">Engineering</option>
+                  <option value="sales">Sales</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="hr">Human Resources</option>
+                  <option value="operations">Operations</option>
+                </select>
+                {errors.department && (
+                  <small className="text-danger">{errors.department}</small>
+                )}
+              </div>
+
+              {/* SPECIALIZATION */}
+              <div className="mb-3">
+                <label className="form-label fw-semibold">Specialization</label>
+                <select
+                  name="specialization"
+                  className={`form-control ${
+                    errors.specialization ? "is-invalid" : ""
+                  }`}
+                  value={formData.specialization}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Specialization</option>
+                  <option value="general_it">General IT</option>
+                  <option value="software_development">Software Development</option>
+                  <option value="data_science">Data Science</option>
+                  <option value="cloud_computing">Cloud Computing</option>
+                  <option value="cybersecurity">Cybersecurity</option>
+                  <option value="devops">DevOps</option>
+                  <option value="qa_testing">QA Testing</option>
+                  <option value="network_engineering">Network Engineering</option>
+                  <option value="database_administration">Database Administration</option>
+                </select>
+                {errors.specialization && (
+                  <small className="text-danger">{errors.specialization}</small>
+                )}
+              </div>
+
+              {/* MAX CLIENTS */}
+              <div className="mb-3">
+                <label className="form-label fw-semibold">Max Clients</label>
+                <input
+                  type="number"
+                  name="max_clients"
+                  className={`form-control ${
+                    errors.max_clients ? "is-invalid" : ""
+                  }`}
+                  value={formData.max_clients}
+                  onChange={handleChange}
+                  min="1"
+                  max="100"
+                  placeholder="Enter maximum number of clients"
+                />
+                {errors.max_clients && (
+                  <small className="text-danger">{errors.max_clients}</small>
+                )}
               </div>
 
               {/* PASSWORD */}

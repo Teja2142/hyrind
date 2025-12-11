@@ -280,6 +280,7 @@ const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters })
   const isSubmitted = candidate.status === 'submitted';
   const isApproved = candidate.status === 'approved';
   const recruiter = recruiters.find(r => r.id === candidate.recruiterId);
+  const isActive = candidate.active !== false; // Default to true if not specified
   
   const statusColors = {
     'submitted': { bg: '#FEF3C7', text: '#92400E', border: '#F59E0B' },
@@ -310,6 +311,16 @@ const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters })
                   {candidate.status}
                 </span>
               )}
+              <span 
+                className="badge px-2 py-1 fw-semibold ms-2" 
+                style={{ 
+                  backgroundColor: isActive ? '#D1FAE5' : '#FEE2E2', 
+                  color: isActive ? '#065F46' : '#991B1B',
+                  fontSize: '0.7rem'
+                }}
+              >
+                {isActive ? '● Active' : '● Inactive'}
+              </span>
             </div>
             <div className="d-flex flex-wrap gap-3 text-muted small">
               <span><strong>User ID:</strong> {candidate.id}</span>
@@ -361,7 +372,7 @@ const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters })
   );
 };
 
-const RecruitersView = ({ recruiters, candidates, openDetailsModal, isLoading, error, refetchData }) => {
+const RecruitersView = ({ recruiters, candidates, openDetailsModal, isLoading, error, refetchData, toggleRecruiterActive }) => {
   return (
     <div className="recruiters-view">
       <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
@@ -409,6 +420,7 @@ const RecruitersView = ({ recruiters, candidates, openDetailsModal, isLoading, e
               recruiter={recruiter} 
               candidates={candidates}
               openDetailsModal={openDetailsModal}
+              toggleRecruiterActive={toggleRecruiterActive}
             />
           </div>
         ))}
@@ -417,9 +429,10 @@ const RecruitersView = ({ recruiters, candidates, openDetailsModal, isLoading, e
   );
 };
 
-const RecruiterCard = ({ recruiter, candidates, openDetailsModal }) => {
+const RecruiterCard = ({ recruiter, candidates, openDetailsModal, toggleRecruiterActive }) => {
   const assignedCount = candidates.filter(c => c.recruiterId === recruiter.id).length;
   const isAssigned = assignedCount > 0;
+  const isActive = recruiter.active !== false; // Default to true if not specified
 
   return (
     <div className="card border-0 shadow-sm h-100" style={{ borderLeft: `4px solid #8B5CF6` }}>
@@ -427,7 +440,19 @@ const RecruiterCard = ({ recruiter, candidates, openDetailsModal }) => {
         <div className="flex-grow-1">
           <div className="d-flex justify-content-between align-items-start mb-3">
             <div className="flex-grow-1">
-              <h5 className="fw-bold text-dark mb-1">{recruiter.email}</h5>
+              <div className="d-flex align-items-center mb-2">
+                <h5 className="fw-bold text-dark mb-0 me-2">{recruiter.email}</h5>
+                <span 
+                  className="badge px-2 py-1 fw-semibold" 
+                  style={{ 
+                    backgroundColor: isActive ? '#D1FAE5' : '#FEE2E2', 
+                    color: isActive ? '#065F46' : '#991B1B',
+                    fontSize: '0.7rem'
+                  }}
+                >
+                  {isActive ? '● Active' : '● Inactive'}
+                </span>
+              </div>
               <p className="text-muted small mb-0">User ID: {recruiter.id}</p>
             </div>
             <span 
@@ -452,7 +477,30 @@ const RecruiterCard = ({ recruiter, candidates, openDetailsModal }) => {
           )}
         </div>
 
-        <div className="pt-3 border-top d-flex justify-content-end">
+        <div className="pt-3 border-top d-flex justify-content-between gap-2">
+          <div className="d-flex gap-2">
+            {/* Activate/Deactivate Button */}
+            {isActive ? (
+              <button
+                onClick={() => toggleRecruiterActive(recruiter, false)}
+                className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1 px-2"
+                style={{ fontSize: '0.8rem' }}
+              >
+                <XCircle className="w-4 h-4" style={{ width: '14px', height: '14px' }} />
+                Deactivate
+              </button>
+            ) : (
+              <button
+                onClick={() => toggleRecruiterActive(recruiter, true)}
+                className="btn btn-sm btn-outline-success d-flex align-items-center gap-1 px-2"
+                style={{ fontSize: '0.8rem' }}
+              >
+                <CheckCircle className="w-4 h-4" style={{ width: '14px', height: '14px' }} />
+                Activate
+              </button>
+            )}
+          </div>
+          
           {isAssigned && (
             <button
               onClick={() => openDetailsModal(recruiter)}
@@ -821,23 +869,42 @@ useEffect(() => {
         return;
     }
     
-    const url = `${ADMIN_BASE_URL}/candidates/${profileId}/${newStatus=="approved"?"activate":"deactivate"}`;
+    // Determine the action based on the new status
+    // 'approved' -> 'activate', 'rejected' -> 'deactivate'
+    const action = newStatus === "approved" ? "activate" : "deactivate";
+    const url = `${ADMIN_BASE_URL}/candidates/${profileId}/${action}/`;
     
     try {
-        // Simulate loading state change
+        const storedToken = localStorage.getItem("accessToken");
+        if (!storedToken) {
+          setError("Not logged in.");
+          return;
+        }
+
+        // Show loading state
         setCandidates(prev => 
             prev.map(c => (c.id === candidate.id ? { ...c, status: 'updating...' } : c))
         );
         
-        // In a real application, you would send a PATCH/PUT request here.
-        // For demonstration, we'll simulate success and update local state.
-        console.log(`Simulating PATCH to ${url} with status: ${newStatus}`);
-        await new Promise(resolve => setTimeout(resolve, 500)); 
+        const response = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+                accept: "application/json",
+                Authorization: `Bearer ${storedToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to ${action} candidate`);
+        }
 
         // Update local state on success
         setCandidates(prev => 
-            prev.map(c => (c.id === candidate.id ? { ...c, status: newStatus } : c))
+            prev.map(c => (c.id === candidate.id ? { ...c, status: newStatus, active: newStatus === "approved" } : c))
         );
+        
+        console.log(`Successfully updated candidate ${profileId} to ${newStatus}`);
     } catch (err) {
         console.error(`Failed to update status for ${profileId}:`, err);
         // Revert status or show error message
@@ -846,7 +913,7 @@ useEffect(() => {
         );
         alert(`Failed to update candidate status: ${err.message}`);
     }
-  }, []);
+  }, [ADMIN_BASE_URL]);
 
   /**
    * Assigns a candidate to a recruiter using the provided API endpoint.
@@ -896,6 +963,120 @@ useEffect(() => {
         throw new Error(`Assignment failed: ${err.message}`);
     }
   }, []);
+
+  /**
+   * Toggle candidate active/inactive status
+   * @param {object} candidate - The candidate object
+   * @param {boolean} activate - true to activate, false to deactivate
+   */
+  const toggleCandidateActive = useCallback(async (candidate, activate) => {
+    const profileId = candidate.profile_id;
+    if (!profileId) {
+      alert("Cannot update status: Candidate profile ID is missing.");
+      return;
+    }
+    
+    const action = activate ? "activate" : "deactivate";
+    const url = `${ADMIN_BASE_URL}/candidates/${profileId}/${action}/`;
+    
+    try {
+      const storedToken = localStorage.getItem("accessToken");
+      if (!storedToken) {
+        setError("Not logged in.");
+        navigate("/AdminLogin");
+        return;
+      }
+
+      // Show loading state
+      setCandidates(prev => 
+        prev.map(c => (c.id === candidate.id ? { ...c, active: 'updating...' } : c))
+      );
+      
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${storedToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${action} candidate`);
+      }
+
+      // Update local state on success
+      setCandidates(prev => 
+        prev.map(c => (c.id === candidate.id ? { ...c, active: activate } : c))
+      );
+      
+      console.log(`Successfully ${activate ? 'activated' : 'deactivated'} candidate ${profileId}`);
+    } catch (err) {
+      console.error(`Failed to ${action} candidate:`, err);
+      // Revert to previous state
+      setCandidates(prev => 
+        prev.map(c => (c.id === candidate.id ? { ...c, active: candidate.active } : c))
+      );
+      alert(`Failed to ${action} candidate: ${err.message}`);
+    }
+  }, [ADMIN_BASE_URL, navigate]);
+
+  /**
+   * Toggle recruiter active/inactive status
+   * @param {object} recruiter - The recruiter object
+   * @param {boolean} activate - true to activate, false to deactivate
+   */
+  const toggleRecruiterActive = useCallback(async (recruiter, activate) => {
+    const recruiterId = recruiter.id;
+    if (!recruiterId) {
+      alert("Cannot update status: Recruiter ID is missing.");
+      return;
+    }
+    
+    const action = activate ? "activate" : "deactivate";
+    const url = `${API_BASE_URL}/recruiters/${recruiterId}/${action}/`;
+    
+    try {
+      const storedToken = localStorage.getItem("accessToken");
+      if (!storedToken) {
+        setError("Not logged in.");
+        navigate("/AdminLogin");
+        return;
+      }
+
+      // Show loading state
+      setRecruiters(prev => 
+        prev.map(r => (r.id === recruiterId ? { ...r, active: 'updating...' } : r))
+      );
+      
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${storedToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${action} recruiter`);
+      }
+
+      // Update local state on success
+      setRecruiters(prev => 
+        prev.map(r => (r.id === recruiterId ? { ...r, active: activate } : r))
+      );
+      
+      console.log(`Successfully ${activate ? 'activated' : 'deactivated'} recruiter ${recruiterId}`);
+    } catch (err) {
+      console.error(`Failed to ${action} recruiter:`, err);
+      // Revert to previous state
+      setRecruiters(prev => 
+        prev.map(r => (r.id === recruiterId ? { ...r, active: recruiter.active } : r))
+      );
+      alert(`Failed to ${action} recruiter: ${err.message}`);
+    }
+  }, [API_BASE_URL, navigate]);
 
   // Modal handlers
   const openAssignModal = useCallback((candidate = null) => {
@@ -1025,6 +1206,7 @@ useEffect(() => {
                 isLoading={isLoading}
                 error={activeView === 'recruiters' ? error : null}
                 refetchData={fetchUsers}
+                toggleRecruiterActive={toggleRecruiterActive}
               />
             )}
           </div>

@@ -5,7 +5,7 @@ const RecruiterLogin = () => {
   const navigate = useNavigate();
 
   // 🔥 Your recruiter login API (assuming recruiters also use same JWT login API)
-  const LOGIN_API_URL = "http://127.0.0.1:8000/api/users/login/";
+  const LOGIN_API_URL = "http://127.0.0.1:8000/api/recruiters/login/";
 
   const [formData, setFormData] = useState({
     email: "",

@@ -487,7 +487,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const primaryColor = '#4F46E5';
   const paleBackground = '#F0F8FF';
-  const BASE_API_URL = "http://127.0.0.1:8000/api/users/profiles/"; 
+  const BASE_API_URL = "http://127.0.0.1:8000/api/users";
 
   const [profileData, setProfileData] = useState(null);
   const [formData, setFormData] = useState({});
@@ -501,8 +501,10 @@ const Profile = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentData, setPaymentData] = useState({
-    username: '',
-    password: ''
+    cardNumber: '',
+    cardHolderName: '',
+    expiryDate: '',
+    cvv: ''
   });
 
   const degreeOptions = ["Bachelor's", "Master's", 'PhD'];
@@ -570,7 +572,7 @@ const Profile = () => {
         const decoded = parseJwt(storedToken);
         const userId = decoded?.user_id;
 
-        const response = await fetch(`${BASE_API_URL}`, {
+        const response = await fetch(`${BASE_API_URL}/me`, {
           method: "GET",
           headers: {
             accept: "application/json",
@@ -581,7 +583,7 @@ const Profile = () => {
         if (!response.ok) throw new Error("Failed to load profiles");
 
         const profiles = await response.json();
-        const profile = profiles.find((p) => p.user.id === Number(userId));
+        const profile = profiles
 
         if (!profile) {
           setError("Profile not found for current user.");
@@ -693,7 +695,7 @@ const Profile = () => {
     setIsSubmitting(true);
     setSubmissionMessage('Saving changes...');
     const token = localStorage.getItem('accessToken');
-    const updateUrl = `${BASE_API_URL}${profileId}/`;
+    const updateUrl = `${BASE_API_URL}/profiles/${profileId}/`;
 
     const data = new FormData();
     const fieldMap = {
@@ -808,7 +810,7 @@ const Profile = () => {
     setSubmissionMessage('Deleting profile...');
     
     const token = localStorage.getItem('accessToken');
-    const deleteUrl = `${BASE_API_URL}${profileId}/`;
+    const deleteUrl = `${BASE_API_URL}/profiles/${profileId}/`;
     
     try {
       const response = await fetch(deleteUrl, {
@@ -871,15 +873,50 @@ const handleUpgradeProfile = () => {
 
   const handlePaymentChange = (e) => {
     const { name, value } = e.target;
-    setPaymentData(prev => ({ ...prev, [name]: value }));
+    let formattedValue = value;
+
+    // Format card number with spaces (XXXX XXXX XXXX XXXX)
+    if (name === 'cardNumber') {
+      formattedValue = value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
+      formattedValue = formattedValue.substring(0, 19); // 16 digits + 3 spaces
+    }
+    
+    // Format expiry date (MM/YY)
+    if (name === 'expiryDate') {
+      formattedValue = value.replace(/\D/g, '');
+      if (formattedValue.length >= 2) {
+        formattedValue = formattedValue.substring(0, 2) + '/' + formattedValue.substring(2, 4);
+      }
+      formattedValue = formattedValue.substring(0, 5);
+    }
+    
+    // Format CVV (only digits, max 4)
+    if (name === 'cvv') {
+      formattedValue = value.replace(/\D/g, '').substring(0, 4);
+    }
+
+    setPaymentData(prev => ({ ...prev, [name]: formattedValue }));
   };
 
   const handlePaymentSubmit = async (e) => {
     e.preventDefault();
     
     // Basic validation
-    if (!paymentData.username || !paymentData.password) {
-      alert('Please fill in all fields');
+    if (!paymentData.cardNumber || !paymentData.cardHolderName || !paymentData.expiryDate || !paymentData.cvv) {
+      alert('Please fill in all card details');
+      return;
+    }
+
+    // Validate card number (basic check for 16 digits)
+    const cardNumberDigits = paymentData.cardNumber.replace(/\s/g, '');
+    if (cardNumberDigits.length !== 16) {
+      alert('Card number must be 16 digits');
+      return;
+    }
+
+    // Validate CVV (3 or 4 digits)
+    if (paymentData.cvv.length < 3 || paymentData.cvv.length > 4) {
+      alert('CVV must be 3 or 4 digits');
       return;
     }
 
@@ -894,7 +931,7 @@ const handleUpgradeProfile = () => {
       
       setSubmissionMessage('Payment successful! Your profile has been upgraded.');
       setShowPaymentModal(false);
-      setPaymentData({ username: '', password: '' });
+      setPaymentData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '' });
       setIsSubmitting(false);
     } catch (err) {
       setSubmissionMessage('Payment failed. Please try again.');
@@ -992,9 +1029,35 @@ const handleUpgradeProfile = () => {
                 </div>
                 
                 <form onSubmit={handlePaymentSubmit}>
+                  {/* Card Number */}
                   <div className="mb-3">
-                    <label htmlFor="payment-username" className="form-label fw-semibold">
-                      Username <span className="text-danger">*</span>
+                    <label htmlFor="payment-cardNumber" className="form-label fw-semibold">
+                      Card Number <span className="text-danger">*</span>
+                    </label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: primaryColor }}>
+                          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                          <line x1="1" y1="10" x2="23" y2="10"></line>
+                        </svg>
+                      </span>
+                      <input
+                        type="text"
+                        id="payment-cardNumber"
+                        name="cardNumber"
+                        value={paymentData.cardNumber}
+                        onChange={handlePaymentChange}
+                        className="form-control form-control-lg"
+                        placeholder="1234 5678 9012 3456"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Cardholder Name */}
+                  <div className="mb-3">
+                    <label htmlFor="payment-cardHolderName" className="form-label fw-semibold">
+                      Cardholder Name <span className="text-danger">*</span>
                     </label>
                     <div className="input-group">
                       <span className="input-group-text bg-white">
@@ -1002,38 +1065,66 @@ const handleUpgradeProfile = () => {
                       </span>
                       <input
                         type="text"
-                        id="payment-username"
-                        name="username"
-                        value={paymentData.username}
+                        id="payment-cardHolderName"
+                        name="cardHolderName"
+                        value={paymentData.cardHolderName}
                         onChange={handlePaymentChange}
                         className="form-control form-control-lg"
-                        placeholder="Enter your username"
+                        placeholder="Enter name on card"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="mb-4">
-                    <label htmlFor="payment-password" className="form-label fw-semibold">
-                      Password <span className="text-danger">*</span>
-                    </label>
-                    <div className="input-group">
-                      <span className="input-group-text bg-white">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: primaryColor }}>
-                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                        </svg>
-                      </span>
-                      <input
-                        type="password"
-                        id="payment-password"
-                        name="password"
-                        value={paymentData.password}
-                        onChange={handlePaymentChange}
-                        className="form-control form-control-lg"
-                        placeholder="Enter your password"
-                        required
-                      />
+                  {/* Expiry Date and CVV Row */}
+                  <div className="row mb-4">
+                    <div className="col-6">
+                      <label htmlFor="payment-expiryDate" className="form-label fw-semibold">
+                        Expiry Date <span className="text-danger">*</span>
+                      </label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-white">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: primaryColor }}>
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                          </svg>
+                        </span>
+                        <input
+                          type="text"
+                          id="payment-expiryDate"
+                          name="expiryDate"
+                          value={paymentData.expiryDate}
+                          onChange={handlePaymentChange}
+                          className="form-control form-control-lg"
+                          placeholder="MM/YY"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <label htmlFor="payment-cvv" className="form-label fw-semibold">
+                        CVV <span className="text-danger">*</span>
+                      </label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-white">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: primaryColor }}>
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                          </svg>
+                        </span>
+                        <input
+                          type="text"
+                          id="payment-cvv"
+                          name="cvv"
+                          value={paymentData.cvv}
+                          onChange={handlePaymentChange}
+                          className="form-control form-control-lg"
+                          placeholder="123"
+                          required
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -1047,7 +1138,7 @@ const handleUpgradeProfile = () => {
                       type="button"
                       onClick={() => {
                         setShowPaymentModal(false);
-                        setPaymentData({ username: '', password: '' });
+                        setPaymentData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '' });
                       }}
                       className="btn btn-secondary px-4 py-2 fw-semibold"
                       style={{ minWidth: '120px' }}
