@@ -1,26 +1,8 @@
-<<<<<<< HEAD
-import { Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Home from "./components/Home";
-import About from "./components/About";
-import Services from "./components/Services";
 
-export default function App() {
-  return (
-    <>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/services" element={<Services />} />
-      </Routes>
-    </>
-  );
-}
-=======
+
 import React , { useEffect } from 'react';
-// Import BrowserRouter, Routes, and Route
-import { BrowserRouter as Router, Routes, Route , useLocation } from 'react-router-dom'; 
+// Import Routes, Route, and useLocation
+import { Routes, Route, useLocation } from 'react-router-dom'; 
 
 
 import Navbar from './Navbar'; 
@@ -55,8 +37,7 @@ function ScrollToTop() {
 
 function App() {
   return (
-    // Use Router wrapper
-    <Router>
+    <>
       <ScrollToTop />
       <Navbar />
       <main>
@@ -85,9 +66,8 @@ function App() {
         </Routes>
       </main>
       <Footer />
-    </Router>
+    </>
   );
 }
 
 export default App;
->>>>>>> 7ef1d77d4afc265b27b9e9f4fb00885373ee2114
