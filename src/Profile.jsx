@@ -269,6 +269,180 @@ body {
     transform: translateX(0);
   }
 }
+}
+/* New Payment Modal Styles */
+.payment-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  z-index: 1050;
+  transition: all 0.3s ease;
+}
+.payment-card {
+  border: none;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh; /* Prevent overflow on small screens */
+}
+
+.payment-header {
+  background: #ffffff;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #1f2937;
+  text-align: center;
+  position: relative;
+  flex-shrink: 0;
+}
+.payment-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.payment-amount-large {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0.25rem 0;
+  color: #4f46e5;
+  letter-spacing: -1px;
+}
+.payment-body {
+  padding: 1.5rem;
+  background-color: #ffffff;
+  /* overflow-y: auto; removed global scroll */
+  flex-grow: 1;
+}
+.service-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.service-item:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+.service-item.selected {
+  border-color: #4f46e5;
+  background-color: #eff6ff;
+  box-shadow: 0 0 0 1px #4f46e5;
+}
+.service-info h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #1e293b;
+}
+.service-info p {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 0;
+}
+.service-price {
+  font-weight: 700;
+  color: #4f46e5;
+  font-size: 1.1rem;
+}
+.cart-summary {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #1e293b;
+}
+.payment-input-group {
+  transition: all 0.2s ease;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.payment-input-group:focus-within {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  transform: translateY(-1px);
+}
+.payment-input-icon {
+  background-color: #f8fafc;
+  border: none;
+  color: #64748b;
+  padding-left: 1rem;
+  padding-right: 0.75rem;
+}
+.payment-input {
+  border: none !important;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #1e293b;
+  padding: 0.8rem 0.5rem;
+  background-color: #f8fafc;
+}
+.payment-input:focus {
+  background-color: #ffffff;
+  box-shadow: none;
+}
+.payment-input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+.secure-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #e2e8f0;
+}
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Custom Scrollbar Styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.service-list-container {
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 0.5rem; /* space for scrollbar */
+  margin-right: -0.5rem; /* compensate for padding */
+}
 `;
 
 // date helpers
@@ -489,6 +663,13 @@ const Profile = () => {
   const paleBackground = '#F0F8FF';
   const BASE_API_URL = "http://127.0.0.1:8000/api/users";
 
+  const AVAILABLE_SERVICES = [
+    { id: 'marketing', title: 'Profile Marketing', price: 199, period: 'month', description: 'Boost your visibility to recruiters' },
+    { id: 'interview', title: 'Interview & Screening Practice', price: 299, period: 'month', description: 'Mock interviews with experts' },
+    { id: 'skills', title: 'Skills Training', price: 399, period: 'month', description: 'Access to premium courses' },
+    { id: 'premium', title: 'Full Premium Access', price: 499, period: 'lifetime', description: 'All services included forever', isBundle: true },
+  ];
+
   const [profileData, setProfileData] = useState(null);
   const [formData, setFormData] = useState({});
   const [profileId, setProfileId] = useState(null);
@@ -500,6 +681,10 @@ const Profile = () => {
   const [errors, setErrors] = useState({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentStep, setPaymentStep] = useState(1); // 1: Select Services, 2: Payment Details
+  const [selectedServices, setSelectedServices] = useState(['premium']); // Default to premium
+  const [cartTotal, setCartTotal] = useState(499);
+
   const [paymentData, setPaymentData] = useState({
     cardNumber: '',
     cardHolderName: '',
@@ -868,8 +1053,52 @@ const Profile = () => {
     }
   };
 const handleUpgradeProfile = () => {
+    setPaymentStep(1); // Reset to selection step
     setShowPaymentModal(true);
   };
+
+  const toggleService = (serviceId) => {
+    setSelectedServices(prev => {
+      let newSelection = [...prev];
+      const isPremium = serviceId === 'premium';
+      
+      if (isPremium) {
+        // If selecting premium, clear others and select only premium
+        // If premium is already selected, do nothing (or toggle off if we want to allow empty cart)
+        return ['premium'];
+      } else {
+        // If selecting a regular service
+        if (newSelection.includes('premium')) {
+           // If premium was selected, remove it and add the new service
+           newSelection = [serviceId];
+        } else {
+          // Toggle logic
+          if (newSelection.includes(serviceId)) {
+            newSelection = newSelection.filter(id => id !== serviceId);
+          } else {
+            newSelection.push(serviceId);
+          }
+        }
+      }
+      
+      // If nothing selected, maybe keep it empty or default? Let's allow empty.
+      return newSelection;
+    });
+  };
+
+  useEffect(() => {
+    // Recalculate total whenever selectedServices changes
+    let total = 0;
+    if (selectedServices.includes('premium')) {
+      total = 499;
+    } else {
+      total = selectedServices.reduce((sum, id) => {
+        const service = AVAILABLE_SERVICES.find(s => s.id === id);
+        return sum + (service ? service.price : 0);
+      }, 0);
+    }
+    setCartTotal(total);
+  }, [selectedServices]);
 
   const handlePaymentChange = (e) => {
     const { name, value } = e.target;
@@ -1017,145 +1246,240 @@ const handleUpgradeProfile = () => {
 
         {/* Payment Modal */}
         {showPaymentModal && (
-          <div className="position-fixed top-0 start-0 w-100 h-100" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1050 }}>
-            <div className="position-absolute top-50 start-50 translate-middle bg-white rounded-3 shadow-lg p-4" style={{ maxWidth: '500px', width: '90%' }}>
-              <div>
-                <div className="text-center mb-4">
-                  <div className="mb-3">
-                    <Upgrade width={48} height={48} style={{ color: primaryColor }} />
-                  </div>
-                  <h4 className="fw-bold mb-2" style={{ color: '#1F2937' }}>Payment Mode</h4>
-                  <p className="text-muted mb-0">Upgrade your profile for ₹499</p>
+          <div className="payment-modal-overlay position-fixed top-0 start-0 w-100 h-100" style={{ zIndex: 1050 }}>
+            <div className="payment-card position-absolute top-50 start-50 translate-middle bg-white w-100" style={{ maxWidth: '480px' }}>
+              
+              {/* Header */}
+              <div className="payment-header">
+                <button 
+                  onClick={() => {
+                    setShowPaymentModal(false);
+                    setPaymentData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '' });
+                    setPaymentStep(1);
+                  }}
+                  className="position-absolute top-0 end-0 m-3 btn btn-sm"
+                  style={{ 
+                    color: '#6b7280', 
+                    background: '#f3f4f6', 
+                    border: 'none', 
+                    borderRadius: '50%', 
+                    width: '36px', 
+                    height: '36px', 
+                    padding: '0', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    zIndex: 10
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                {paymentStep === 2 && (
+                   <button 
+                   onClick={() => setPaymentStep(1)}
+                   className="position-absolute top-0 start-0 m-3 btn btn-sm"
+                   style={{ background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', gap: '5px', color: '#6b7280', fontWeight: '600' }}
+                 >
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                   Back
+                 </button>
+                )}
+                <div className="payment-title">{paymentStep === 1 ? 'Select Services' : 'Secure Payment'}</div>
+                <div className="payment-amount-large">₹{cartTotal}</div>
+                <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
+                  {selectedServices.includes('premium') ? 'One-time payment for lifetime access' : 'Total monthly subscription'}
                 </div>
+              </div>
+
+              {/* Body */}
+              <div className="payment-body">
                 
-                <form onSubmit={handlePaymentSubmit}>
-                  {/* Card Number */}
-                  <div className="mb-3">
-                    <label htmlFor="payment-cardNumber" className="form-label fw-semibold">
-                      Card Number <span className="text-danger">*</span>
-                    </label>
-                    <div className="input-group">
-                      <span className="input-group-text bg-white">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: primaryColor }}>
-                          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                          <line x1="1" y1="10" x2="23" y2="10"></line>
-                        </svg>
-                      </span>
-                      <input
-                        type="text"
-                        id="payment-cardNumber"
-                        name="cardNumber"
-                        value={paymentData.cardNumber}
-                        onChange={handlePaymentChange}
-                        className="form-control form-control-lg"
-                        placeholder="1234 5678 9012 3456"
-                        required
-                      />
+                {/* STEP 1: SERVICE SELECTION */}
+                {paymentStep === 1 && (
+                  <>
+                    <div className="service-list-container custom-scrollbar d-flex flex-column gap-2">
+                       {AVAILABLE_SERVICES.map((service) => (
+                         <div 
+                           key={service.id} 
+                           className={`service-item ${selectedServices.includes(service.id) ? 'selected' : ''}`}
+                           onClick={() => toggleService(service.id)}
+                         >
+                           <div className="service-info text-start">
+                             <h5>
+                               {service.title}
+                               {service.isBundle && <span className="badge bg-warning text-dark ms-2" style={{ fontSize: '0.7rem' }}>BEST VALUE</span>}
+                             </h5>
+                             <p>{service.description}</p>
+                           </div>
+                           <div className="service-price">₹{service.price}<small className="text-muted fw-normal" style={{ fontSize: '0.75rem' }}>/{service.period}</small></div>
+                           <div className="ms-3">
+                             {selectedServices.includes(service.id) ? (
+                               <div className="rounded-circle bg-primary d-flex align-items-center justify-content-center" style={{ width: '24px', height: '24px' }}>
+                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                               </div>
+                             ) : (
+                               <div className="rounded-circle border border-2 border-secondary" style={{ width: '24px', height: '24px' }}></div>
+                             )}
+                           </div>
+                         </div>
+                       ))}
                     </div>
-                  </div>
 
-                  {/* Cardholder Name */}
-                  <div className="mb-3">
-                    <label htmlFor="payment-cardHolderName" className="form-label fw-semibold">
-                      Cardholder Name <span className="text-danger">*</span>
-                    </label>
-                    <div className="input-group">
-                      <span className="input-group-text bg-white">
-                        <User width={20} height={20} style={{ color: primaryColor }} />
-                      </span>
-                      <input
-                        type="text"
-                        id="payment-cardHolderName"
-                        name="cardHolderName"
-                        value={paymentData.cardHolderName}
-                        onChange={handlePaymentChange}
-                        className="form-control form-control-lg"
-                        placeholder="Enter name on card"
-                        required
-                      />
+                    <div className="cart-summary">
+                      <span>Total Amount</span>
+                      <span>₹{cartTotal}</span>
                     </div>
-                  </div>
 
-                  {/* Expiry Date and CVV Row */}
-                  <div className="row mb-4">
-                    <div className="col-6">
-                      <label htmlFor="payment-expiryDate" className="form-label fw-semibold">
-                        Expiry Date <span className="text-danger">*</span>
-                      </label>
-                      <div className="input-group">
-                        <span className="input-group-text bg-white">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: primaryColor }}>
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                          </svg>
-                        </span>
-                        <input
-                          type="text"
-                          id="payment-expiryDate"
-                          name="expiryDate"
-                          value={paymentData.expiryDate}
-                          onChange={handlePaymentChange}
-                          className="form-control form-control-lg"
-                          placeholder="MM/YY"
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <label htmlFor="payment-cvv" className="form-label fw-semibold">
-                        CVV <span className="text-danger">*</span>
-                      </label>
-                      <div className="input-group">
-                        <span className="input-group-text bg-white">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: primaryColor }}>
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                          </svg>
-                        </span>
-                        <input
-                          type="text"
-                          id="payment-cvv"
-                          name="cvv"
-                          value={paymentData.cvv}
-                          onChange={handlePaymentChange}
-                          className="form-control form-control-lg"
-                          placeholder="123"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-light rounded-3 p-3 mb-4 text-center">
-                    <p className="mb-1 text-muted small">Total Amount</p>
-                    <h3 className="fw-bold mb-0" style={{ color: primaryColor }}>₹499</h3>
-                  </div>
-
-                  <div className="d-flex gap-3 justify-content-center">
                     <button
-                      type="button"
                       onClick={() => {
-                        setShowPaymentModal(false);
-                        setPaymentData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '' });
+                        if (cartTotal > 0) setPaymentStep(2);
+                        else alert("Please select at least one service.");
                       }}
-                      className="btn btn-secondary px-4 py-2 fw-semibold"
-                      style={{ minWidth: '120px' }}
-                      disabled={isSubmitting}
+                      className="btn w-100 py-3 fw-bold shadow-sm mt-4"
+                      style={{ 
+                        background: primaryColor,
+                        border: 'none', 
+                        color: 'white',
+                        fontSize: '1.1rem',
+                        borderRadius: '12px'
+                      }}
                     >
-                      Cancel
+                      Proceed to Checkout
                     </button>
+                  </>
+                )}
+
+                {/* STEP 2: PAYMENT FORM */}
+                {paymentStep === 2 && (
+                  <form onSubmit={handlePaymentSubmit}>
+                    
+                    {/* Card Number */}
+                    <div className="mb-4">
+                      <label className="form-label text-muted small fw-bold text-uppercase mb-1" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Card Details</label>
+                      <div className="payment-input-group d-flex align-items-center">
+                        <span className="payment-input-icon">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                            <line x1="1" y1="10" x2="23" y2="10" />
+                          </svg>
+                        </span>
+                        <input
+                          type="text"
+                          name="cardNumber"
+                          value={paymentData.cardNumber}
+                          onChange={handlePaymentChange}
+                          className="form-control payment-input"
+                          placeholder="0000 0000 0000 0000"
+                          maxLength="19"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Expiry & CVC */}
+                    <div className="row g-3 mb-4">
+                      <div className="col-6">
+                        <div className="payment-input-group d-flex align-items-center">
+                          <span className="payment-input-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                              <line x1="16" y1="2" x2="16" y2="6" />
+                              <line x1="8" y1="2" x2="8" y2="6" />
+                              <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                          </span>
+                          <input
+                            type="text"
+                            name="expiryDate"
+                            value={paymentData.expiryDate}
+                            onChange={handlePaymentChange}
+                            className="form-control payment-input"
+                            placeholder="MM/YY"
+                            maxLength="5"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="col-6">
+                        <div className="payment-input-group d-flex align-items-center">
+                          <span className="payment-input-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                          </span>
+                          <input
+                            type="text"
+                            name="cvv"
+                            value={paymentData.cvv}
+                            onChange={handlePaymentChange}
+                            className="form-control payment-input"
+                            placeholder="CVC"
+                            maxLength="4"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Name */}
+                    <div className="mb-4">
+                      <label className="form-label text-muted small fw-bold text-uppercase mb-1" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Cardholder Name</label>
+                      <div className="payment-input-group d-flex align-items-center">
+                        <span className="payment-input-icon">
+                          <User width={18} height={18} />
+                        </span>
+                        <input
+                          type="text"
+                          name="cardHolderName"
+                          value={paymentData.cardHolderName}
+                          onChange={handlePaymentChange}
+                          className="form-control payment-input"
+                          placeholder="John Doe"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
                     <button
                       type="submit"
-                      className="btn px-4 py-2 fw-semibold text-white"
-                      style={{ minWidth: '120px', backgroundColor: primaryColor, border: 'none' }}
                       disabled={isSubmitting}
+                      className="btn w-100 py-3 fw-bold shadow-sm"
+                      style={{ 
+                        background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', 
+                        border: 'none', 
+                        color: 'white',
+                        fontSize: '1.1rem',
+                        borderRadius: '12px',
+                        transition: 'transform 0.1s ease'
+                      }}
+                      onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
+                      onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
+                      onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                     >
-                      {isSubmitting ? 'Processing...' : 'Proceed to Pay'}
+                      {isSubmitting ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          Processing Payment...
+                        </>
+                      ) : (
+                        `Pay ₹${cartTotal} Now`
+                      )}
                     </button>
-                  </div>
-                </form>
+
+                    {/* Secure Badge */}
+                    <div className="secure-badge">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                      <span>SSL Encrypted 256-bit Payment</span>
+                    </div>
+                    
+                  </form>
+                )}
               </div>
             </div>
           </div>
