@@ -664,10 +664,11 @@ const Profile = () => {
   const BASE_API_URL = "http://127.0.0.1:8000/api/users";
 
   const AVAILABLE_SERVICES = [
-    { id: 'marketing', title: 'Profile Marketing', price: 199, period: 'month', description: 'Boost your visibility to recruiters' },
-    { id: 'interview', title: 'Interview & Screening Practice', price: 299, period: 'month', description: 'Mock interviews with experts' },
-    { id: 'skills', title: 'Skills Training', price: 399, period: 'month', description: 'Access to premium courses' },
-    { id: 'premium', title: 'Full Premium Access', price: 499, period: 'lifetime', description: 'All services included forever', isBundle: true },
+    { id: 'registration', title: 'Registration Fee', price: 400, period: 'one-time', description: 'Mandatory registration fee', isMandatory: true },
+    { id: 'marketing', title: 'Profile Marketing', price: 10, period: 'month', description: 'Boost your visibility to recruiters' },
+    { id: 'interview', title: 'Interview & Screening Practice', price: 10, period: 'month', description: 'Mock interviews with experts' },
+    { id: 'skills', title: 'Skills Training', price: 10, period: 'month', description: 'Access to premium courses' },
+    { id: 'resume', title: 'Resume Review', price: 10, period: 'month', description: 'Professional resume critique' },
   ];
 
   const [profileData, setProfileData] = useState(null);
@@ -682,8 +683,8 @@ const Profile = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentStep, setPaymentStep] = useState(1); // 1: Select Services, 2: Payment Details
-  const [selectedServices, setSelectedServices] = useState(['premium']); // Default to premium
-  const [cartTotal, setCartTotal] = useState(499);
+  const [selectedServices, setSelectedServices] = useState(['registration']); // Default to registration
+  const [cartTotal, setCartTotal] = useState(400);
 
   const [paymentData, setPaymentData] = useState({
     cardNumber: '',
@@ -1059,44 +1060,29 @@ const handleUpgradeProfile = () => {
 
   const toggleService = (serviceId) => {
     setSelectedServices(prev => {
+      // Check if service is mandatory
+      const service = AVAILABLE_SERVICES.find(s => s.id === serviceId);
+      if (service && service.isMandatory) {
+        return prev; // Cannot toggle mandatory service
+      }
+
       let newSelection = [...prev];
-      const isPremium = serviceId === 'premium';
-      
-      if (isPremium) {
-        // If selecting premium, clear others and select only premium
-        // If premium is already selected, do nothing (or toggle off if we want to allow empty cart)
-        return ['premium'];
+      if (newSelection.includes(serviceId)) {
+        newSelection = newSelection.filter(id => id !== serviceId);
       } else {
-        // If selecting a regular service
-        if (newSelection.includes('premium')) {
-           // If premium was selected, remove it and add the new service
-           newSelection = [serviceId];
-        } else {
-          // Toggle logic
-          if (newSelection.includes(serviceId)) {
-            newSelection = newSelection.filter(id => id !== serviceId);
-          } else {
-            newSelection.push(serviceId);
-          }
-        }
+        newSelection.push(serviceId);
       }
       
-      // If nothing selected, maybe keep it empty or default? Let's allow empty.
       return newSelection;
     });
   };
 
   useEffect(() => {
     // Recalculate total whenever selectedServices changes
-    let total = 0;
-    if (selectedServices.includes('premium')) {
-      total = 499;
-    } else {
-      total = selectedServices.reduce((sum, id) => {
-        const service = AVAILABLE_SERVICES.find(s => s.id === id);
-        return sum + (service ? service.price : 0);
-      }, 0);
-    }
+    const total = selectedServices.reduce((sum, id) => {
+      const service = AVAILABLE_SERVICES.find(s => s.id === id);
+      return sum + (service ? service.price : 0);
+    }, 0);
     setCartTotal(total);
   }, [selectedServices]);
 
@@ -1286,9 +1272,9 @@ const handleUpgradeProfile = () => {
                  </button>
                 )}
                 <div className="payment-title">{paymentStep === 1 ? 'Select Services' : 'Secure Payment'}</div>
-                <div className="payment-amount-large">₹{cartTotal}</div>
+                <div className="payment-amount-large">${cartTotal}</div>
                 <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
-                  {selectedServices.includes('premium') ? 'One-time payment for lifetime access' : 'Total monthly subscription'}
+                  Total amount for selected services
                 </div>
               </div>
 
@@ -1303,16 +1289,18 @@ const handleUpgradeProfile = () => {
                          <div 
                            key={service.id} 
                            className={`service-item ${selectedServices.includes(service.id) ? 'selected' : ''}`}
-                           onClick={() => toggleService(service.id)}
+                           style={{ cursor: service.isMandatory ? 'default' : 'pointer', opacity: service.isMandatory ? 0.9 : 1 }}
+                           onClick={() => !service.isMandatory && toggleService(service.id)}
                          >
                            <div className="service-info text-start">
                              <h5>
                                {service.title}
+                               {service.isMandatory && <span className="badge bg-danger text-white ms-2" style={{ fontSize: '0.7rem' }}>REQUIRED</span>}
                                {service.isBundle && <span className="badge bg-warning text-dark ms-2" style={{ fontSize: '0.7rem' }}>BEST VALUE</span>}
                              </h5>
                              <p>{service.description}</p>
                            </div>
-                           <div className="service-price">₹{service.price}<small className="text-muted fw-normal" style={{ fontSize: '0.75rem' }}>/{service.period}</small></div>
+                           <div className="service-price">${service.price}<small className="text-muted fw-normal" style={{ fontSize: '0.75rem' }}>/{service.period}</small></div>
                            <div className="ms-3">
                              {selectedServices.includes(service.id) ? (
                                <div className="rounded-circle bg-primary d-flex align-items-center justify-content-center" style={{ width: '24px', height: '24px' }}>
@@ -1328,7 +1316,7 @@ const handleUpgradeProfile = () => {
 
                     <div className="cart-summary">
                       <span>Total Amount</span>
-                      <span>₹{cartTotal}</span>
+                      <span>${cartTotal}</span>
                     </div>
 
                     <button
