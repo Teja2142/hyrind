@@ -656,6 +656,9 @@ const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEdit
   );
 };
 
+const RezerpayPayment = () => {
+  
+}
 // --- Main Profile Component with admin dashboard layout ---
 const Profile = () => {
   const navigate = useNavigate();
@@ -664,11 +667,7 @@ const Profile = () => {
   const BASE_API_URL = "http://127.0.0.1:8000/api/users";
 
   const AVAILABLE_SERVICES = [
-    { id: 'registration', title: 'Registration Fee', price: 400, period: 'one-time', description: 'Mandatory registration fee', isMandatory: true },
-    { id: 'marketing', title: 'Profile Marketing', price: 10, period: 'month', description: 'Boost your visibility to recruiters' },
-    { id: 'interview', title: 'Interview & Screening Practice', price: 10, period: 'month', description: 'Mock interviews with experts' },
-    { id: 'skills', title: 'Skills Training', price: 10, period: 'month', description: 'Access to premium courses' },
-    { id: 'resume', title: 'Resume Review', price: 10, period: 'month', description: 'Professional resume critique' },
+    { id: 'subscription', title: 'One Month Subscription', price: 400, period: 'month', description: 'Benefits of service: resume building, mock interviews and much more..', isMandatory: true },
   ];
 
   const [profileData, setProfileData] = useState(null);
@@ -682,8 +681,9 @@ const Profile = () => {
   const [errors, setErrors] = useState({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentStep, setPaymentStep] = useState(1); // 1: Select Services, 2: Payment Details
-  const [selectedServices, setSelectedServices] = useState(['registration']); // Default to registration
+  // Removed paymentStep state as we are combining the steps
+  // const [paymentStep, setPaymentStep] = useState(1); // 1: Select Services, 2: Payment Details
+  const [selectedServices, setSelectedServices] = useState(['subscription']); // Default to subscription
   const [cartTotal, setCartTotal] = useState(400);
 
   const [paymentData, setPaymentData] = useState({
@@ -807,6 +807,17 @@ const Profile = () => {
 
     fetchProfile();
   }, [navigate, BASE_API_URL]);
+
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   // Auto-dismiss toast message
     useEffect(() => {
@@ -1054,7 +1065,7 @@ const Profile = () => {
     }
   };
 const handleUpgradeProfile = () => {
-    setPaymentStep(1); // Reset to selection step
+    // setPaymentStep(1); // Removed as we only have one step now
     setShowPaymentModal(true);
   };
 
@@ -1116,40 +1127,107 @@ const handleUpgradeProfile = () => {
   const handlePaymentSubmit = async (e) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!paymentData.cardNumber || !paymentData.cardHolderName || !paymentData.expiryDate || !paymentData.cvv) {
-      alert('Please fill in all card details');
-      return;
-    }
-
-    // Validate card number (basic check for 16 digits)
-    const cardNumberDigits = paymentData.cardNumber.replace(/\s/g, '');
-    if (cardNumberDigits.length !== 16) {
-      alert('Card number must be 16 digits');
-      return;
-    }
-
-    // Validate CVV (3 or 4 digits)
-    if (paymentData.cvv.length < 3 || paymentData.cvv.length > 4) {
-      alert('CVV must be 3 or 4 digits');
-      return;
-    }
-
-    // Here you would typically make an API call to process the payment
-    // For now, we'll just show a success message
     try {
       setIsSubmitting(true);
-      setSubmissionMessage('Processing payment...');
+      setSubmissionMessage('Creating payment order...');
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const token = localStorage.getItem('accessToken');
+      const amount = cartTotal;
       
-      setSubmissionMessage('Payment successful! Your profile has been upgraded.');
-      setShowPaymentModal(false);
-      setPaymentData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '' });
+      const payload = { amount: amount };
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      
+      // Create order
+      const resp = await fetch('/api/payments/razorpay/create-order/', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(payload)
+      });
+      
+      const json = await resp.json();
+      if (!resp.ok) {
+        setSubmissionMessage('Failed to create payment order: ' + (json.error || 'Unknown error'));
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const order = json.order;
+      const payment_uuid = json.payment_uuid;
+      const key_id = json.key_id;
+      
+      setSubmissionMessage('Opening payment gateway...');
       setIsSubmitting(false);
-    } catch (err) {
-      setSubmissionMessage('Payment failed. Please try again.');
+      
+      // Check if Razorpay is loaded
+      if (typeof window.Razorpay === 'undefined') {
+        setSubmissionMessage('Payment gateway not loaded. Please refresh and try again.');
+        return;
+      }
+      
+      // Open Razorpay Checkout
+      const options = {
+        key: key_id,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Hyrind',
+        description: 'Profile Upgrade - One Month Subscription',
+        order_id: order.id,
+        handler: async function(response) {
+          try {
+            setIsSubmitting(true);
+            setSubmissionMessage('Verifying payment...');
+            
+            // Send verification request to backend
+            const verifyPayload = {
+              payment_id: response.razorpay_payment_id,
+              order_id: response.razorpay_order_id,
+              signature: response.razorpay_signature,
+              payment_uuid: payment_uuid
+            };
+            
+            const verifyResp = await fetch('/api/payments/razorpay/verify/', {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify(verifyPayload)
+            });
+            
+            const verifyJson = await verifyResp.json();
+            if (!verifyResp.ok) {
+              setSubmissionMessage('Payment verification failed: ' + (verifyJson.error || 'Unknown error'));
+              setIsSubmitting(false);
+              return;
+            }
+            
+            setSubmissionMessage('Payment successful! Your profile has been upgraded.');
+            setShowPaymentModal(false);
+            setPaymentData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '' });
+            setIsSubmitting(false);
+          } catch (error) {
+            setSubmissionMessage('Payment verification error: ' + error.message);
+            setIsSubmitting(false);
+          }
+        },
+        prefill: {
+          name: profileData?.first_name + ' ' + profileData?.last_name || '',
+          email: profileData?.email || ''
+        },
+        theme: {
+          color: primaryColor
+        },
+        modal: {
+          ondismiss: function() {
+            setSubmissionMessage('Payment cancelled');
+            setIsSubmitting(false);
+          }
+        }
+      };
+      
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+      
+    } catch (error) {
+      setSubmissionMessage('Payment error: ' + error.message);
       setIsSubmitting(false);
     }
   };
@@ -1241,7 +1319,7 @@ const handleUpgradeProfile = () => {
                   onClick={() => {
                     setShowPaymentModal(false);
                     setPaymentData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '' });
-                    setPaymentStep(1);
+                    // setPaymentStep(1); // Removed
                   }}
                   className="position-absolute top-0 end-0 m-3 btn btn-sm"
                   style={{ 
@@ -1261,17 +1339,7 @@ const handleUpgradeProfile = () => {
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
-                {paymentStep === 2 && (
-                   <button 
-                   onClick={() => setPaymentStep(1)}
-                   className="position-absolute top-0 start-0 m-3 btn btn-sm"
-                   style={{ background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', gap: '5px', color: '#6b7280', fontWeight: '600' }}
-                 >
-                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                   Back
-                 </button>
-                )}
-                <div className="payment-title">{paymentStep === 1 ? 'Select Services' : 'Secure Payment'}</div>
+                <div className="payment-title">Secure Payment</div>
                 <div className="payment-amount-large">${cartTotal}</div>
                 <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
                   Total amount for selected services
@@ -1281,193 +1349,60 @@ const handleUpgradeProfile = () => {
               {/* Body */}
               <div className="payment-body">
                 
-                {/* STEP 1: SERVICE SELECTION */}
-                {paymentStep === 1 && (
-                  <>
-                    <div className="service-list-container custom-scrollbar d-flex flex-column gap-2">
-                       {AVAILABLE_SERVICES.map((service) => (
-                         <div 
-                           key={service.id} 
-                           className={`service-item ${selectedServices.includes(service.id) ? 'selected' : ''}`}
-                           style={{ cursor: service.isMandatory ? 'default' : 'pointer', opacity: service.isMandatory ? 0.9 : 1 }}
-                           onClick={() => !service.isMandatory && toggleService(service.id)}
-                         >
-                           <div className="service-info text-start">
-                             <h5>
-                               {service.title}
-                               {service.isMandatory && <span className="badge bg-danger text-white ms-2" style={{ fontSize: '0.7rem' }}>REQUIRED</span>}
-                               {service.isBundle && <span className="badge bg-warning text-dark ms-2" style={{ fontSize: '0.7rem' }}>BEST VALUE</span>}
-                             </h5>
-                             <p>{service.description}</p>
-                           </div>
-                           <div className="service-price">${service.price}<small className="text-muted fw-normal" style={{ fontSize: '0.75rem' }}>/{service.period}</small></div>
-                           <div className="ms-3">
-                             {selectedServices.includes(service.id) ? (
-                               <div className="rounded-circle bg-primary d-flex align-items-center justify-content-center" style={{ width: '24px', height: '24px' }}>
-                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                               </div>
-                             ) : (
-                               <div className="rounded-circle border border-2 border-secondary" style={{ width: '24px', height: '24px' }}></div>
-                             )}
-                           </div>
+                {/* STEP 1: SERVICE SELECTION (Now Display Only) */}
+                  <div className="service-list-container custom-scrollbar d-flex flex-column gap-2 mb-4">
+                     {AVAILABLE_SERVICES.map((service) => (
+                       <div 
+                         key={service.id} 
+                         className={`service-item ${selectedServices.includes(service.id) ? 'selected' : ''}`}
+                         style={{ cursor: service.isMandatory ? 'default' : 'pointer', opacity: service.isMandatory ? 0.9 : 1 }}
+                         onClick={() => !service.isMandatory && toggleService(service.id)}
+                       >
+                         <div className="service-info text-start">
+                           <h5>
+                             {service.title}
+                             {service.isMandatory && <span className="badge bg-danger text-white ms-2" style={{ fontSize: '0.7rem' }}>REQUIRED</span>}
+                             {service.isBundle && <span className="badge bg-warning text-dark ms-2" style={{ fontSize: '0.7rem' }}>BEST VALUE</span>}
+                           </h5>
+                           <p>{service.description}</p>
                          </div>
-                       ))}
-                    </div>
+                         <div className="service-price">${service.price}<small className="text-muted fw-normal" style={{ fontSize: '0.75rem' }}>/{service.period}</small></div>
+                         <div className="ms-3">
+                           {selectedServices.includes(service.id) ? (
+                             <div className="rounded-circle bg-primary d-flex align-items-center justify-content-center" style={{ width: '24px', height: '24px' }}>
+                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                             </div>
+                           ) : (
+                             <div className="rounded-circle border border-2 border-secondary" style={{ width: '24px', height: '24px' }}></div>
+                           )}
+                         </div>
+                       </div>
+                     ))}
+                  </div>
 
-                    <div className="cart-summary">
-                      <span>Total Amount</span>
-                      <span>${cartTotal}</span>
-                    </div>
+                  {/* <div className="cart-summary mb-4">
+                    <span>Total Amount</span>
+                    <span>${cartTotal}</span>
+                  </div> */}
 
-                    <button
-                      onClick={() => {
-                        if (cartTotal > 0) setPaymentStep(2);
-                        else alert("Please select at least one service.");
-                      }}
-                      className="btn w-100 py-3 fw-bold shadow-sm mt-4"
-                      style={{ 
-                        background: primaryColor,
-                        border: 'none', 
-                        color: 'white',
-                        fontSize: '1.1rem',
-                        borderRadius: '12px'
-                      }}
-                    >
-                      Proceed to Checkout
-                    </button>
-                  </>
-                )}
-
-                {/* STEP 2: PAYMENT FORM */}
-                {paymentStep === 2 && (
-                  <form onSubmit={handlePaymentSubmit}>
-                    
-                    {/* Card Number */}
-                    <div className="mb-4">
-                      <label className="form-label text-muted small fw-bold text-uppercase mb-1" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Card Details</label>
-                      <div className="payment-input-group d-flex align-items-center">
-                        <span className="payment-input-icon">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                            <line x1="1" y1="10" x2="23" y2="10" />
-                          </svg>
-                        </span>
-                        <input
-                          type="text"
-                          name="cardNumber"
-                          value={paymentData.cardNumber}
-                          onChange={handlePaymentChange}
-                          className="form-control payment-input"
-                          placeholder="0000 0000 0000 0000"
-                          maxLength="19"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Expiry & CVC */}
-                    <div className="row g-3 mb-4">
-                      <div className="col-6">
-                        <div className="payment-input-group d-flex align-items-center">
-                          <span className="payment-input-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                              <line x1="16" y1="2" x2="16" y2="6" />
-                              <line x1="8" y1="2" x2="8" y2="6" />
-                              <line x1="3" y1="10" x2="21" y2="10" />
-                            </svg>
-                          </span>
-                          <input
-                            type="text"
-                            name="expiryDate"
-                            value={paymentData.expiryDate}
-                            onChange={handlePaymentChange}
-                            className="form-control payment-input"
-                            placeholder="MM/YY"
-                            maxLength="5"
-                            required
-                          />
-                        </div>
-                      </div>
-                      <div className="col-6">
-                        <div className="payment-input-group d-flex align-items-center">
-                          <span className="payment-input-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                            </svg>
-                          </span>
-                          <input
-                            type="text"
-                            name="cvv"
-                            value={paymentData.cvv}
-                            onChange={handlePaymentChange}
-                            className="form-control payment-input"
-                            placeholder="CVC"
-                            maxLength="4"
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Name */}
-                    <div className="mb-4">
-                      <label className="form-label text-muted small fw-bold text-uppercase mb-1" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Cardholder Name</label>
-                      <div className="payment-input-group d-flex align-items-center">
-                        <span className="payment-input-icon">
-                          <User width={18} height={18} />
-                        </span>
-                        <input
-                          type="text"
-                          name="cardHolderName"
-                          value={paymentData.cardHolderName}
-                          onChange={handlePaymentChange}
-                          className="form-control payment-input"
-                          placeholder="John Doe"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Action Button */}
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="btn w-100 py-3 fw-bold shadow-sm"
-                      style={{ 
-                        background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', 
-                        border: 'none', 
-                        color: 'white',
-                        fontSize: '1.1rem',
-                        borderRadius: '12px',
-                        transition: 'transform 0.1s ease'
-                      }}
-                      onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
-                      onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
-                      onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          Processing Payment...
-                        </>
-                      ) : (
-                        `Pay ₹${cartTotal} Now`
-                      )}
-                    </button>
-
-                    {/* Secure Badge */}
-                    <div className="secure-badge">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                      </svg>
-                      <span>SSL Encrypted 256-bit Payment</span>
-                    </div>
-                    
-                  </form>
-                )}
+                <button
+                  onClick={handlePaymentSubmit}
+                  className="btn w-100 py-3 fw-bold shadow-sm"
+                  style={{ 
+                    background: primaryColor,
+                    border: 'none', 
+                    color: 'white',
+                    fontSize: '1.1rem',
+                    borderRadius: '12px',
+                    transition: 'all 0.2s ease',
+                    marginTop: '1.5rem'
+                  }}
+                  onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
+                  onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
+                  onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                >
+                  Proceed to Pay
+                </button>
               </div>
             </div>
           </div>
