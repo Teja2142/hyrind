@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // --- START: Inline SVG Icon Definitions ---
@@ -598,7 +598,7 @@ const SidebarButton = ({ Icon, label, onClick, variant = 'normal', isEditing }) 
 };
 
 // AdminSidebar with full name + actions
-const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEditing, onDeleteProfile,onUpgradeProfile }) => {
+const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEditing, onDeleteProfile, onUpgradeProfile, isSubscribed }) => {
   const displayName = fullName && fullName.trim().length > 0 ? fullName : 'Candidate Profile';
 
   return (
@@ -611,7 +611,6 @@ const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEdit
         <p className="admin-profile-welcome">
           Manage your HYRIND registration & interest details.
         </p>
-        <p className="admin-profile-recruiter"> Assigned Recruiter: {'Not assigned yet'}</p>
       </div>
 
       <nav className="sidebar-nav">
@@ -630,13 +629,15 @@ const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEdit
           onClick={onInterestForm}
           variant="normal"
         />
-        {/* Upgrade Profile */}
-        <SidebarButton
-          Icon={Upgrade}
-          label="Upgrade Profile"
-          onClick={onUpgradeProfile}
-          variant="normal"
-        />
+        {/* Upgrade Profile - Hide if already subscribed */}
+        {!isSubscribed && (
+          <SidebarButton
+            Icon={Upgrade}
+            label="Upgrade Profile"
+            onClick={onUpgradeProfile}
+            variant="normal"
+          />
+        )}
         {/* Delete Profile */}
         <SidebarButton
           Icon={Delete}
@@ -656,9 +657,113 @@ const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEdit
   );
 };
 
-const RezerpayPayment = () => {
+// Subscription Status Banner with Timer
+const SubscriptionStatusBanner = ({ isSubscribed, subscriptionData }) => {
+  const [timeRemaining, setTimeRemaining] = React.useState('');
   
-}
+  React.useEffect(() => {
+    // Only show if user has active subscription
+    if (!isSubscribed) {
+      return;
+    }
+    
+    const calculateTimeRemaining = () => {
+      if (!subscriptionData.next_billing_date) return '';
+      
+      const now = new Date();
+      const billingDate = new Date(subscriptionData.next_billing_date);
+      const diff = billingDate - now;
+      
+      if (diff <= 0) return 'Billing due';
+      
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      
+      if (days > 0) return `${days}d ${hours}h remaining`;
+      if (hours > 0) return `${hours}h ${minutes}m remaining`;
+      return `${minutes}m remaining`;
+    };
+    
+    // Update timer every minute
+    const timer = setInterval(() => {
+      setTimeRemaining(calculateTimeRemaining());
+    }, 60000);
+    
+    // Initial calculation
+    setTimeRemaining(calculateTimeRemaining());
+    
+    return () => clearInterval(timer);
+  }, [subscriptionData.next_billing_date, isSubscribed]);
+  
+  // Don't show banner if no subscription
+  if (!isSubscribed) {
+    return null;
+  }
+  
+  const statusColors = {
+    active: { bg: '#10B981', border: '#059669', text: 'Active Subscription' },
+    past_due: { bg: '#EF4444', border: '#DC2626', text: 'Payment Overdue' },
+    paused: { bg: '#F59E0B', border: '#D97706', text: 'Subscription Paused' }
+  };
+  
+  const status = statusColors[subscriptionData.status] || statusColors.active;
+  
+  return (
+    <div 
+      className="mb-4 p-3 rounded-3 border-2" 
+      style={{ 
+        backgroundColor: status.bg + '15',
+        borderLeft: `4px solid ${status.bg}`,
+        borderColor: status.border + '40'
+      }}
+    >
+      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div className="d-flex align-items-center gap-3">
+          <div 
+            className="d-flex align-items-center justify-content-center rounded-circle" 
+            style={{ 
+              width: '40px', 
+              height: '40px', 
+              backgroundColor: status.bg,
+              color: 'white'
+            }}
+          >
+            <Upgrade width={20} height={20} />
+          </div>
+          <div>
+            <h6 className="mb-0 fw-bold" style={{ color: status.bg }}>
+              {status.text}
+            </h6>
+            <p className="mb-0 small text-muted">
+              {subscriptionData.recruiter ? (
+                <span>Recruiter: <strong>{subscriptionData.recruiter.name || subscriptionData.recruiter.email}</strong></span>
+              ) : (
+                <span>Recruiter assignment pending</span>
+              )}
+            </p>
+          </div>
+        </div>
+        
+        {subscriptionData.next_billing_date && (
+          <div className="text-end">
+            <div className="small text-muted">Next billing</div>
+            <div className="fw-bold" style={{ color: status.bg }}>
+              {timeRemaining || new Date(subscriptionData.next_billing_date).toLocaleDateString()}
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {subscriptionData.marketing_start_date && (
+        <div className="mt-2 pt-2 border-top small text-muted">
+          Marketing started: {new Date(subscriptionData.marketing_start_date).toLocaleDateString()}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // --- Main Profile Component with admin dashboard layout ---
 const Profile = () => {
   const navigate = useNavigate();
@@ -685,6 +790,15 @@ const Profile = () => {
   // const [paymentStep, setPaymentStep] = useState(1); // 1: Select Services, 2: Payment Details
   const [selectedServices, setSelectedServices] = useState(['subscription']); // Default to subscription
   const [cartTotal, setCartTotal] = useState(400);
+  
+  // Subscription state (local until API is ready)
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscriptionData, setSubscriptionData] = useState({
+    status: 'active',
+    next_billing_date: null,
+    marketing_start_date: null,
+    recruiter: null
+  });
 
   const [paymentData, setPaymentData] = useState({
     cardNumber: '',
@@ -728,8 +842,9 @@ const Profile = () => {
   };
 
   // load profile
-
+  const hasFetchedRef = useRef(false);
   useEffect(() => {
+
     const fetchProfile = async () => {
       const token = localStorage.getItem('accessToken');
       if (!token) {
@@ -738,7 +853,6 @@ const Profile = () => {
         setTimeout(() => navigate('/login'), 2000);
         return;
       }
-
       try {
         const storedToken = localStorage.getItem("accessToken");
         if (!storedToken) {
@@ -757,7 +871,8 @@ const Profile = () => {
 
         const decoded = parseJwt(storedToken);
         const userId = decoded?.user_id;
-
+        if (hasFetchedRef.current) return;
+        hasFetchedRef.current = true;
         const response = await fetch(`${BASE_API_URL}/me`, {
           method: "GET",
           headers: {
@@ -796,6 +911,7 @@ const Profile = () => {
           githubUrl: profile.github_url,
           additionalNotes: profile.additional_notes,
         });
+        
 
       } catch (err) {
         setError("Failed to fetch profile.");
@@ -1126,6 +1242,7 @@ const handleUpgradeProfile = () => {
 
   const handlePaymentSubmit = async (e) => {
     e.preventDefault();
+  
     
     try {
       setIsSubmitting(true);
@@ -1139,7 +1256,7 @@ const handleUpgradeProfile = () => {
       if (token) headers['Authorization'] = 'Bearer ' + token;
       
       // Create order
-      const resp = await fetch('/api/payments/razorpay/create-order/', {
+      const resp = await fetch('http://127.0.0.1:8000/api/payments/razorpay/create-order/', {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(payload)
@@ -1186,7 +1303,7 @@ const handleUpgradeProfile = () => {
               payment_uuid: payment_uuid
             };
             
-            const verifyResp = await fetch('/api/payments/razorpay/verify/', {
+            const verifyResp = await fetch('http://127.0.0.1:8000/api/payments/razorpay/verify/', {
               method: 'POST',
               headers: headers,
               body: JSON.stringify(verifyPayload)
@@ -1202,6 +1319,18 @@ const handleUpgradeProfile = () => {
             setSubmissionMessage('Payment successful! Your profile has been upgraded.');
             setShowPaymentModal(false);
             setPaymentData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '' });
+            
+            // Activate subscription after successful payment
+            setIsSubscribed(true);
+            const nextBillingDate = new Date();
+            nextBillingDate.setMonth(nextBillingDate.getMonth() + 1); // Add 1 month
+            setSubscriptionData({
+              status: 'active',
+              next_billing_date: nextBillingDate.toISOString(),
+              marketing_start_date: new Date().toISOString(),
+              recruiter: null // Will be assigned by admin
+            });
+            
             setIsSubmitting(false);
           } catch (error) {
             setSubmissionMessage('Payment verification error: ' + error.message);
@@ -1417,47 +1546,36 @@ const handleUpgradeProfile = () => {
             isEditing={isEditing}
             onDeleteProfile={handleDeleteProfile}
             onUpgradeProfile={handleUpgradeProfile}
+            isSubscribed={isSubscribed}
           />
         </div>
 
         {/* Main content */}
         <main className="admin-main-content">
           <div className="admin-content-wrapper">
-            <div className="container-fluid">
-              <div className="row justify-content-center">
-                <div className="col-12 col-xl-10">
-                  {/* Header - only title now */}
-                  <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                    <h2 className="fw-bold mb-0" style={{ color: primaryColor }}>
-                      {isEditing ? 'Edit Candidate Profile' : 'Candidate Profile'}
-                    </h2>
-                  </div>
+            <div className="p-4">
+              {/* Profile summary */}
+              <div className="text-center mb-4">
+                <div 
+                  className="mx-auto rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                  style={{ width: '100px', height: '100px', backgroundColor: primaryColor + '33' }}
+                >
+                  <User className="w-10 h-10" style={{ color: primaryColor }} />
+                </div>
+                <h3 className="mt-3 fw-bold text-dark">
+                  {fullName || 'Candidate'}
+                </h3>
+                <p className="text-muted mb-1">Profile ID: {profile.id}</p>
+                <p className="text-muted small">
+                  {profile.degree} • {profile.major} • {profile.university}
+                </p>
+              </div>
 
-                  {/* Profile summary */}
-                  <div className="text-center mb-4">
-                    <div 
-                      className="mx-auto rounded-circle d-flex align-items-center justify-content-center shadow-sm"
-                      style={{ width: '100px', height: '100px', backgroundColor: primaryColor + '33' }}
-                    >
-                      <User className="w-10 h-10" style={{ color: primaryColor }} />
-                    </div>
-                    <h3 className="mt-3 fw-bold text-dark">
-                      {fullName || 'Candidate'}
-                    </h3>
-                    <p className="text-muted mb-1">Profile ID: {profile.id}</p>
-                    <p className="text-muted small">
-                      {profile.degree} • {profile.major} • {profile.university}
-                    </p>
-                    <p className="text-muted small">
-  Assigned Recruiter: { 'Not assigned yet'}
-</p>
+              {/* Subscription Status Banner */}
+              <SubscriptionStatusBanner isSubscribed={isSubscribed} subscriptionData={subscriptionData} />
 
-                  </div>
-
-
-
-                  {/* Form / View */}
-                  <form onSubmit={handleUpdateProfile} noValidate>
+              {/* Form / View */}
+              <form onSubmit={handleUpdateProfile} noValidate>
                     <div className="row g-4">
                       {isEditing ? (
                         <>
@@ -1753,8 +1871,6 @@ const handleUpgradeProfile = () => {
                   </form>
                 </div>
               </div>
-            </div>
-          </div>
         </main>
       </div>
     </>

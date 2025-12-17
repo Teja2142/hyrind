@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // ============================================
@@ -581,6 +581,7 @@ const RecruiterDashboard = () => {
   // ============================================
   // FETCH PROFILE ON MOUNT
   // ============================================
+  const hasFetchedRef = useRef(false);
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem('accessToken');
@@ -591,7 +592,8 @@ const RecruiterDashboard = () => {
         setTimeout(() => navigate('/recruiter-login'), 2000);
         return;
       }
-
+      if (hasFetchedRef.current) return;
+      hasFetchedRef.current = true;
       try {
         const response = await fetch(BASE_API_URL, {
           method: "GET",
