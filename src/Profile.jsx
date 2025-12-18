@@ -769,7 +769,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const primaryColor = '#4F46E5';
   const paleBackground = '#F0F8FF';
-  const BASE_API_URL = "http://127.0.0.1:8000/api/users";
+  const BASE_API_URL = "api.hyrind.com/api/users";
 
   const AVAILABLE_SERVICES = [
     { id: 'subscription', title: 'One Month Subscription', price: 400, period: 'month', description: 'Benefits of service: resume building, mock interviews and much more..', isMandatory: true },
@@ -1256,7 +1256,7 @@ const handleUpgradeProfile = () => {
       if (token) headers['Authorization'] = 'Bearer ' + token;
       
       // Create order
-      const resp = await fetch('http://127.0.0.1:8000/api/payments/razorpay/create-order/', {
+      const resp = await fetch('api.hyrind.com/api/payments/razorpay/create-order/', {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(payload)
@@ -1303,7 +1303,7 @@ const handleUpgradeProfile = () => {
               payment_uuid: payment_uuid
             };
             
-            const verifyResp = await fetch('http://127.0.0.1:8000/api/payments/razorpay/verify/', {
+            const verifyResp = await fetch('api.hyrind.com/api/payments/razorpay/verify/', {
               method: 'POST',
               headers: headers,
               body: JSON.stringify(verifyPayload)
