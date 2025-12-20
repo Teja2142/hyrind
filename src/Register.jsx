@@ -237,7 +237,7 @@ const formatDateToMMYYYY = (dateString) => {
 const Register = () => {
   const navigate = useNavigate(); 
   // CORRECTED API endpoint to match user's curl request
-  const REGISTER_API_URL = "api.hyrind.com/api/users/register/"; 
+  const REGISTER_API_URL = "http://127.0.0.1:8000/api/users/register/"; 
   
   const initialFormState = {
     firstName: '',

@@ -598,7 +598,7 @@ const SidebarButton = ({ Icon, label, onClick, variant = 'normal', isEditing }) 
 };
 
 // AdminSidebar with full name + actions
-const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEditing, onDeleteProfile, onUpgradeProfile, isSubscribed }) => {
+const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEditing, onDeleteProfile, onUpgradeProfile, isSubscribed, hasAddonPlans }) => {
   const displayName = fullName && fullName.trim().length > 0 ? fullName : 'Candidate Profile';
 
   return (
@@ -629,15 +629,22 @@ const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEdit
           onClick={onInterestForm}
           variant="normal"
         />
-        {/* Upgrade Profile - Hide if already subscribed */}
-        {!isSubscribed && (
+        {/* Upgrade Profile - Show for non-subscribers OR Add Services for subscribers with addon plans */}
+        {!isSubscribed ? (
           <SidebarButton
             Icon={Upgrade}
             label="Upgrade Profile"
             onClick={onUpgradeProfile}
             variant="normal"
           />
-        )}
+        ) : hasAddonPlans ? (
+          <SidebarButton
+            Icon={Upgrade}
+            label="Add Services"
+            onClick={onUpgradeProfile}
+            variant="normal"
+          />
+        ) : null}
         {/* Delete Profile */}
         <SidebarButton
           Icon={Delete}
@@ -657,8 +664,8 @@ const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEdit
   );
 };
 
-// Subscription Status Banner with Timer
-const SubscriptionStatusBanner = ({ isSubscribed, subscriptionData }) => {
+// Subscription Status Banner with Timer, Details and Cancel Button
+const SubscriptionStatusBanner = ({ isSubscribed, subscriptionData, onCancelSubscription, isCancelling }) => {
   const [timeRemaining, setTimeRemaining] = React.useState('');
   
   React.useEffect(() => {
@@ -704,21 +711,26 @@ const SubscriptionStatusBanner = ({ isSubscribed, subscriptionData }) => {
   const statusColors = {
     active: { bg: '#10B981', border: '#059669', text: 'Active Subscription' },
     past_due: { bg: '#EF4444', border: '#DC2626', text: 'Payment Overdue' },
-    paused: { bg: '#F59E0B', border: '#D97706', text: 'Subscription Paused' }
+    paused: { bg: '#F59E0B', border: '#D97706', text: 'Subscription Paused' },
+    cancelled: { bg: '#6B7280', border: '#4B5563', text: 'Subscription Cancelled' }
   };
   
   const status = statusColors[subscriptionData.status] || statusColors.active;
+  const basePlanName = subscriptionData.base_subscription?.plan_details?.name || 'Base Plan';
+  const addons = subscriptionData.addons || [];
+  const monthlyCost = parseFloat(subscriptionData.monthly_cost) || 0;
   
   return (
     <div 
       className="mb-4 p-3 rounded-3 border-2" 
       style={{ 
-        backgroundColor: status.bg + '15',
+        backgroundColor: status.bg + '10',
         borderLeft: `4px solid ${status.bg}`,
         borderColor: status.border + '40'
       }}
     >
-      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      {/* Header Row */}
+      <div className="d-flex justify-content-between align-items-start flex-wrap gap-2">
         <div className="d-flex align-items-center gap-3">
           <div 
             className="d-flex align-items-center justify-content-center rounded-circle" 
@@ -736,20 +748,90 @@ const SubscriptionStatusBanner = ({ isSubscribed, subscriptionData }) => {
               {status.text}
             </h6>
             <p className="mb-0 small text-muted">
-              {subscriptionData.recruiter ? (
-                <span>Recruiter: <strong>{subscriptionData.recruiter.name || subscriptionData.recruiter.email}</strong></span>
-              ) : (
-                <span>Recruiter assignment pending</span>
-              )}
+              Monthly Cost: <strong style={{ color: '#4F46E5' }}>${monthlyCost.toFixed(2)}</strong>
             </p>
           </div>
         </div>
         
-        {subscriptionData.next_billing_date && (
-          <div className="text-end">
-            <div className="small text-muted">Next billing</div>
-            <div className="fw-bold" style={{ color: status.bg }}>
-              {timeRemaining || new Date(subscriptionData.next_billing_date).toLocaleDateString()}
+        <div className="d-flex align-items-center gap-3">
+          {subscriptionData.next_billing_date && (
+            <div className="text-end">
+              <div className="small text-muted">Next billing</div>
+              <div className="fw-bold" style={{ color: status.bg }}>
+                {timeRemaining || new Date(subscriptionData.next_billing_date).toLocaleDateString()}
+              </div>
+            </div>
+          )}
+          
+          {/* Cancel Subscription Button - Only show for active subscriptions */}
+          {subscriptionData.status === 'active' && onCancelSubscription && (
+            <button
+              onClick={onCancelSubscription}
+              disabled={isCancelling}
+              className="btn btn-sm btn-outline-danger"
+              style={{ 
+                borderRadius: '8px',
+                fontSize: '0.8rem',
+                padding: '0.4rem 0.8rem'
+              }}
+            >
+              {isCancelling ? 'Cancelling...' : 'Cancel'}
+            </button>
+          )}
+        </div>
+      </div>
+      
+      {/* Subscription Details */}
+      <div className="mt-3 pt-2 border-top">
+        {/* Base Plan */}
+        <div className="d-flex align-items-center gap-2 mb-2">
+          <span 
+            className="badge" 
+            style={{ 
+              backgroundColor: '#4F46E5', 
+              color: 'white',
+              fontSize: '0.65rem',
+              padding: '0.25rem 0.5rem'
+            }}
+          >
+            BASE
+          </span>
+          <span className="small fw-semibold text-dark">{basePlanName}</span>
+          <span className="small text-muted">
+            (${parseFloat(subscriptionData.base_subscription?.price || 0).toFixed(2)}/month)
+          </span>
+        </div>
+        
+        {/* Add-ons */}
+        {addons.length > 0 && (
+          <div className="mt-2">
+            <div className="small text-muted mb-1">Active Add-ons:</div>
+            <div className="d-flex flex-wrap gap-2">
+              {addons.map((addon, index) => (
+                <div 
+                  key={addon.id || index}
+                  className="d-flex align-items-center gap-1 px-2 py-1 rounded"
+                  style={{ backgroundColor: '#10B98120', border: '1px solid #10B98140' }}
+                >
+                  <span 
+                    className="badge" 
+                    style={{ 
+                      backgroundColor: '#10B981', 
+                      color: 'white',
+                      fontSize: '0.6rem',
+                      padding: '0.15rem 0.35rem'
+                    }}
+                  >
+                    ADD-ON
+                  </span>
+                  <span className="small fw-medium" style={{ color: '#065F46' }}>
+                    {addon.plan_details?.name || 'Add-on Service'}
+                  </span>
+                  <span className="small text-muted">
+                    (${parseFloat(addon.price || 0).toFixed(2)}/mo)
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -769,11 +851,14 @@ const Profile = () => {
   const navigate = useNavigate();
   const primaryColor = '#4F46E5';
   const paleBackground = '#F0F8FF';
-  const BASE_API_URL = "api.hyrind.com/api/users";
+  const BASE_API_URL = "http://127.0.0.1:8000";
 
-  const AVAILABLE_SERVICES = [
-    { id: 'subscription', title: 'One Month Subscription', price: 400, period: 'month', description: 'Benefits of service: resume building, mock interviews and much more..', isMandatory: true },
-  ];
+  // Dynamic plans from API (replaces hardcoded AVAILABLE_SERVICES)
+  const [availablePlans, setAvailablePlans] = useState([]);
+  const [basePlan, setBasePlan] = useState(null);
+  const [addonPlans, setAddonPlans] = useState([]);
+  const [loadingPlans, setLoadingPlans] = useState(false);
+  const plansFetchedRef = useRef(false); // Prevent double API calls
 
   const [profileData, setProfileData] = useState(null);
   const [formData, setFormData] = useState({});
@@ -786,18 +871,25 @@ const Profile = () => {
   const [errors, setErrors] = useState({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  // Removed paymentStep state as we are combining the steps
-  // const [paymentStep, setPaymentStep] = useState(1); // 1: Select Services, 2: Payment Details
-  const [selectedServices, setSelectedServices] = useState(['subscription']); // Default to subscription
-  const [cartTotal, setCartTotal] = useState(400);
+  const [selectedServices, setSelectedServices] = useState([]); // Will be set when plans load
+  const [cartTotal, setCartTotal] = useState(0);
   
-  // Subscription state (local until API is ready)
+  // Subscription state
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isCancellingSubscription, setIsCancellingSubscription] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [activeSubscriptions, setActiveSubscriptions] = useState([]); // Store created subscription IDs
+  const [subscribedPlanIds, setSubscribedPlanIds] = useState([]); // Plan IDs user already has
   const [subscriptionData, setSubscriptionData] = useState({
-    status: 'active',
+    status: 'inactive',
     next_billing_date: null,
     marketing_start_date: null,
-    recruiter: null
+    recruiter: null,
+    monthly_cost: 0,
+    base_subscription: null,
+    addons: [],
+    total_subscriptions: 0,
+    active_subscriptions: 0
   });
 
   const [paymentData, setPaymentData] = useState({
@@ -846,6 +938,10 @@ const Profile = () => {
   useEffect(() => {
 
     const fetchProfile = async () => {
+      // Check ref first to prevent double calls in StrictMode
+      if (hasFetchedRef.current) return;
+      hasFetchedRef.current = true;
+      
       const token = localStorage.getItem('accessToken');
       if (!token) {
         setError("You are not logged in. Redirecting to login...");
@@ -871,9 +967,7 @@ const Profile = () => {
 
         const decoded = parseJwt(storedToken);
         const userId = decoded?.user_id;
-        if (hasFetchedRef.current) return;
-        hasFetchedRef.current = true;
-        const response = await fetch(`${BASE_API_URL}/me`, {
+        const response = await fetch(`${BASE_API_URL}/api/users/me`, {
           method: "GET",
           headers: {
             accept: "application/json",
@@ -934,6 +1028,134 @@ const Profile = () => {
       document.body.removeChild(script);
     };
   }, []);
+
+  // Fetch subscription plans from API
+  const fetchPlans = async () => {
+    setLoadingPlans(true);
+    try {
+      // Fetch base plan (PUBLIC - no auth required)
+      const baseResp = await fetch(`${BASE_API_URL}/api/subscriptions/plans/base_plan/`);
+      if (baseResp.ok) {
+        const baseData = await baseResp.json();
+        setBasePlan(baseData);
+        
+        // Set base plan as default selected
+        setSelectedServices([baseData.id]);
+      }
+
+      // Fetch add-on plans (PUBLIC - no auth required)
+      const addonsResp = await fetch(`${BASE_API_URL}/api/subscriptions/plans/addons/`);
+      if (addonsResp.ok) {
+        const addonsData = await addonsResp.json();
+        setAddonPlans(addonsData);
+      }
+
+    } catch (error) {
+      console.error('Error fetching subscription plans:', error);
+    } finally {
+      setLoadingPlans(false);
+    }
+  };
+
+  // Combine plans into availablePlans array
+  useEffect(() => {
+    const plans = [];
+    if (basePlan) {
+      plans.push({
+        id: basePlan.id,
+        title: basePlan.name,
+        price: parseFloat(basePlan.base_price),
+        period: basePlan.billing_cycle || 'month',
+        description: basePlan.description || 'Mandatory base subscription for all users',
+        isMandatory: basePlan.is_mandatory || true,
+        features: basePlan.features || [],
+        plan_type: 'base'
+      });
+    }
+    if (addonPlans && addonPlans.length > 0) {
+      addonPlans.forEach(addon => {
+        plans.push({
+          id: addon.id,
+          title: addon.name,
+          price: parseFloat(addon.base_price),
+          period: addon.billing_cycle || 'month',
+          description: addon.description || '',
+          isMandatory: false,
+          features: addon.features || [],
+          plan_type: 'addon'
+        });
+      });
+    }
+    setAvailablePlans(plans);
+  }, [basePlan, addonPlans]);
+
+  // Fetch plans on component mount (with ref to prevent double calls)
+  useEffect(() => {
+    if (plansFetchedRef.current) return;
+    plansFetchedRef.current = true;
+    fetchPlans();
+  }, []);
+
+  // Fetch subscription summary from API
+  const fetchSubscriptionSummary = async () => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+
+    try {
+      const response = await fetch(`${BASE_API_URL}/api/subscriptions/my-subscriptions/summary/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsSubscribed(data.active_subscriptions > 0);
+        setSubscriptionData({
+          status: data.base_subscription?.status || 'inactive',
+          next_billing_date: data.next_billing_date || null,
+          marketing_start_date: data.base_subscription?.started_at || null,
+          recruiter: data.base_subscription?.recruiter || null,
+          monthly_cost: data.monthly_cost || 0,
+          base_subscription: data.base_subscription || null,
+          addons: data.addons || [],
+          total_subscriptions: data.total_subscriptions || 0,
+          active_subscriptions: data.active_subscriptions || 0
+        });
+
+        // Store active subscription IDs for cancellation
+        const activeSubIds = [];
+        // Store subscribed plan IDs to disable them in the modal
+        const subscribedPlanIds = [];
+        
+        if (data.base_subscription?.id) {
+          activeSubIds.push(data.base_subscription.id);
+          if (data.base_subscription.plan) {
+            subscribedPlanIds.push(data.base_subscription.plan);
+          }
+        }
+        if (data.addons) {
+          data.addons.forEach(addon => {
+            if (addon.id) activeSubIds.push(addon.id);
+            if (addon.plan) subscribedPlanIds.push(addon.plan);
+          });
+        }
+        setActiveSubscriptions(activeSubIds);
+        // Store subscribed plan IDs in a new state
+        setSubscribedPlanIds(subscribedPlanIds);
+      }
+    } catch (error) {
+      console.error('Error fetching subscription summary:', error);
+    }
+  };
+
+  // Fetch subscription summary when profile loads
+  useEffect(() => {
+    if (profileData) {
+      fetchSubscriptionSummary();
+    }
+  }, [profileData]);
 
   // Auto-dismiss toast message
     useEffect(() => {
@@ -1008,7 +1230,7 @@ const Profile = () => {
     setIsSubmitting(true);
     setSubmissionMessage('Saving changes...');
     const token = localStorage.getItem('accessToken');
-    const updateUrl = `${BASE_API_URL}/profiles/${profileId}/`;
+    const updateUrl = `${BASE_API_URL}/api/users/profiles/${profileId}/`;
 
     const data = new FormData();
     const fieldMap = {
@@ -1123,7 +1345,7 @@ const Profile = () => {
     setSubmissionMessage('Deleting profile...');
     
     const token = localStorage.getItem('accessToken');
-    const deleteUrl = `${BASE_API_URL}/profiles/${profileId}/`;
+    const deleteUrl = `${BASE_API_URL}/api/users/profiles/${profileId}/`;
     
     try {
       const response = await fetch(deleteUrl, {
@@ -1181,14 +1403,180 @@ const Profile = () => {
     }
   };
 const handleUpgradeProfile = () => {
-    // setPaymentStep(1); // Removed as we only have one step now
+    // If not subscribed, show base plan; if subscribed, show add-ons
+    if (!isSubscribed && basePlan) {
+      setSelectedServices([basePlan.id]);
+    } else {
+      // For add-ons, start with empty selection
+      setSelectedServices([]);
+    }
     setShowPaymentModal(true);
+  };
+
+  // Create subscription record (called before payment)
+  const createSubscription = async (planId, planData) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token || !profileId) return null;
+
+    try {
+      const response = await fetch(`${BASE_API_URL}/api/subscriptions/my-subscriptions/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          profile: profileId,
+          plan: planId,
+          plan_details: {
+            name: planData.title || planData.name,
+            plan_type: planData.plan_type || 'base',
+            description: planData.description || '',
+            base_price: planData.price?.toString() || planData.base_price,
+            is_mandatory: planData.isMandatory || false,
+            is_active: true,
+            billing_cycle: planData.period || planData.billing_cycle || 'monthly',
+            features: planData.features || []
+          },
+          price: planData.price?.toString() || planData.base_price,
+          status: 'inactive',
+          billing_cycle: planData.period || planData.billing_cycle || 'monthly'
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to create subscription:', errorData);
+        throw new Error(errorData.detail || errorData.non_field_errors?.[0] || 'Failed to create subscription');
+      }
+    } catch (error) {
+      console.error('Create subscription error:', error);
+      throw error;
+    }
+  };
+
+  // Activate subscription after successful payment
+  const activateSubscription = async (subId, razorpayPaymentId, razorpayOrderId, planData) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token || !subId) return false;
+
+    // Calculate next billing date (30 days from now)
+    const nextBillingDate = new Date();
+    nextBillingDate.setDate(nextBillingDate.getDate() + 30);
+    const nextBillingDateStr = nextBillingDate.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+
+    try {
+      const response = await fetch(`${BASE_API_URL}/api/subscriptions/my-subscriptions/${subId}/activate/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          profile: profileId,
+          plan: planData?.id || subId,
+          plan_details: planData ? {
+            name: planData.title || planData.name,
+            plan_type: planData.plan_type || 'base',
+            description: planData.description || '',
+            base_price: planData.price?.toString() || planData.base_price,
+            is_mandatory: planData.isMandatory || false,
+            is_active: true,
+            billing_cycle: planData.period || planData.billing_cycle || 'monthly',
+            features: planData.features || []
+          } : {},
+          price: planData?.price?.toString() || '400.00',
+          status: 'active',
+          razorpay_subscription_id: razorpayPaymentId,
+          billing_cycle: planData?.period || 'monthly',
+          next_billing_date: nextBillingDateStr
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to activate subscription:', errorData);
+        throw new Error(errorData.detail || 'Failed to activate subscription');
+      }
+    } catch (error) {
+      console.error('Activate subscription error:', error);
+      throw error;
+    }
+  };
+
+  // Cancel subscription - Show modal first
+  const handleCancelSubscription = () => {
+    setShowCancelModal(true);
+  };
+
+  // Confirm cancel subscription - Actually call the API
+  const confirmCancelSubscription = async () => {
+    setShowCancelModal(false);
+    
+    if (!activeSubscriptions || activeSubscriptions.length === 0) {
+      setSubmissionMessage('No active subscription to cancel.');
+      return;
+    }
+
+    setIsCancellingSubscription(true);
+    const token = localStorage.getItem('accessToken');
+
+    try {
+      let cancelledCount = 0;
+      
+      // Cancel all active subscriptions
+      for (const subId of activeSubscriptions) {
+        const response = await fetch(`${BASE_API_URL}/api/subscriptions/my-subscriptions/${subId}/cancel/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          cancelledCount++;
+        } else {
+          const errorData = await response.json();
+          console.error(`Failed to cancel subscription ${subId}:`, errorData);
+        }
+      }
+
+      if (cancelledCount > 0) {
+        setSubmissionMessage(`${cancelledCount} subscription(s) cancelled successfully.`);
+        setIsSubscribed(false);
+        setActiveSubscriptions([]);
+        setSubscriptionData({
+          status: 'cancelled',
+          next_billing_date: null,
+          marketing_start_date: null,
+          recruiter: null,
+          monthly_cost: '0.00',
+          addons: []
+        });
+        // Refresh subscription summary
+        await fetchSubscriptionSummary();
+      } else {
+        setSubmissionMessage('Failed to cancel subscription. Please try again.');
+      }
+    } catch (error) {
+      setSubmissionMessage('Network error while cancelling subscription.');
+      console.error('Cancel subscription network error:', error);
+    } finally {
+      setIsCancellingSubscription(false);
+    }
   };
 
   const toggleService = (serviceId) => {
     setSelectedServices(prev => {
       // Check if service is mandatory
-      const service = AVAILABLE_SERVICES.find(s => s.id === serviceId);
+      const service = availablePlans.find(s => s.id === serviceId);
       if (service && service.isMandatory) {
         return prev; // Cannot toggle mandatory service
       }
@@ -1205,13 +1593,13 @@ const handleUpgradeProfile = () => {
   };
 
   useEffect(() => {
-    // Recalculate total whenever selectedServices changes
+    // Recalculate total whenever selectedServices or availablePlans changes
     const total = selectedServices.reduce((sum, id) => {
-      const service = AVAILABLE_SERVICES.find(s => s.id === id);
+      const service = availablePlans.find(s => s.id === id);
       return sum + (service ? service.price : 0);
     }, 0);
     setCartTotal(total);
-  }, [selectedServices]);
+  }, [selectedServices, availablePlans]);
 
   const handlePaymentChange = (e) => {
     const { name, value } = e.target;
@@ -1242,12 +1630,47 @@ const handleUpgradeProfile = () => {
 
   const handlePaymentSubmit = async (e) => {
     e.preventDefault();
-  
+    
+    if (selectedServices.length === 0) {
+      setSubmissionMessage('Please select at least one plan.');
+      return;
+    }
     
     try {
       setIsSubmitting(true);
-      setSubmissionMessage('Creating payment order...');
       
+      // Step 1: Create subscription records for all selected plans
+      setSubmissionMessage('Creating subscription records...');
+      const createdSubscriptions = [];
+      
+      for (const planId of selectedServices) {
+        const plan = availablePlans.find(p => p.id === planId);
+        if (plan) {
+          try {
+            const subscription = await createSubscription(planId, plan);
+            createdSubscriptions.push({
+              id: subscription.id,
+              planId: planId,
+              planData: plan
+            });
+          } catch (error) {
+            // If subscription already exists, it might return an error
+            console.error(`Error creating subscription for plan ${planId}:`, error);
+            setSubmissionMessage('Error: ' + error.message);
+            setIsSubmitting(false);
+            return;
+          }
+        }
+      }
+      
+      if (createdSubscriptions.length === 0) {
+        setSubmissionMessage('No subscriptions were created. Please try again.');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // Step 2: Create Razorpay payment order
+      setSubmissionMessage('Creating payment order...');
       const token = localStorage.getItem('accessToken');
       const amount = cartTotal;
       
@@ -1255,8 +1678,7 @@ const handleUpgradeProfile = () => {
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = 'Bearer ' + token;
       
-      // Create order
-      const resp = await fetch('api.hyrind.com/api/payments/razorpay/create-order/', {
+      const resp = await fetch(`${BASE_API_URL}/api/payments/razorpay/create-order/`, {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(payload)
@@ -1282,13 +1704,13 @@ const handleUpgradeProfile = () => {
         return;
       }
       
-      // Open Razorpay Checkout
+      // Step 3: Open Razorpay Checkout
       const options = {
         key: key_id,
         amount: order.amount,
         currency: order.currency,
         name: 'Hyrind',
-        description: 'Profile Upgrade - One Month Subscription',
+        description: `Subscription - ${createdSubscriptions.length} plan(s)`,
         order_id: order.id,
         handler: async function(response) {
           try {
@@ -1303,7 +1725,7 @@ const handleUpgradeProfile = () => {
               payment_uuid: payment_uuid
             };
             
-            const verifyResp = await fetch('api.hyrind.com/api/payments/razorpay/verify/', {
+            const verifyResp = await fetch(`${BASE_API_URL}/api/payments/razorpay/verify/`, {
               method: 'POST',
               headers: headers,
               body: JSON.stringify(verifyPayload)
@@ -1316,20 +1738,34 @@ const handleUpgradeProfile = () => {
               return;
             }
             
-            setSubmissionMessage('Payment successful! Your profile has been upgraded.');
+            // Step 4: Activate all created subscriptions with payment IDs
+            setSubmissionMessage('Activating subscriptions...');
+            let activatedCount = 0;
+            
+            for (const sub of createdSubscriptions) {
+              try {
+                await activateSubscription(
+                  sub.id,
+                  response.razorpay_payment_id,
+                  response.razorpay_order_id,
+                  sub.planData
+                );
+                activatedCount++;
+              } catch (error) {
+                console.error(`Error activating subscription ${sub.id}:`, error);
+              }
+            }
+            
             setShowPaymentModal(false);
             setPaymentData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '' });
             
-            // Activate subscription after successful payment
-            setIsSubscribed(true);
-            const nextBillingDate = new Date();
-            nextBillingDate.setMonth(nextBillingDate.getMonth() + 1); // Add 1 month
-            setSubscriptionData({
-              status: 'active',
-              next_billing_date: nextBillingDate.toISOString(),
-              marketing_start_date: new Date().toISOString(),
-              recruiter: null // Will be assigned by admin
-            });
+            if (activatedCount > 0) {
+              setSubmissionMessage(`Payment successful! ${activatedCount} subscription(s) activated.`);
+              // Refresh subscription summary to get updated data
+              await fetchSubscriptionSummary();
+            } else {
+              setSubmissionMessage('Payment completed but subscription activation failed. Please contact support.');
+            }
             
             setIsSubmitting(false);
           } catch (error) {
@@ -1437,6 +1873,59 @@ const handleUpgradeProfile = () => {
           </div>
         )}
 
+        {/* Cancel Subscription Confirmation Modal */}
+        {showCancelModal && (
+          <div className="position-fixed top-0 start-0 w-100 h-100" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1050 }}>
+            <div className="position-absolute top-50 start-50 translate-middle bg-white rounded-3 shadow-lg p-4" style={{ maxWidth: '500px', width: '90%' }}>
+              <div className="text-center">
+                <div className="mb-3">
+                  <div 
+                    className="mx-auto rounded-circle d-flex align-items-center justify-content-center" 
+                    style={{ width: '64px', height: '64px', backgroundColor: '#FEF3C7' }}
+                  >
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                      <line x1="12" y1="9" x2="12" y2="13"></line>
+                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                  </div>
+                </div>
+                <h4 className="fw-bold mb-3" style={{ color: '#1F2937' }}>Cancel Subscription</h4>
+                <p className="text-muted mb-2">
+                  Are you sure you want to cancel your subscription?
+                </p>
+                <p className="small mb-4" style={{ color: '#6B7280' }}>
+                  Your subscription will remain active until the end of your current billing period. 
+                  You will lose access to premium features after that date.
+                </p>
+                <div className="d-flex gap-3 justify-content-center">
+                  <button
+                    onClick={() => setShowCancelModal(false)}
+                    className="btn btn-secondary px-4 py-2 fw-semibold"
+                    style={{ minWidth: '120px', borderRadius: '8px' }}
+                  >
+                    Keep Subscription
+                  </button>
+                  <button
+                    onClick={confirmCancelSubscription}
+                    disabled={isCancellingSubscription}
+                    className="btn px-4 py-2 fw-semibold"
+                    style={{ 
+                      minWidth: '120px', 
+                      borderRadius: '8px',
+                      backgroundColor: '#EF4444',
+                      border: 'none',
+                      color: 'white'
+                    }}
+                  >
+                    {isCancellingSubscription ? 'Cancelling...' : 'Yes, Cancel'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Payment Modal */}
         {showPaymentModal && (
           <div className="payment-modal-overlay position-fixed top-0 start-0 w-100 h-100" style={{ zIndex: 1050 }}>
@@ -1468,45 +1957,124 @@ const handleUpgradeProfile = () => {
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
-                <div className="payment-title">Secure Payment</div>
+                <div className="payment-title">{isSubscribed ? 'Add Services' : 'Upgrade Profile'}</div>
                 <div className="payment-amount-large">${cartTotal}</div>
                 <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
-                  Total amount for selected services
+                  {isSubscribed ? 'Select add-on services' : 'Total amount for subscription'}
                 </div>
               </div>
 
               {/* Body */}
               <div className="payment-body">
                 
-                {/* STEP 1: SERVICE SELECTION (Now Display Only) */}
+                {/* SERVICE SELECTION - Dynamic from API */}
                   <div className="service-list-container custom-scrollbar d-flex flex-column gap-2 mb-4">
-                     {AVAILABLE_SERVICES.map((service) => (
-                       <div 
-                         key={service.id} 
-                         className={`service-item ${selectedServices.includes(service.id) ? 'selected' : ''}`}
-                         style={{ cursor: service.isMandatory ? 'default' : 'pointer', opacity: service.isMandatory ? 0.9 : 1 }}
-                         onClick={() => !service.isMandatory && toggleService(service.id)}
-                       >
-                         <div className="service-info text-start">
-                           <h5>
-                             {service.title}
-                             {service.isMandatory && <span className="badge bg-danger text-white ms-2" style={{ fontSize: '0.7rem' }}>REQUIRED</span>}
-                             {service.isBundle && <span className="badge bg-warning text-dark ms-2" style={{ fontSize: '0.7rem' }}>BEST VALUE</span>}
-                           </h5>
-                           <p>{service.description}</p>
+                     {loadingPlans ? (
+                       <div className="text-center py-4">
+                         <div className="spinner-border text-primary spinner-border-sm" role="status">
+                           <span className="visually-hidden">Loading plans...</span>
                          </div>
-                         <div className="service-price">${service.price}<small className="text-muted fw-normal" style={{ fontSize: '0.75rem' }}>/{service.period}</small></div>
-                         <div className="ms-3">
-                           {selectedServices.includes(service.id) ? (
-                             <div className="rounded-circle bg-primary d-flex align-items-center justify-content-center" style={{ width: '24px', height: '24px' }}>
-                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                             </div>
-                           ) : (
-                             <div className="rounded-circle border border-2 border-secondary" style={{ width: '24px', height: '24px' }}></div>
-                           )}
-                         </div>
+                         <p className="mt-2 mb-0 small text-muted">Loading available plans...</p>
                        </div>
-                     ))}
+                     ) : (!isSubscribed && !basePlan) || (isSubscribed && (!addonPlans || addonPlans.length === 0)) ? (
+                       <div className="text-center py-4">
+                         <p className="mb-0 text-muted">
+                           {isSubscribed ? 'No add-on services available at the moment.' : 'No plans available. Please try again later.'}
+                         </p>
+                       </div>
+                     ) : (
+                       // Show base plan for non-subscribers, add-ons for subscribers
+                       (isSubscribed ? availablePlans.filter(p => p.plan_type === 'addon') : availablePlans.filter(p => p.plan_type === 'base')).map((service) => {
+                        const isAlreadySubscribed = subscribedPlanIds.includes(service.id);
+                        const isDisabled = service.isMandatory || isAlreadySubscribed;
+                        
+                        return (
+                        <div 
+                          key={service.id} 
+                          className={`service-item ${selectedServices.includes(service.id) ? 'selected' : ''} ${isAlreadySubscribed ? 'already-subscribed' : ''}`}
+                          style={{ 
+                            cursor: isDisabled ? 'not-allowed' : 'pointer', 
+                            opacity: isAlreadySubscribed ? 0.6 : 1,
+                            backgroundColor: isAlreadySubscribed ? '#f0f0f0' : undefined
+                          }}
+                          onClick={() => !isDisabled && toggleService(service.id)}
+                        >
+                          <div className="d-flex align-items-center gap-3 flex-grow-1">
+                            <div className="ms-2">
+                              {isAlreadySubscribed ? (
+                                <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: '28px', height: '28px', backgroundColor: '#6B7280' }}>
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                              ) : selectedServices.includes(service.id) ? (
+                                <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: '28px', height: '28px', backgroundColor: primaryColor }}>
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                              ) : (
+                                <div className="rounded-circle border border-2" style={{ width: '28px', height: '28px', borderColor: '#cbd5e1' }}></div>
+                              )}
+                            </div>
+                            <div className="service-info text-start flex-grow-1">
+                              <div className="d-flex align-items-center gap-2 flex-wrap">
+                                <h5 className="mb-0 fw-semibold" style={{ fontSize: '1rem', color: isAlreadySubscribed ? '#6B7280' : '#1e293b' }}>
+                                  {service.title}
+                                </h5>
+                                {isAlreadySubscribed && (
+                                  <span 
+                                    className="badge" 
+                                    style={{ 
+                                      backgroundColor: '#6B7280', 
+                                      color: 'white', 
+                                      fontSize: '0.65rem', 
+                                      padding: '0.25rem 0.5rem',
+                                      borderRadius: '4px',
+                                      fontWeight: '600'
+                                    }}
+                                  >
+                                    SUBSCRIBED
+                                  </span>
+                                )}
+                                {service.isMandatory && !isAlreadySubscribed && (
+                                  <span 
+                                    className="badge" 
+                                    style={{ 
+                                      backgroundColor: '#DC2626', 
+                                      color: 'white', 
+                                      fontSize: '0.65rem', 
+                                      padding: '0.25rem 0.5rem',
+                                      borderRadius: '4px',
+                                      fontWeight: '600',
+                                      letterSpacing: '0.5px'
+                                    }}
+                                  >
+                                    REQUIRED
+                                  </span>
+                                )}
+                                {service.plan_type === 'addon' && !isAlreadySubscribed && (
+                                  <span 
+                                    className="badge" 
+                                    style={{ 
+                                      backgroundColor: '#10B981', 
+                                      color: 'white', 
+                                      fontSize: '0.65rem', 
+                                      padding: '0.25rem 0.5rem',
+                                      borderRadius: '4px',
+                                      fontWeight: '600'
+                                    }}
+                                  >
+                                    ADD-ON
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mb-0 mt-1" style={{ fontSize: '0.85rem', color: '#64748b' }}>{service.description}</p>
+                            </div>
+                          </div>
+                          <div className="service-price text-end" style={{ minWidth: '80px' }}>
+                            <span className="fw-bold" style={{ fontSize: '1.25rem', color: isAlreadySubscribed ? '#6B7280' : primaryColor }}>${service.price}</span>
+                            <small className="text-muted d-block" style={{ fontSize: '0.75rem' }}>/{service.period}</small>
+                          </div>
+                        </div>
+                      )})
+                      )}
                   </div>
 
                   {/* <div className="cart-summary mb-4">
@@ -1547,6 +2115,7 @@ const handleUpgradeProfile = () => {
             onDeleteProfile={handleDeleteProfile}
             onUpgradeProfile={handleUpgradeProfile}
             isSubscribed={isSubscribed}
+            hasAddonPlans={addonPlans && addonPlans.length > 0}
           />
         </div>
 
@@ -1572,7 +2141,12 @@ const handleUpgradeProfile = () => {
               </div>
 
               {/* Subscription Status Banner */}
-              <SubscriptionStatusBanner isSubscribed={isSubscribed} subscriptionData={subscriptionData} />
+              <SubscriptionStatusBanner 
+                isSubscribed={isSubscribed} 
+                subscriptionData={subscriptionData} 
+                onCancelSubscription={handleCancelSubscription}
+                isCancelling={isCancellingSubscription}
+              />
 
               {/* Form / View */}
               <form onSubmit={handleUpdateProfile} noValidate>
