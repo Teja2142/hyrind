@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { base_url } from "./commonAPI's.json";
 
 const RecruiterRegister = () => {
   const navigate = useNavigate();
-  const API_URL = "http://127.0.0.1:8000/api/recruiters/register/";
+  const API_URL = `${base_url}/api/recruiters/register/`;
 
   const [formData, setFormData] = useState({
     email: "",

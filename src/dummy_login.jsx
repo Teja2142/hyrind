@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 // Import the useNavigate hook
-import { Link, useNavigate } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom';
+import { base_url } from "./commonAPI's.json";
 
 // --- Start: Inline SVG Icon Definitions ---
 
@@ -114,7 +115,7 @@ const Login = ({ onLoginSuccess }) => {
 
   const [isRecruiter, setIsRecruiter] = useState(false);
   
-  const LOGIN_API_URL = isRecruiter==false ? "http://127.0.0.1:8000/api/login/" : "http://127.0.0.1:8000/api/recruiter-login/";
+  const LOGIN_API_URL = isRecruiter==false ? `${base_url}/api/login/` : `${base_url}/api/recruiter-login/`;
 
   const [formData, setFormData] = useState({
     email: '',

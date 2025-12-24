@@ -1,6 +1,7 @@
 import React, { useState,useEffect } from 'react';
 // Import the useNavigate hook
-import { Link, useNavigate } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom';
+import { base_url } from "./commonAPI's.json";
 
 // --- Start: Inline SVG Icon Definitions ---
 
@@ -112,7 +113,7 @@ const Login = ({ onLoginSuccess }) => {
 
   const navigate = useNavigate(); 
   
-  const LOGIN_API_URL = "http://127.0.0.1:8000/api/users/login/";
+  const LOGIN_API_URL = `${base_url}/api/users/login/`;
 
   const [formData, setFormData] = useState({
     email: '',

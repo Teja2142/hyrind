@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { base_url } from "./commonAPI's.json";
 
 // --- Start: Inline SVG Icon Definitions ---
 
@@ -110,7 +111,7 @@ const AdminLogin = ({ onLoginSuccess }) => {
 
   const navigate = useNavigate(); 
   
-  const ADMIN_LOGIN_API_URL = "http://127.0.0.1:8000/api/admin/login/";
+  const ADMIN_LOGIN_API_URL = `${base_url}/api/admin/login/`;
 
   const [formData, setFormData] = useState({
     username: '',

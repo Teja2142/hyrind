@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { base_url } from "./commonAPI's.json";
 // --- Icons (same style as Register.jsx) ---
 
 const User = (props) => (
@@ -286,7 +286,7 @@ const TextInput = ({
 const Interest = () => {
   const navigate = useNavigate();
 
-  const INTEREST_API_URL = "http://127.0.0.1:8000/api/interest/"; // adjust as needed
+  const INTEREST_API_URL = `${base_url}/api/interest/`; // adjust as needed
 
   const primaryColor = '#4682B4'; // Steel Blue
   const paleBackground = '#F0F8FF'; // Alice Blue

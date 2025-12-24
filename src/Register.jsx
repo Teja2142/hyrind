@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 // Import Link and useNavigate
 import { Link, useNavigate } from 'react-router-dom'; 
+import { base_url } from "./commonAPI's.json";
 
 // --- Start: Inline SVG Icon Definitions (Lucide Icons used for aesthetics) ---
 
@@ -237,7 +238,7 @@ const formatDateToMMYYYY = (dateString) => {
 const Register = () => {
   const navigate = useNavigate(); 
   // CORRECTED API endpoint to match user's curl request
-  const REGISTER_API_URL = "http://127.0.0.1:8000/api/users/register/"; 
+  const REGISTER_API_URL = `${base_url}/api/users/register/`; 
   
   const initialFormState = {
     firstName: '',

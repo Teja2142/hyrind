@@ -1,6 +1,6 @@
 import React, { useState, useEffect,useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { base_url } from "./commonAPI's.json";
 // ============================================
 // SVG ICONS
 // ============================================
@@ -535,8 +535,8 @@ const CandidatesTable = ({ candidates, page, setPage, pageSize = 10 }) => {
 const RecruiterDashboard = () => {
   const navigate = useNavigate();
   const primaryColor = '#4F46E5';
-  const BASE_API_URL = "http://127.0.0.1:8000/api/recruiters/me";
-  const CANDIDATES_API_URL = "http://127.0.0.1:8000/api/users/profiles/";
+  const BASE_API_URL = `${base_url}/api/recruiters/me`;
+  const CANDIDATES_API_URL = `${base_url}/api/users/profiles/`;
 
   // State Management
   const [activeView, setActiveView] = useState('profile'); // 'profile' or 'candidates'

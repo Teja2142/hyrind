@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Briefcase, CheckCircle, XCircle, UserPlus, Zap, Loader, AlertTriangle, RefreshCw, LogOut } from 'lucide-react';
+import { base_url } from "./commonAPI's.json";
 
 // --- HELPER FUNCTIONS ---
 // date helpers
@@ -21,7 +22,7 @@ const formatDateToApi = (dateString) => {
 
 // --- API CONFIGURATION ---
 // NOTE: Replace these placeholder values with actual dynamic values in a real application.
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = `${base_url}/api`;
 const PLACEHOLDER_AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0ODY1NjEwLCJpYXQiOjE3NjQ4NjM4MTAsImp0aSI6ImRlMGJjNGQzZWM5NTQxNGI4NTZmNThiMTJkOTlhZGRiIiwidXNlcl9pZCI6IjEwIn0.SLlu_vFK7mmm96LUCaqEnuF948Edspxjy3GLA97oJoM';
 const PLACEHOLDER_CSRF_TOKEN = 'eL0NJos1AcwHGVv9rppEKP75j7QyYFECQFsxIPspyVzBRG66AcYhshJ7Cfq2Cc4T';
 
@@ -650,7 +651,7 @@ const RecruiterDetailsContent = ({ recruiter, assignedCandidates, onClose }) => 
 export default function Admin() {
     const primaryColor = '#4F46E5';
   const paleBackground = '#F0F8FF';
-  const ADMIN_BASE_URL ="http://127.0.0.1:8000/api/users/admin" 
+  const ADMIN_BASE_URL =`${base_url}/api/users/admin` 
   const [activeView, setActiveView] = useState('candidates');
   const [candidates, setCandidates] = useState(initialCandidates);
   const [recruiters, setRecruiters] = useState(initialRecruiters);

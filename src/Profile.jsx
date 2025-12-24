@@ -1,5 +1,6 @@
 import React, { useState, useEffect,useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { base_url } from "./commonAPI's.json";
 
 // --- START: Inline SVG Icon Definitions ---
 
@@ -851,7 +852,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const primaryColor = '#4F46E5';
   const paleBackground = '#F0F8FF';
-  const BASE_API_URL = "http://127.0.0.1:8000";
+  const BASE_API_URL = `${base_url}`;
 
   // Dynamic plans from API (replaces hardcoded AVAILABLE_SERVICES)
   const [availablePlans, setAvailablePlans] = useState([]);
