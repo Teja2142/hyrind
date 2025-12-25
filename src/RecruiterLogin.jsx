@@ -6,7 +6,7 @@ const RecruiterLogin = () => {
   const navigate = useNavigate();
 
   // 🔥 Your recruiter login API (assuming recruiters also use same JWT login API)
-  const LOGIN_API_URL = `${base_url}/api/recruiters/login/`;
+  const LOGIN_API_URL = `https://api.hyrind.com/api/recruiters/login/`;
 
   const [formData, setFormData] = useState({
     email: "",

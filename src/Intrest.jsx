@@ -286,7 +286,7 @@ const TextInput = ({
 const Interest = () => {
   const navigate = useNavigate();
 
-  const INTEREST_API_URL = `${base_url}/api/interest/`; // adjust as needed
+  const INTEREST_API_URL = `https://api.hyrind.com/api/interest/`; // adjust as needed
 
   const primaryColor = '#4682B4'; // Steel Blue
   const paleBackground = '#F0F8FF'; // Alice Blue

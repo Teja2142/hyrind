@@ -535,8 +535,8 @@ const CandidatesTable = ({ candidates, page, setPage, pageSize = 10 }) => {
 const RecruiterDashboard = () => {
   const navigate = useNavigate();
   const primaryColor = '#4F46E5';
-  const BASE_API_URL = `${base_url}/api/recruiters/me`;
-  const CANDIDATES_API_URL = `${base_url}/api/users/profiles/`;
+  const BASE_API_URL = `https://api.hyrind.com/api/recruiters/me`;
+  const CANDIDATES_API_URL = `https://api.hyrind.com/api/users/profiles/`;
 
   // State Management
   const [activeView, setActiveView] = useState('profile'); // 'profile' or 'candidates'

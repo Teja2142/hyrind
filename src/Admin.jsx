@@ -651,7 +651,7 @@ const RecruiterDetailsContent = ({ recruiter, assignedCandidates, onClose }) => 
 export default function Admin() {
     const primaryColor = '#4F46E5';
   const paleBackground = '#F0F8FF';
-  const ADMIN_BASE_URL =`${base_url}/api/users/admin` 
+  const ADMIN_BASE_URL =`https://api.hyrind.com/api/users/admin` 
   const [activeView, setActiveView] = useState('candidates');
   const [candidates, setCandidates] = useState(initialCandidates);
   const [recruiters, setRecruiters] = useState(initialRecruiters);
