@@ -111,7 +111,7 @@ const AdminLogin = ({ onLoginSuccess }) => {
 
   const navigate = useNavigate(); 
   
-  const ADMIN_LOGIN_API_URL = `https://api.hyrind.com/api/admin/login/`;
+  const ADMIN_LOGIN_API_URL = `${base_url}/api/admin/login/`;
 
   const [formData, setFormData] = useState({
     username: '',

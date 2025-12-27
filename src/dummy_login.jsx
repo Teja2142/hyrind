@@ -115,7 +115,7 @@ const Login = ({ onLoginSuccess }) => {
 
   const [isRecruiter, setIsRecruiter] = useState(false);
   
-  const LOGIN_API_URL = isRecruiter==false ? `https://api.hyrind.com/api/login/` : `https://api.hyrind.com/api/recruiter-login/`;
+  const LOGIN_API_URL = isRecruiter==false ? `${base_url}/api/login/` : `${base_url}/api/recruiter-login/`;
 
   const [formData, setFormData] = useState({
     email: '',

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Briefcase, CheckCircle, XCircle, UserPlus, Zap, Loader, AlertTriangle, RefreshCw, LogOut } from 'lucide-react';
+import { Users, Briefcase, CheckCircle, XCircle, UserPlus, Zap, Loader, AlertTriangle, RefreshCw, LogOut, CreditCard, Layers, DollarSign, List, Download } from 'lucide-react';
 import { base_url } from "./commonAPI's.json";
 // import { base_url } from "./commonAPI's.json";
 
@@ -189,6 +189,25 @@ const AdminSidebar = ({ activeView, setActiveView, admin }) => (
         label="Recruiters"
         isActive={activeView === 'recruiters'}
         onClick={() => setActiveView('recruiters')}
+      />
+      <div className="border-t border-indigo-400 my-2 opacity-50"></div>
+      <SidebarButton
+        Icon={Layers}
+        label="Subscription Plans"
+        isActive={activeView === 'plans'}
+        onClick={() => setActiveView('plans')}
+      />
+      <SidebarButton
+        Icon={List}
+        label="User Subscriptions"
+        isActive={activeView === 'subscriptions'}
+        onClick={() => setActiveView('subscriptions')}
+      />
+      <SidebarButton
+        Icon={DollarSign}
+        label="Billing History"
+        isActive={activeView === 'billing'}
+        onClick={() => setActiveView('billing')}
       />
     </nav>
   </div>
@@ -647,12 +666,421 @@ const RecruiterDetailsContent = ({ recruiter, assignedCandidates, onClose }) => 
   </div>
 );
 
+// --- SUBSCRIPTION RELATED VIEWS ---
+
+const PlanCard = ({ plan }) => {
+  const isBasePlan = plan.plan_type === 'base';
+  const isActive = plan.is_active !== false;
+
+  return (
+    <div className="card border-0 shadow-sm h-100" style={{ borderLeft: `4px solid ${isBasePlan ? '#4F46E5' : '#10B981'}` }}>
+      <div className="card-body p-4 d-flex flex-column">
+        <div className="flex-grow-1">
+          <div className="d-flex justify-content-between align-items-start mb-3">
+            <div className="flex-grow-1">
+              <div className="d-flex align-items-center mb-2">
+                <h5 className="fw-bold text-dark mb-0 me-2">{plan.name}</h5>
+                <span 
+                  className="badge px-2 py-1 fw-semibold" 
+                  style={{ 
+                    backgroundColor: isActive ? '#D1FAE5' : '#FEE2E2', 
+                    color: isActive ? '#065F46' : '#991B1B',
+                    fontSize: '0.7rem'
+                  }}
+                >
+                  {isActive ? '● Active' : '● Inactive'}
+                </span>
+              </div>
+              <p className="text-muted small mb-0">{plan.description || 'No description available'}</p>
+            </div>
+            <span 
+              className="badge px-3 py-2 fw-semibold"
+              style={{
+                backgroundColor: isBasePlan ? '#EEF2FF' : '#F0FDF4',
+                color: isBasePlan ? '#4F46E5' : '#10B981',
+                fontSize: '0.75rem'
+              }}
+            >
+              {isBasePlan ? 'BASE' : 'ADD-ON'}
+            </span>
+          </div>
+
+          <div className="mb-3">
+            <div className="d-flex align-items-baseline gap-2">
+              <span className="fs-3 fw-bold" style={{ color: '#4F46E5' }}>${plan.base_price}</span>
+              <span className="text-muted small">/ {plan.billing_cycle || 'month'}</span>
+            </div>
+          </div>
+
+          {plan.features && plan.features.length > 0 && (
+            <div className="mb-2">
+              <p className="small text-muted mb-2 fw-semibold">Features:</p>
+              <ul className="list-unstyled mb-0">
+                {plan.features.slice(0, 4).map((feature, idx) => (
+                  <li key={idx} className="small mb-2 d-flex align-items-start gap-2">
+                    <CheckCircle className="text-success flex-shrink-0" style={{ width: '14px', height: '14px', marginTop: '2px' }} />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+                {plan.features.length > 4 && (
+                  <li className="small text-muted fst-italic">+{plan.features.length - 4} more features</li>
+                )}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        <div className="pt-3 border-top mt-2">
+          <div className="d-flex justify-content-between align-items-center text-muted small">
+            <span>Plan ID: {plan.id}</span>
+            {plan.is_mandatory && (
+              <span className="badge bg-warning-subtle text-warning px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                MANDATORY
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+// --- SUBSCRIPTION RELATED VIEWS ---
+
+const PlansView = ({ plans, isLoading, error, refetchData }) => {
+  const basePlansCount = plans.filter(p => p.plan_type === 'base').length;
+  const addonPlansCount = plans.filter(p => p.plan_type === 'addon').length;
+  const activePlansCount = plans.filter(p => p.is_active !== false).length;
+
+  return (
+    <div className="plans-view">
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+          <h2 className="fw-bold mb-1" style={{ color: '#4F46E5', fontSize: '1.75rem' }}>
+            Subscription Plans
+          </h2>
+          <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>Total: {plans.length} plans</p>
+        </div>
+        <button 
+          onClick={refetchData} 
+          disabled={isLoading}
+          className="btn btn-sm d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+          style={{ 
+            backgroundColor: '#4F46E5', 
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4338CA'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4F46E5'}
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          {isLoading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
+      
+      <div className="metrics-grid">
+        <MetricCard title="Base Plans" value={basePlansCount} color="bg-blue-100 text-blue-800" Icon={Layers} />
+        <MetricCard title="Add-on Plans" value={addonPlansCount} color="bg-green-100 text-green-800" Icon={Zap} />
+        <MetricCard title="Active Plans" value={activePlansCount} color="bg-indigo-100 text-indigo-800" Icon={CheckCircle} />
+      </div>
+
+      {isLoading && <div className="text-center p-4 text-indigo-600"><Loader className="w-6 h-6 inline-block animate-spin mr-2" /> Loading plans...</div>}
+      {error && <div className="p-4 bg-red-100 text-red-700 rounded-lg flex items-center"><AlertTriangle className="w-5 h-5 mr-2" /> Error loading data: {error}</div>}
+
+      <div className="row g-4 mt-2">
+        {plans.length === 0 && !isLoading && !error && (
+          <div className="col-12">
+            <div className="text-center p-5 bg-light rounded-3 border border-2 border-dashed" style={{ borderColor: '#E5E7EB' }}>
+              <Layers className="w-12 h-12 mx-auto mb-3 opacity-25" style={{ color: '#6B7280' }} />
+              <p className="text-muted mb-0 fw-semibold">No plans found</p>
+              <p className="text-muted small mb-0">Subscription plans will appear here once created</p>
+            </div>
+          </div>
+        )}
+        {plans.map(plan => (
+          <div key={plan.id} className="col-12 col-md-6 col-lg-4">
+            <PlanCard plan={plan} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const SubscriptionCard = ({ subscription }) => {
+  const isActive = subscription.status === 'active';
+  const userEmail = subscription.user_email || subscription.profile?.email || subscription.user_subscription?.user_email || 'N/A';
+  const planName = subscription.plan?.name || subscription.plan_name || subscription.plan_details?.name || 'N/A';
+  const startDate = subscription.started_at ? new Date(subscription.started_at).toLocaleDateString() : 'N/A';
+  const nextBilling = subscription.next_billing_date || 'N/A';
+
+  return (
+    <div className="card border-0 shadow-sm" style={{ borderLeft: `4px solid ${isActive ? '#10B981' : '#6B7280'}` }}>
+      <div className="card-body p-4">
+        <div className="row align-items-center">
+          <div className="col-md-8 mb-3 mb-md-0">
+            <div className="d-flex align-items-center mb-2">
+              <h5 className="mb-0 fw-bold text-dark me-3">{userEmail}</h5>
+              <span 
+                className="badge px-3 py-1 fw-semibold text-uppercase" 
+                style={{ 
+                  backgroundColor: isActive ? '#D1FAE5' : '#F3F4F6', 
+                  color: isActive ? '#065F46' : '#6B7280',
+                  fontSize: '0.7rem',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                {subscription.status}
+              </span>
+            </div>
+            <div className="d-flex flex-wrap gap-3 text-muted small">
+              <span><strong>Plan:</strong> {planName}</span>
+              <span><strong>Subscription ID:</strong> {subscription.id?.substring(0, 13)}...</span>
+            </div>
+            <div className="d-flex flex-wrap gap-3 text-muted small mt-2">
+              <span><strong>Started:</strong> {startDate}</span>
+              <span><strong>Next Billing:</strong> {nextBilling}</span>
+            </div>
+          </div>
+
+          <div className="col-md-4 d-flex flex-column align-items-md-end">
+            <div className="mb-2">
+              <span className="fs-4 fw-bold" style={{ color: '#4F46E5' }}>${subscription.price}</span>
+              <span className="text-muted small ms-1">/month</span>
+            </div>
+            {subscription.razorpay_subscription_id && (
+              <span className="badge bg-info-subtle text-info px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                Razorpay: {subscription.razorpay_subscription_id.substring(0, 10)}...
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+const SubscriptionsView = ({ subscriptions, isLoading, error, refetchData }) => {
+  const activeCount = subscriptions.filter(s => s.status === 'active').length;
+  const inactiveCount = subscriptions.filter(s => s.status === 'inactive').length;
+  const totalRevenue = subscriptions
+    .filter(s => s.status === 'active')
+    .reduce((sum, s) => sum + parseFloat(s.price || 0), 0);
+
+  return (
+    <div className="subscriptions-view">
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+          <h2 className="fw-bold mb-1" style={{ color: '#4F46E5', fontSize: '1.75rem' }}>
+            User Subscriptions
+          </h2>
+          <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>Total: {subscriptions.length} subscriptions</p>
+        </div>
+        <button 
+          onClick={refetchData} 
+          disabled={isLoading}
+          className="btn btn-sm d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+          style={{ 
+            backgroundColor: '#4F46E5', 
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4338CA'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4F46E5'}
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          {isLoading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
+
+      <div className="metrics-grid">
+        <MetricCard title="Active Subscriptions" value={activeCount} color="bg-green-100 text-green-800" Icon={CheckCircle} />
+        <MetricCard title="Inactive Subscriptions" value={inactiveCount} color="bg-gray-100 text-gray-800" Icon={XCircle} />
+        <MetricCard title="Monthly Revenue" value={`$${totalRevenue.toFixed(2)}`} color="bg-indigo-100 text-indigo-800" Icon={DollarSign} />
+      </div>
+
+      {isLoading && <div className="text-center p-4 text-indigo-600"><Loader className="w-6 h-6 inline-block animate-spin mr-2" /> Loading subscriptions...</div>}
+      {error && <div className="p-4 bg-red-100 text-red-700 rounded-lg flex items-center"><AlertTriangle className="w-5 h-5 mr-2" /> Error loading data: {error}</div>}
+
+      <div className="d-flex flex-column gap-3 mt-4">
+        {subscriptions.length === 0 && !isLoading && !error && (
+          <div className="text-center p-5 bg-light rounded-3 border border-2 border-dashed" style={{ borderColor: '#E5E7EB' }}>
+            <List className="w-12 h-12 mx-auto mb-3 opacity-25" style={{ color: '#6B7280' }} />
+            <p className="text-muted mb-0 fw-semibold">No subscriptions found</p>
+            <p className="text-muted small mb-0">User subscriptions will appear here once activated</p>
+          </div>
+        )}
+        {subscriptions.map(subscription => (
+          <SubscriptionCard key={subscription.id} subscription={subscription} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const BillingCard = ({ bill }) => {
+  const isSuccess = bill.status === 'success';
+  const userEmail = bill.user_subscription?.user_email || bill.profile?.email || 'N/A';
+  const transactionDate = new Date(bill.created_at).toLocaleString();
+
+  return (
+    <div className="card border-0 shadow-sm" style={{ borderLeft: `4px solid ${isSuccess ? '#10B981' : '#F59E0B'}` }}>
+      <div className="card-body p-4">
+        <div className="row align-items-center">
+          <div className="col-md-8 mb-3 mb-md-0">
+            <div className="d-flex align-items-center mb-2">
+              <h5 className="mb-0 fw-bold text-dark me-3">{userEmail}</h5>
+              <span 
+                className="badge px-3 py-1 fw-semibold text-uppercase" 
+                style={{ 
+                  backgroundColor: isSuccess ? '#D1FAE5' : '#FEF3C7', 
+                  color: isSuccess ? '#065F46' : '#92400E',
+                  fontSize: '0.7rem',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                {bill.status}
+              </span>
+            </div>
+            <div className="d-flex flex-wrap gap-3 text-muted small">
+              <span><strong>Transaction ID:</strong> <code className="text-muted" style={{ fontSize: '0.75rem' }}>{bill.id?.substring(0, 16)}...</code></span>
+              {bill.razorpay_payment_id && (
+                <span><strong>Razorpay ID:</strong> <code className="text-muted" style={{ fontSize: '0.75rem' }}>{bill.razorpay_payment_id.substring(0, 12)}...</code></span>
+              )}
+            </div>
+            <div className="d-flex flex-wrap gap-3 text-muted small mt-2">
+              <span><strong>Date:</strong> {transactionDate}</span>
+              {bill.description && <span><strong>Description:</strong> {bill.description}</span>}
+            </div>
+          </div>
+
+          <div className="col-md-4 d-flex flex-column align-items-md-end">
+            <div className="mb-2">
+              <span className="fs-3 fw-bold" style={{ color: isSuccess ? '#10B981' : '#F59E0B' }}>${bill.amount}</span>
+            </div>
+            {isSuccess && (
+              <span className="badge bg-success-subtle text-success px-2 py-1" style={{ fontSize: '0.7rem' }}>
+                <CheckCircle className="w-3 h-3 me-1" style={{ display: 'inline', width: '12px', height: '12px' }} />
+                Payment Confirmed
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+const BillingHistoryView = ({ history, isLoading, error, refetchData }) => {
+  const successCount = history.filter(h => h.status === 'success').length;
+  const pendingCount = history.filter(h => h.status === 'pending').length;
+  const totalAmount = history
+    .filter(h => h.status === 'success')
+    .reduce((sum, h) => sum + parseFloat(h.amount || 0), 0);
+
+  const handleExportCSV = () => {
+    if (history.length === 0) return;
+    const headers = ["ID", "User Email", "Amount", "Status", "Date", "Razorpay ID"];
+    const rows = history.map(bill => [
+      bill.id,
+      bill.user_subscription?.user_email || 'N/A',
+      bill.amount,
+      bill.status,
+      new Date(bill.created_at).toLocaleString(),
+      bill.razorpay_payment_id || 'N/A'
+    ]);
+    
+    let csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\n"
+      + rows.map(e => e.join(",")).join("\n");
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `billing_history_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="billing-view">
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+          <h2 className="fw-bold mb-1" style={{ color: '#4F46E5', fontSize: '1.75rem' }}>
+            Billing History
+          </h2>
+          <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>Total: {history.length} transactions</p>
+        </div>
+        <div className="d-flex gap-2">
+          <button 
+            onClick={handleExportCSV} 
+            disabled={history.length === 0} 
+            className="btn btn-sm btn-outline-dark d-flex align-items-center gap-2 px-3 py-2 fw-semibold" 
+            style={{ borderRadius: '8px' }}
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+          <button 
+            onClick={refetchData} 
+            disabled={isLoading}
+            className="btn btn-sm d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+            style={{ 
+              backgroundColor: '#4F46E5', 
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4338CA'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4F46E5'}
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            {isLoading ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
+      </div>
+
+      <div className="metrics-grid">
+        <MetricCard title="Successful Payments" value={successCount} color="bg-green-100 text-green-800" Icon={CheckCircle} />
+        <MetricCard title="Pending Payments" value={pendingCount} color="bg-yellow-100 text-yellow-800" Icon={Zap} />
+        <MetricCard title="Total Revenue" value={`$${totalAmount.toFixed(2)}`} color="bg-indigo-100 text-indigo-800" Icon={DollarSign} />
+      </div>
+
+      {isLoading && <div className="text-center p-4 text-indigo-600"><Loader className="w-6 h-6 inline-block animate-spin mr-2" /> Loading billing records...</div>}
+      {error && <div className="p-4 bg-red-100 text-red-700 rounded-lg flex items-center"><AlertTriangle className="w-5 h-5 mr-2" /> Error loading data: {error}</div>}
+
+      <div className="d-flex flex-column gap-3 mt-4">
+        {history.length === 0 && !isLoading && !error && (
+          <div className="text-center p-5 bg-light rounded-3 border border-2 border-dashed" style={{ borderColor: '#E5E7EB' }}>
+            <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-25" style={{ color: '#6B7280' }} />
+            <p className="text-muted mb-0 fw-semibold">No billing history found</p>
+            <p className="text-muted small mb-0">Payment transactions will appear here once processed</p>
+          </div>
+        )}
+        {history.map(bill => (
+          <BillingCard key={bill.id} bill={bill} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
 // --- MAIN APP COMPONENT ---
 
 export default function Admin() {
     const primaryColor = '#4F46E5';
   const paleBackground = '#F0F8FF';
-  const ADMIN_BASE_URL =`https://api.hyrind.com/api/users/admin` 
+  const ADMIN_BASE_URL =`${base_url}/api/users/admin` 
   const [activeView, setActiveView] = useState('candidates');
   const [candidates, setCandidates] = useState(initialCandidates);
   const [recruiters, setRecruiters] = useState(initialRecruiters);
@@ -663,6 +1091,13 @@ export default function Admin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);  
+
+  // Subscription related states
+  const [plans, setPlans] = useState([]);
+  const [allSubscriptions, setAllSubscriptions] = useState([]);
+  const [billingHistory, setBillingHistory] = useState([]);
+  const [isSubsLoading, setIsSubsLoading] = useState(false);
+  const [subsError, setSubsError] = useState(null);
   const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
 const [profileId, setProfileId] = useState(null);
@@ -777,6 +1212,53 @@ useEffect(() => {
     if (!selectedRecruiter) return [];
     return candidates.filter(c => c.recruiterId === selectedRecruiter.id);
   }, [candidates, selectedRecruiter]);
+
+  const fetchSubscriptionsData = useCallback(async () => {
+    const storedToken = localStorage.getItem("accessToken");
+    setIsSubsLoading(true);
+    setSubsError(null);
+    try {
+      // 1. Fetch Plans
+      const plansRes = await fetch(`${base_url}/api/subscriptions/plans/`, {
+        headers: { Authorization: `Bearer ${storedToken}` }
+      });
+      if (plansRes.ok) {
+        const plansData = await plansRes.json();
+        setPlans(plansData);
+      }
+
+      // 2. Fetch User Subscriptions
+      const subsRes = await fetch(`${base_url}/api/subscriptions/my-subscriptions/`, {
+        headers: { Authorization: `Bearer ${storedToken}` }
+      });
+      if (subsRes.ok) {
+        const subsData = await subsRes.json();
+        setAllSubscriptions(subsData);
+      }
+
+      // 3. Fetch Billing History
+      const billingRes = await fetch(`${base_url}/api/subscriptions/billing-history/`, {
+        headers: { Authorization: `Bearer ${storedToken}` }
+      });
+      if (billingRes.ok) {
+        const billingData = await billingRes.json();
+        setBillingHistory(billingData);
+      }
+
+    } catch (err) {
+      console.error("Failed to fetch subscription data:", err);
+      setSubsError("Failed to load subscription data.");
+    } finally {
+      setIsSubsLoading(false);
+    }
+  }, []);
+
+  // Effect to fetch subscription data when relevant view is active
+  useEffect(() => {
+    if (['plans', 'subscriptions', 'billing'].includes(activeView)) {
+      fetchSubscriptionsData();
+    }
+  }, [activeView, fetchSubscriptionsData]);
 
   /**
    * Fetches all users and classifies them into candidates and recruiters.
@@ -1209,6 +1691,30 @@ useEffect(() => {
                 error={activeView === 'recruiters' ? error : null}
                 refetchData={fetchUsers}
                 toggleRecruiterActive={toggleRecruiterActive}
+              />
+            )}
+            {activeView === 'plans' && (
+              <PlansView 
+                plans={plans} 
+                isLoading={isSubsLoading} 
+                error={subsError} 
+                refetchData={fetchSubscriptionsData} 
+              />
+            )}
+            {activeView === 'subscriptions' && (
+              <SubscriptionsView 
+                subscriptions={allSubscriptions} 
+                isLoading={isSubsLoading} 
+                error={subsError} 
+                refetchData={fetchSubscriptionsData} 
+              />
+            )}
+            {activeView === 'billing' && (
+              <BillingHistoryView 
+                history={billingHistory} 
+                isLoading={isSubsLoading} 
+                error={subsError} 
+                refetchData={fetchSubscriptionsData} 
               />
             )}
           </div>

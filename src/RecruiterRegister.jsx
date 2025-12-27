@@ -4,7 +4,7 @@ import { base_url } from "./commonAPI's.json";
 
 const RecruiterRegister = () => {
   const navigate = useNavigate();
-  const API_URL = `https://api.hyrind.com/api/recruiters/register/`;
+  const API_URL = `${base_url}/api/recruiters/register/`;
 
   const [formData, setFormData] = useState({
     email: "",

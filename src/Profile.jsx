@@ -852,7 +852,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const primaryColor = '#4F46E5';
   const paleBackground = '#F0F8FF';
-  const BASE_API_URL = `https://api.hyrind.com/api/users/`;
+const BASE_API_URL = `${base_url}`;
 
   // Dynamic plans from API (replaces hardcoded AVAILABLE_SERVICES)
   const [availablePlans, setAvailablePlans] = useState([]);

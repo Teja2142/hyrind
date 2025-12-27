@@ -113,7 +113,7 @@ const Login = ({ onLoginSuccess }) => {
 
   const navigate = useNavigate(); 
   
-  const LOGIN_API_URL = `https://api.hyrind.com/api/users/login/`;
+  const LOGIN_API_URL = `${base_url}/api/users/login/`;
 
   const [formData, setFormData] = useState({
     email: '',
