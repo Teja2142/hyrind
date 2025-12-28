@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { Users, Briefcase, CheckCircle, XCircle, UserPlus, Zap, Loader, AlertTriangle, RefreshCw, LogOut, CreditCard, Layers, DollarSign, List, Download } from 'lucide-react';
 import { base_url } from "./commonAPI's.json";
-// import { base_url } from "./commonAPI's.json";
+
 
 // --- HELPER FUNCTIONS ---
 // date helpers
@@ -22,16 +22,16 @@ const formatDateToApi = (dateString) => {
 };
 
 // --- API CONFIGURATION ---
-// NOTE: Replace these placeholder values with actual dynamic values in a real application.
 const API_BASE_URL = `${base_url}/api`;
-const PLACEHOLDER_AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0ODY1NjEwLCJpYXQiOjE3NjQ4NjM4MTAsImp0aSI6ImRlMGJjNGQzZWM5NTQxNGI4NTZmNThiMTJkOTlhZGRiIiwidXNlcl9pZCI6IjEwIn0.SLlu_vFK7mmm96LUCaqEnuF948Edspxjy3GLA97oJoM';
-const PLACEHOLDER_CSRF_TOKEN = 'eL0NJos1AcwHGVv9rppEKP75j7QyYFECQFsxIPspyVzBRG66AcYhshJ7Cfq2Cc4T';
 
-const API_HEADERS = {
-  'accept': 'application/json',
-  'Authorization': `Bearer ${PLACEHOLDER_AUTH_TOKEN}`,
-  'X-CSRFTOKEN': PLACEHOLDER_CSRF_TOKEN,
-  'Content-Type': 'application/json',
+// Helper function to get current API headers with fresh token
+const getApiHeaders = () => {
+  const token = localStorage.getItem('accessToken');
+  return {
+    'accept': 'application/json',
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
 };
 
 // --- DUMMY DATA (Only used for structure/initial state until real data loads) ---
@@ -67,8 +67,14 @@ body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -m
 .candidates-title, .recruiters-title { font-size: 1.875rem; font-weight: 800; color: #374151; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e5e7eb; }
 .metrics-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 2rem; }
 .metric-card { padding: 1rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); display: flex; align-items: center; }
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 50; display: flex; align-items: center; justify-content: center; }
-.modal-container { background-color: white; border-radius: 0.75rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 32rem; padding: 1.5rem; margin: 1rem; transform: scale(1); transition: all 0.3s ease; }
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.modal-container { background-color: white; border-radius: 1rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); width: 100%; max-width: 450px; overflow: hidden; transform: scale(1); transition: all 0.3s ease; display: flex; flex-direction: column; }
+.modal-header { padding: 1.25rem 1.5rem; background-color: #f9fafb; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0; }
+.modal-close-button { background: none; border: none; color: #9ca3af; cursor: pointer; padding: 0.5rem; border-radius: 0.375rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+.modal-close-button:hover { background-color: #f3f4f6; color: #374151; }
+.modal-body { padding: 1.5rem; flex: 1; }
+
 @media (min-width: 768px) {
   .admin-container { flex-direction: row; }
   .admin-main-content { padding: 2rem; }
@@ -224,11 +230,15 @@ const SidebarButton = ({ Icon, label, isActive, onClick }) => (
 );
 
 const MetricCard = ({ title, value, color, Icon }) => (
-  <div className={`p-4 rounded-xl shadow-lg flex items-center ${color}`}>
-    <Icon className="w-8 h-8 opacity-70 mr-4" />
-    <div className="flex flex-col">
-      <p className="text-sm font-medium">{title}</p>
-      <p className="text-3xl font-bold">{value}</p>
+  <div className={`card border-0 shadow-sm h-100 ${color}`}>
+    <div className="card-body p-4 d-flex align-items-center">
+      <div className="p-3 rounded-3 bg-white bg-opacity-25 me-3">
+        {Icon && <Icon className="w-6 h-6" style={{ width: '24px', height: '24px' }} />}
+      </div>
+      <div className="flex-grow-1">
+        <p className="text-sm fw-semibold mb-1 opacity-75">{title}</p>
+        <h3 className="fs-3 fw-bold mb-0">{value}</h3>
+      </div>
     </div>
   </div>
 );
@@ -555,7 +565,10 @@ const AssignCandidateContent = ({ candidates, recruiters, onAssign, onClose, ini
   }, [initialCandidate]);
 
   const handleAssignment = async () => {
-    if (!selectedCandidateId || !selectedRecruiterId) return;
+    if (!selectedCandidateId || !selectedRecruiterId) {
+      setAssignError("Please select both a candidate and a recruiter.");
+      return;
+    }
 
     const candidate = candidates.find(c => c.id === selectedCandidateId);
     const recruiter = recruiters.find(r => r.id === selectedRecruiterId);
@@ -566,10 +579,15 @@ const AssignCandidateContent = ({ candidates, recruiters, onAssign, onClose, ini
         return;
     }
 
+    if (!recruiter) {
+        setAssignError("Selected recruiter not found.");
+        return;
+    }
+
     try {
         setIsAssigning(true);
         setAssignError(null);
-        await onAssign(candidate.profile_id, recruiter.id);
+        await onAssign(candidate.profile_id, recruiter);
         onClose();
     } catch (error) {
         console.error("Assignment failed:", error);
@@ -579,58 +597,168 @@ const AssignCandidateContent = ({ candidates, recruiters, onAssign, onClose, ini
     }
   };
 
+  const selectedCandidate = candidates.find(c => c.id === selectedCandidateId);
+  const selectedRecruiter = recruiters.find(r => r.id === selectedRecruiterId);
+
   return (
-    <div className="p-2">
-      {assignError && <div className="p-3 mb-4 bg-red-100 text-red-700 rounded-lg text-sm">{assignError}</div>}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {assignError && (
+        <div style={{ 
+          padding: '1rem', 
+          backgroundColor: '#FEF2F2', 
+          border: '1px solid #FEE2E2', 
+          borderRadius: '0.5rem', 
+          display: 'flex', 
+          gap: '0.75rem',
+          maxHeight: '140px'
+        }}>
+          <AlertTriangle className="w-5 h-5" style={{ color: '#EF4444', flexShrink: 0 }} />
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: '#991B1B' }}>Assignment Error</p>
+            <div style={{ 
+              maxHeight: '80px', 
+              overflowY: 'auto', 
+              fontSize: '0.8125rem', 
+              color: '#B91C1C', 
+              marginTop: '0.25rem',
+              wordBreak: 'break-word',
+              lineHeight: '1.4'
+            }}>
+              {assignError}
+            </div>
+          </div>
+        </div>
+      )}
       
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">Select Candidate</label>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+          Select Candidate
+        </label>
         <select
           value={selectedCandidateId}
           onChange={(e) => setSelectedCandidateId(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+          style={{ 
+            width: '100%', 
+            padding: '0.75rem', 
+            borderRadius: '0.5rem', 
+            border: '1px solid #D1D5DB', 
+            fontSize: '0.875rem',
+            backgroundColor: '#F9FAFB',
+            color: '#111827'
+          }}
           disabled={!!initialCandidate || unassignedApprovedCandidates.length === 0}
         >
           {initialCandidate ? (
             <option value={initialCandidate.id}>{initialCandidate.email}</option>
           ) : (
             <>
-              <option value="">{unassignedApprovedCandidates.length === 0 ? 'No Approved Candidates available' : 'Choose an Approved Candidate'}</option>
+              <option value="">
+                {unassignedApprovedCandidates.length === 0 
+                  ? 'No Approved Candidates available' 
+                  : 'Choose an Approved Candidate'}
+              </option>
               {unassignedApprovedCandidates.map(c => (
-                <option key={c.id} value={c.id}>{c.email}</option>
+                <option key={c.id} value={c.id}>
+                  {c.email} - {c.first_name} {c.last_name}
+                </option>
               ))}
             </>
           )}
         </select>
+        {selectedCandidate && (
+          <div style={{ padding: '0.75rem', backgroundColor: '#EEF2FF', borderRadius: '0.5rem', border: '1px solid #E0E7FF' }}>
+            <p style={{ margin: 0, fontSize: '0.75rem', color: '#4338CA' }}>
+              <strong>Profile ID:</strong> {selectedCandidate.profile_id}
+            </p>
+          </div>
+        )}
       </div>
 
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-1">Select Recruiter</label>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+          Select Recruiter
+        </label>
         <select
           value={selectedRecruiterId}
           onChange={(e) => setSelectedRecruiterId(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+          style={{ 
+            width: '100%', 
+            padding: '0.75rem', 
+            borderRadius: '0.5rem', 
+            border: '1px solid #D1D5DB', 
+            fontSize: '0.875rem',
+            backgroundColor: '#F9FAFB',
+            color: '#111827'
+          }}
+          disabled={recruiters.length === 0}
         >
-          <option value="">Choose a Recruiter</option>
+          <option value="">
+            {recruiters.length === 0 ? 'No Recruiters available' : 'Choose a Recruiter'}
+          </option>
           {recruiters.map(r => (
-            <option key={r.id} value={r.id}>{r.email} (ID: {r.id})</option>
+            <option key={r.id} value={r.id}>
+              {r.name || r.user_name || r.email} - {r.department_display || r.department}
+            </option>
           ))}
         </select>
+        {selectedRecruiter && (
+          <div style={{ padding: '0.75rem', backgroundColor: '#F0FDF4', borderRadius: '0.5rem', border: '1px solid #DCFCE7' }}>
+            <p style={{ margin: 0, fontSize: '0.75rem', color: '#15803D' }}>
+              <strong>Recruiter:</strong> {selectedRecruiter.name || selectedRecruiter.user_name}
+            </p>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: '#15803D' }}>
+              <strong>Available Slots:</strong> {selectedRecruiter.available_slots || 'N/A'}
+            </p>
+          </div>
+        )}
       </div>
 
-      <div className="flex justify-end gap-3">
-        <ActionButton 
-            label="Cancel" 
-            onClick={onClose} 
-            className="bg-gray-500 hover:bg-gray-600"
-        />
-        <ActionButton 
-          Icon={isAssigning ? Loader : UserPlus}
-          label={isAssigning ? "Assigning..." : "Confirm Assignment"}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'flex-end', 
+        gap: '0.75rem', 
+        paddingTop: '1rem', 
+        borderTop: '1px solid #F3F4F6',
+        marginTop: '0.5rem'
+      }}>
+        <button 
+          onClick={onClose}
+          disabled={isAssigning}
+          style={{ 
+            padding: '0.625rem 1.25rem', 
+            borderRadius: '0.5rem', 
+            border: '1px solid #D1D5DB', 
+            backgroundColor: 'white', 
+            color: '#374151', 
+            fontSize: '0.875rem', 
+            fontWeight: 600,
+            cursor: isAssigning ? 'not-allowed' : 'pointer',
+            opacity: isAssigning ? 0.6 : 1
+          }}
+        >
+          Cancel
+        </button>
+        <button 
           onClick={handleAssignment} 
           disabled={!selectedCandidateId || !selectedRecruiterId || isAssigning}
-          className="bg-indigo-600 hover:bg-indigo-700"
-        />
+          style={{ 
+            padding: '0.625rem 1.25rem', 
+            borderRadius: '0.5rem', 
+            border: 'none', 
+            backgroundColor: '#4F46E5', 
+            color: 'white', 
+            fontSize: '0.875rem', 
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            cursor: (!selectedCandidateId || !selectedRecruiterId || isAssigning) ? 'not-allowed' : 'pointer',
+            opacity: (!selectedCandidateId || !selectedRecruiterId || isAssigning) ? 0.6 : 1
+          }}
+        >
+          {isAssigning ? <Loader className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+          {isAssigning ? "Assigning..." : "Confirm Assignment"}
+        </button>
       </div>
     </div>
   );
@@ -669,75 +797,63 @@ const RecruiterDetailsContent = ({ recruiter, assignedCandidates, onClose }) => 
 // --- SUBSCRIPTION RELATED VIEWS ---
 
 const PlanCard = ({ plan }) => {
-  const isBasePlan = plan.plan_type === 'base';
+  const isBase = plan.plan_type === 'base';
   const isActive = plan.is_active !== false;
 
   return (
-    <div className="card border-0 shadow-sm h-100" style={{ borderLeft: `4px solid ${isBasePlan ? '#4F46E5' : '#10B981'}` }}>
+    <div className="card border-0 shadow-sm h-100" style={{ borderLeft: `4px solid ${isBase ? '#4F46E5' : '#10B981'}` }}>
+      <div className={`card-header text-center py-2 ${isBase ? 'bg-indigo-600' : 'bg-success'} text-white`}>
+        <small className="fw-bold text-uppercase" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>
+          {isBase ? 'Base Plan' : 'Add-on Plan'}
+        </small>
+      </div>
+      
       <div className="card-body p-4 d-flex flex-column">
-        <div className="flex-grow-1">
-          <div className="d-flex justify-content-between align-items-start mb-3">
-            <div className="flex-grow-1">
-              <div className="d-flex align-items-center mb-2">
-                <h5 className="fw-bold text-dark mb-0 me-2">{plan.name}</h5>
-                <span 
-                  className="badge px-2 py-1 fw-semibold" 
-                  style={{ 
-                    backgroundColor: isActive ? '#D1FAE5' : '#FEE2E2', 
-                    color: isActive ? '#065F46' : '#991B1B',
-                    fontSize: '0.7rem'
-                  }}
-                >
-                  {isActive ? '● Active' : '● Inactive'}
-                </span>
-              </div>
-              <p className="text-muted small mb-0">{plan.description || 'No description available'}</p>
-            </div>
+        <div className="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h5 className="fw-bold text-dark mb-2">{plan.name}</h5>
             <span 
-              className="badge px-3 py-2 fw-semibold"
-              style={{
-                backgroundColor: isBasePlan ? '#EEF2FF' : '#F0FDF4',
-                color: isBasePlan ? '#4F46E5' : '#10B981',
-                fontSize: '0.75rem'
+              className="badge px-2 py-1" 
+              style={{ 
+                backgroundColor: isActive ? '#D1FAE5' : '#FEE2E2',
+                color: isActive ? '#065F46' : '#991B1B',
+                fontSize: '0.7rem'
               }}
             >
-              {isBasePlan ? 'BASE' : 'ADD-ON'}
+              {isActive ? '● Active' : '● Inactive'}
             </span>
           </div>
-
-          <div className="mb-3">
-            <div className="d-flex align-items-baseline gap-2">
-              <span className="fs-3 fw-bold" style={{ color: '#4F46E5' }}>${plan.base_price}</span>
-              <span className="text-muted small">/ {plan.billing_cycle || 'month'}</span>
-            </div>
-          </div>
-
-          {plan.features && plan.features.length > 0 && (
-            <div className="mb-2">
-              <p className="small text-muted mb-2 fw-semibold">Features:</p>
-              <ul className="list-unstyled mb-0">
-                {plan.features.slice(0, 4).map((feature, idx) => (
-                  <li key={idx} className="small mb-2 d-flex align-items-start gap-2">
-                    <CheckCircle className="text-success flex-shrink-0" style={{ width: '14px', height: '14px', marginTop: '2px' }} />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-                {plan.features.length > 4 && (
-                  <li className="small text-muted fst-italic">+{plan.features.length - 4} more features</li>
-                )}
-              </ul>
-            </div>
-          )}
         </div>
 
-        <div className="pt-3 border-top mt-2">
-          <div className="d-flex justify-content-between align-items-center text-muted small">
-            <span>Plan ID: {plan.id}</span>
-            {plan.is_mandatory && (
-              <span className="badge bg-warning-subtle text-warning px-2 py-1" style={{ fontSize: '0.7rem' }}>
-                MANDATORY
-              </span>
-            )}
+        <div className="mb-3">
+          <div className="d-flex align-items-baseline">
+            <span className="fs-2 fw-bold" style={{ color: '#4F46E5' }}>${plan.price || plan.base_price}</span>
+            <span className="text-muted ms-2">/{plan.billing_cycle || 'month'}</span>
+          </div>
+        </div>
+
+        <p className="text-muted small mb-3">
+          {plan.description || "Professional subscription plan with full access to features."}
+        </p>
+
+        {(plan.features || ['Unlimited Access', 'Premium Support', 'Advanced Analytics']).length > 0 && (
+          <div className="mb-3">
+            <p className="small fw-semibold text-muted mb-2">Features:</p>
+            <ul className="list-unstyled mb-0">
+              {(plan.features || ['Unlimited Access', 'Premium Support', 'Advanced Analytics']).slice(0, 3).map((feature, idx) => (
+                <li key={idx} className="small mb-2 d-flex align-items-start">
+                  <CheckCircle className="text-success me-2 flex-shrink-0" style={{ width: '14px', height: '14px', marginTop: '2px' }} />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="mt-auto pt-3 border-top">
+          <div className="d-flex justify-content-between align-items-center">
+            <small className="text-muted">ID: {plan.id?.substring(0, 8)}</small>
+            <Layers className="text-muted" style={{ width: '16px', height: '16px' }} />
           </div>
         </div>
       </div>
@@ -755,7 +871,7 @@ const PlansView = ({ plans, isLoading, error, refetchData }) => {
 
   return (
     <div className="plans-view">
-      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom p-2">
         <div>
           <h2 className="fw-bold mb-1" style={{ color: '#4F46E5', fontSize: '1.75rem' }}>
             Subscription Plans
@@ -765,18 +881,26 @@ const PlansView = ({ plans, isLoading, error, refetchData }) => {
         <button 
           onClick={refetchData} 
           disabled={isLoading}
-          className="btn btn-sm d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+          className="btn d-flex align-items-center gap-2 px-4 py-2 fw-semibold"
           style={{ 
             backgroundColor: '#4F46E5', 
             color: 'white',
             border: 'none',
-            borderRadius: '8px',
-            transition: 'all 0.2s ease'
+            borderRadius: '12px',
+            fontSize: '0.9rem',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 8px rgba(79, 70, 229, 0.2)'
           }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4338CA'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4F46E5'}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = '#4338CA';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(79, 70, 229, 0.3)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = '#4F46E5';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(79, 70, 229, 0.2)';
+          }}
         >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} style={{ width: '18px', height: '18px' }} />
           {isLoading ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
@@ -801,7 +925,7 @@ const PlansView = ({ plans, isLoading, error, refetchData }) => {
           </div>
         )}
         {plans.map(plan => (
-          <div key={plan.id} className="col-12 col-md-6 col-lg-4">
+          <div key={plan.id} className="col-12 col-md-6 col-xl-4">
             <PlanCard plan={plan} />
           </div>
         ))}
@@ -814,49 +938,52 @@ const SubscriptionCard = ({ subscription }) => {
   const isActive = subscription.status === 'active';
   const userEmail = subscription.user_email || subscription.profile?.email || subscription.user_subscription?.user_email || 'N/A';
   const planName = subscription.plan?.name || subscription.plan_name || subscription.plan_details?.name || 'N/A';
-  const startDate = subscription.started_at ? new Date(subscription.started_at).toLocaleDateString() : 'N/A';
+  const startDate = subscription.started_at ? new Date(subscription.started_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
   const nextBilling = subscription.next_billing_date || 'N/A';
 
   return (
-    <div className="card border-0 shadow-sm" style={{ borderLeft: `4px solid ${isActive ? '#10B981' : '#6B7280'}` }}>
-      <div className="card-body p-4">
-        <div className="row align-items-center">
-          <div className="col-md-8 mb-3 mb-md-0">
-            <div className="d-flex align-items-center mb-2">
-              <h5 className="mb-0 fw-bold text-dark me-3">{userEmail}</h5>
-              <span 
-                className="badge px-3 py-1 fw-semibold text-uppercase" 
-                style={{ 
-                  backgroundColor: isActive ? '#D1FAE5' : '#F3F4F6', 
-                  color: isActive ? '#065F46' : '#6B7280',
-                  fontSize: '0.7rem',
-                  letterSpacing: '0.5px'
-                }}
-              >
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 transition-all hover:shadow-md hover:border-indigo-100">
+      <div className="row align-items-center">
+        <div className="col-lg-5 mb-3 mb-lg-0">
+          <div className="d-flex align-items-center mb-1">
+            <div className={`p-2 rounded-lg me-3 ${isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-50 text-gray-400'}`}>
+              <Zap className="w-5 h-5" />
+            </div>
+            <div>
+              <h6 className="mb-0 fw-bold text-gray-900">{userEmail}</h6>
+              <span className="text-xs text-muted">ID: {subscription.id?.substring(0, 13)}...</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="col-lg-3 mb-3 mb-lg-0">
+          <div className="d-flex flex-column">
+            <span className="text-xs font-semibold text-muted uppercase tracking-wider mb-1">Plan Level</span>
+            <div className="d-flex align-items-center">
+              <span className="fw-bold text-indigo-600">{planName}</span>
+              <span className={`ms-2 badge rounded-pill ${isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'} px-2`} style={{ fontSize: '0.6rem' }}>
                 {subscription.status}
               </span>
             </div>
-            <div className="d-flex flex-wrap gap-3 text-muted small">
-              <span><strong>Plan:</strong> {planName}</span>
-              <span><strong>Subscription ID:</strong> {subscription.id?.substring(0, 13)}...</span>
-            </div>
-            <div className="d-flex flex-wrap gap-3 text-muted small mt-2">
-              <span><strong>Started:</strong> {startDate}</span>
-              <span><strong>Next Billing:</strong> {nextBilling}</span>
-            </div>
           </div>
+        </div>
 
-          <div className="col-md-4 d-flex flex-column align-items-md-end">
-            <div className="mb-2">
-              <span className="fs-4 fw-bold" style={{ color: '#4F46E5' }}>${subscription.price}</span>
-              <span className="text-muted small ms-1">/month</span>
-            </div>
-            {subscription.razorpay_subscription_id && (
-              <span className="badge bg-info-subtle text-info px-2 py-1" style={{ fontSize: '0.7rem' }}>
-                Razorpay: {subscription.razorpay_subscription_id.substring(0, 10)}...
-              </span>
-            )}
+        <div className="col-lg-2 mb-3 mb-lg-0">
+          <div className="d-flex flex-column text-start text-lg-center">
+            <span className="text-xs font-semibold text-muted uppercase tracking-wider mb-1">Cycle Details</span>
+            <span className="text-sm fw-medium text-gray-700">Starts: {startDate}</span>
+            <span className="text-xs text-muted">Next: {nextBilling}</span>
           </div>
+        </div>
+
+        <div className="col-lg-2 d-flex flex-column align-items-lg-end">
+          <div className="text-end">
+            <span className="fs-5 fw-bold text-dark">${subscription.price}</span>
+            <span className="text-muted small">/mo</span>
+          </div>
+          {subscription.razorpay_subscription_id && (
+            <span className="text-xs text-indigo-400 font-medium">#{subscription.razorpay_subscription_id.substring(0, 8)}</span>
+          )}
         </div>
       </div>
     </div>
@@ -873,7 +1000,7 @@ const SubscriptionsView = ({ subscriptions, isLoading, error, refetchData }) => 
 
   return (
     <div className="subscriptions-view">
-      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom p-2">
         <div>
           <h2 className="fw-bold mb-1" style={{ color: '#4F46E5', fontSize: '1.75rem' }}>
             User Subscriptions
@@ -883,18 +1010,26 @@ const SubscriptionsView = ({ subscriptions, isLoading, error, refetchData }) => 
         <button 
           onClick={refetchData} 
           disabled={isLoading}
-          className="btn btn-sm d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+          className="btn d-flex align-items-center gap-2 px-4 py-2 fw-semibold"
           style={{ 
             backgroundColor: '#4F46E5', 
             color: 'white',
             border: 'none',
-            borderRadius: '8px',
-            transition: 'all 0.2s ease'
+            borderRadius: '12px',
+            fontSize: '0.9rem',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 8px rgba(79, 70, 229, 0.2)'
           }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4338CA'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4F46E5'}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = '#4338CA';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(79, 70, 229, 0.3)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = '#4F46E5';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(79, 70, 229, 0.2)';
+          }}
         >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} style={{ width: '18px', height: '18px' }} />
           {isLoading ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
@@ -927,50 +1062,50 @@ const SubscriptionsView = ({ subscriptions, isLoading, error, refetchData }) => 
 const BillingCard = ({ bill }) => {
   const isSuccess = bill.status === 'success';
   const userEmail = bill.user_subscription?.user_email || bill.profile?.email || 'N/A';
-  const transactionDate = new Date(bill.created_at).toLocaleString();
+  const transactionDate = new Date(bill.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className="card border-0 shadow-sm" style={{ borderLeft: `4px solid ${isSuccess ? '#10B981' : '#F59E0B'}` }}>
-      <div className="card-body p-4">
-        <div className="row align-items-center">
-          <div className="col-md-8 mb-3 mb-md-0">
-            <div className="d-flex align-items-center mb-2">
-              <h5 className="mb-0 fw-bold text-dark me-3">{userEmail}</h5>
-              <span 
-                className="badge px-3 py-1 fw-semibold text-uppercase" 
-                style={{ 
-                  backgroundColor: isSuccess ? '#D1FAE5' : '#FEF3C7', 
-                  color: isSuccess ? '#065F46' : '#92400E',
-                  fontSize: '0.7rem',
-                  letterSpacing: '0.5px'
-                }}
-              >
-                {bill.status}
-              </span>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 transition-all hover:shadow-md">
+      <div className="row align-items-center">
+        <div className="col-lg-6 mb-3 mb-lg-0">
+          <div className="d-flex align-items-center">
+            <div className={`p-2.5 rounded-xl me-3 ${isSuccess ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+              <DollarSign className="w-5 h-5" />
             </div>
-            <div className="d-flex flex-wrap gap-3 text-muted small">
-              <span><strong>Transaction ID:</strong> <code className="text-muted" style={{ fontSize: '0.75rem' }}>{bill.id?.substring(0, 16)}...</code></span>
-              {bill.razorpay_payment_id && (
-                <span><strong>Razorpay ID:</strong> <code className="text-muted" style={{ fontSize: '0.75rem' }}>{bill.razorpay_payment_id.substring(0, 12)}...</code></span>
-              )}
-            </div>
-            <div className="d-flex flex-wrap gap-3 text-muted small mt-2">
-              <span><strong>Date:</strong> {transactionDate}</span>
-              {bill.description && <span><strong>Description:</strong> {bill.description}</span>}
+            <div>
+              <h6 className="mb-0 fw-bold text-gray-900">{userEmail}</h6>
+              <div className="d-flex align-items-center mt-1">
+                <span className="text-xs text-muted">{transactionDate}</span>
+                <span className="mx-2 text-gray-300">|</span>
+                <span className={`text-xs font-semibold ${isSuccess ? 'text-emerald-600' : 'text-amber-600'}`}>{bill.status.toUpperCase()}</span>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div className="col-md-4 d-flex flex-column align-items-md-end">
-            <div className="mb-2">
-              <span className="fs-3 fw-bold" style={{ color: isSuccess ? '#10B981' : '#F59E0B' }}>${bill.amount}</span>
-            </div>
-            {isSuccess && (
-              <span className="badge bg-success-subtle text-success px-2 py-1" style={{ fontSize: '0.7rem' }}>
-                <CheckCircle className="w-3 h-3 me-1" style={{ display: 'inline', width: '12px', height: '12px' }} />
-                Payment Confirmed
-              </span>
+        <div className="col-lg-4 mb-3 mb-lg-0">
+          <div className="d-flex flex-column">
+            <span className="text-xs text-muted mb-1">Transaction Ref</span>
+            <code className="text-indigo-400 small">{bill.id?.substring(0, 16)}</code>
+            {bill.razorpay_payment_id && (
+              <span className="text-xs text-gray-400 mt-1">RZP: {bill.razorpay_payment_id.substring(0, 12)}</span>
             )}
           </div>
+        </div>
+
+        <div className="col-lg-2 d-flex flex-column align-items-lg-end text-lg-end">
+          <div className="fs-4 fw-bold text-dark">${bill.amount}</div>
+          {isSuccess ? (
+            <div className="d-inline-flex align-items-center text-xs text-emerald-600 fw-medium">
+              <CheckCircle className="w-3 h-3 me-1" />
+              Verified
+            </div>
+          ) : (
+             <div className="d-inline-flex align-items-center text-xs text-amber-600 fw-medium">
+              <AlertTriangle className="w-3 h-3 me-1" />
+              Pending
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -1012,7 +1147,7 @@ const BillingHistoryView = ({ history, isLoading, error, refetchData }) => {
 
   return (
     <div className="billing-view">
-      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom p-2">
         <div>
           <h2 className="fw-bold mb-1" style={{ color: '#4F46E5', fontSize: '1.75rem' }}>
             Billing History
@@ -1023,27 +1158,39 @@ const BillingHistoryView = ({ history, isLoading, error, refetchData }) => {
           <button 
             onClick={handleExportCSV} 
             disabled={history.length === 0} 
-            className="btn btn-sm btn-outline-dark d-flex align-items-center gap-2 px-3 py-2 fw-semibold" 
-            style={{ borderRadius: '8px' }}
+            className="btn btn-outline-secondary d-flex align-items-center gap-2 px-3 py-2 fw-semibold" 
+            style={{ 
+              borderRadius: '12px',
+              fontSize: '0.9rem',
+              transition: 'all 0.2s ease'
+            }}
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4" style={{ width: '18px', height: '18px' }} />
             Export CSV
           </button>
           <button 
             onClick={refetchData} 
             disabled={isLoading}
-            className="btn btn-sm d-flex align-items-center gap-2 px-3 py-2 fw-semibold"
+            className="btn d-flex align-items-center gap-2 px-4 py-2 fw-semibold"
             style={{ 
               backgroundColor: '#4F46E5', 
               color: 'white',
               border: 'none',
-              borderRadius: '8px',
-              transition: 'all 0.2s ease'
+              borderRadius: '12px',
+              fontSize: '0.9rem',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 8px rgba(79, 70, 229, 0.2)'
             }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4338CA'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4F46E5'}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = '#4338CA';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(79, 70, 229, 0.3)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = '#4F46E5';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(79, 70, 229, 0.2)';
+            }}
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} style={{ width: '18px', height: '18px' }} />
             {isLoading ? 'Refreshing...' : 'Refresh'}
           </button>
         </div>
@@ -1404,39 +1551,43 @@ useEffect(() => {
    * @param {string} candidateProfileId - The profile_id of the candidate.
    * @param {number} recruiterUserId - The user_id of the recruiter.
    */
-  const handleAssignCandidate = useCallback(async (candidateProfileId, recruiterUserId) => {
+  const handleAssignCandidate = useCallback(async (candidateProfileId, recruiter) => {
     const url = `${API_BASE_URL}/recruiters/assign/`;
     
     const payload = {
       profile: candidateProfileId,
-      recruiter_id: recruiterUserId,
-      // Leaving 'recruiter' object empty or generic, as it may be optional or auto-populated by the backend
-      recruiter: {
-         "name": "string",
-         "email": "user@example.com",
-         "phone": "string",
-         "active": true
-      }
+      recruiter_id: recruiter.id,
+      recruiter: recruiter
     };
 
     try {
+        // Get fresh token from localStorage
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            throw new Error('No authentication token found. Please log in again.');
+        }
+
         const response = await fetchWithRetry(url, {
             method: 'POST',
-            headers: API_HEADERS,
+            headers: {
+                'accept': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify(payload),
         });
         
         // Assuming success returns the updated assignment or a confirmation
-        await response.json(); 
-        console.log(`Successfully assigned profile ${candidateProfileId} to recruiter ${recruiterUserId}`);
+        const result = await response.json(); 
+        console.log(`Successfully assigned profile ${candidateProfileId} to recruiter ${recruiter.id}`, result);
 
         // Update local state immediately upon success
         setCandidates(prevC => {
             const assignedCandidate = prevC.find(c => c.profile_id === candidateProfileId);
             if (assignedCandidate) {
-                // Ensure the status is 'approved' and assign the recruiter's user ID as the recruiterId
+                // Ensure the status is 'approved' and assign the recruiter's ID as the recruiterId
                 return prevC.map(c => 
-                    (c.profile_id === candidateProfileId ? { ...c, recruiterId: recruiterUserId, status: 'approved' } : c)
+                    (c.profile_id === candidateProfileId ? { ...c, recruiterId: recruiter.id, status: 'approved' } : c)
                 );
             }
             return prevC;
