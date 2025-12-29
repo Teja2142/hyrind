@@ -243,10 +243,10 @@ const MetricCard = ({ title, value, color, Icon }) => (
   </div>
 );
 
-const CandidatesView = ({ candidates, updateCandidateStatus, approvedCandidates, openAssignModal, recruiters, isLoading, error, refetchData }) => {
-  const submittedCount = candidates.filter(c => c.status === 'submitted').length;
-  const approvedCount = candidates.filter(c => c.status === 'approved').length;
-  const readyToAssignCount = approvedCandidates.length;
+const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, recruiters, isLoading, error, refetchData }) => {
+  const submittedCount = candidates.length;
+  const approvedCount = candidates.filter(c => c.active === true).length;
+  const readyToAssignCount = candidates.filter(c => c.active === true && !c.recruiter_info).length;
 
   return (
     <div className="candidates-view">
@@ -308,27 +308,51 @@ const CandidatesView = ({ candidates, updateCandidateStatus, approvedCandidates,
 };
 
 const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters }) => {
-  const isSubmitted = candidate.status === 'submitted';
-  const isApproved = candidate.status === 'approved';
-  const recruiter = recruiters.find(r => r.id === candidate.recruiterId);
+  const isSubmitted = candidate.active == false;
+  const isApproved = candidate.active !== false;
   const isActive = candidate.active !== false; // Default to true if not specified
   
+  // Get recruiter info from the new API structure
+  const recruiterInfo = candidate.recruiter_info;
+  const assignmentStatus = candidate.assignment_status;
+  
   const statusColors = {
+    'active': { bg: '#D1FAE5', text: '#065F46', border: '#10B981' },
+    'inactive': { bg: '#FEE2E2', text: '#991B1B', border: '#EF4444' },
     'submitted': { bg: '#FEF3C7', text: '#92400E', border: '#F59E0B' },
     'approved': { bg: '#D1FAE5', text: '#065F46', border: '#10B981' },
     'rejected': { bg: '#FEE2E2', text: '#991B1B', border: '#EF4444' },
     'default': { bg: '#F3F4F6', text: '#374151', border: '#9CA3AF' },
   };
 
+  const priorityColors = {
+    'high': { bg: '#FEE2E2', text: '#991B1B' },
+    'medium': { bg: '#FEF3C7', text: '#92400E' },
+    'low': { bg: '#E0E7FF', text: '#3730A3' },
+  };
+
   const statusStyle = statusColors[candidate.status] || statusColors.default;
+  
+  // Format datetime
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   return (
     <div className="card border-0 shadow-sm hover-shadow-lg transition-all" style={{ borderLeft: `4px solid #4F46E5` }}>
       <div className="card-body p-4">
-        <div className="row align-items-center">
+        <div className="row align-items-start">
           <div className="col-md-8 mb-3 mb-md-0">
-            <div className="d-flex align-items-center mb-2">
-              <h5 className="mb-0 fw-bold text-dark me-3">{candidate.email}</h5>
+            <div className="d-flex align-items-center mb-2 flex-wrap gap-2">
+              <h5 className="mb-0 fw-bold text-dark me-2">{candidate.email || 'No Email'}</h5>
               {candidate.status && (
                 <span 
                   className="badge px-3 py-1 fw-semibold text-uppercase" 
@@ -339,11 +363,11 @@ const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters })
                     letterSpacing: '0.5px'
                   }}
                 >
-                  {candidate.status}
+                  {candidate.status_display || candidate.status}
                 </span>
               )}
               <span 
-                className="badge px-2 py-1 fw-semibold ms-2" 
+                className="badge px-2 py-1 fw-semibold" 
                 style={{ 
                   backgroundColor: isActive ? '#D1FAE5' : '#FEE2E2', 
                   color: isActive ? '#065F46' : '#991B1B',
@@ -352,17 +376,67 @@ const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters })
               >
                 {isActive ? '● Active' : '● Inactive'}
               </span>
+              {assignmentStatus && (
+                <span 
+                  className="badge px-2 py-1 fw-semibold" 
+                  style={{ 
+                    backgroundColor: priorityColors[assignmentStatus.priority]?.bg || '#F3F4F6',
+                    color: priorityColors[assignmentStatus.priority]?.text || '#374151',
+                    fontSize: '0.7rem'
+                  }}
+                >
+                  {assignmentStatus.priority?.toUpperCase()} Priority
+                </span>
+              )}
             </div>
-            <div className="d-flex flex-wrap gap-3 text-muted small">
+            
+            <div className="d-flex flex-wrap gap-3 text-muted small mb-2">
               <span><strong>User ID:</strong> {candidate.id}</span>
               <span><strong>Profile ID:</strong> {candidate.profile_id || 'N/A'}</span>
             </div>
-            {recruiter && (
-              <div className="mt-2">
-                <span className="badge bg-primary-subtle text-primary px-2 py-1">
-                  <Briefcase className="w-3 h-3 me-1" style={{ display: 'inline' }} />
-                  Assigned to: {recruiter.email}
-                </span>
+            
+            {assignmentStatus && (
+              <div className="mt-2 p-2 rounded" style={{ backgroundColor: '#F9FAFB' }}>
+                <div className="small">
+                  <div className="mb-1">
+                    <strong>Assignment Status:</strong> 
+                    <span className="ms-2 badge badge-sm" style={{ 
+                      backgroundColor: assignmentStatus.status === 'active' ? '#D1FAE5' : '#FEE2E2',
+                      color: assignmentStatus.status === 'active' ? '#065F46' : '#991B1B'
+                    }}>
+                      {assignmentStatus.status}
+                    </span>
+                  </div>
+                  <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                    <span className="me-3">📅 Assigned: {formatDateTime(assignmentStatus.assigned_at)}</span>
+                    <span>⏰ Last Activity: {formatDateTime(assignmentStatus.last_activity)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {recruiterInfo && (
+              <div className="mt-2 p-2 rounded" style={{ backgroundColor: '#EEF2FF' }}>
+                <div className="small">
+                  <div className="fw-bold text-primary mb-1">
+                    <Briefcase className="w-3 h-3 me-1" style={{ display: 'inline' }} />
+                    Assigned Recruiter
+                  </div>
+                  <div className="d-flex flex-wrap gap-2 text-dark">
+                    <span><strong>Name:</strong> {recruiterInfo.name}</span>
+                    <span>|</span>
+                    <span><strong>ID:</strong> {recruiterInfo.employee_id}</span>
+                    <span>|</span>
+                    <span><strong>Email:</strong> {recruiterInfo.email}</span>
+                  </div>
+                  <div className="d-flex flex-wrap gap-2 text-muted mt-1" style={{ fontSize: '0.75rem' }}>
+                    <span>📞 {recruiterInfo.phone}</span>
+                    <span>•</span>
+                    <span>🏢 {recruiterInfo.department_display}</span>
+                    <span>•</span>
+                    <span>💼 {recruiterInfo.specialization_display}</span>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -377,6 +451,8 @@ const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters })
                   variant="approve"
                   size="sm"
                 />
+                              </>
+            )}
                 <ActionButton 
                   Icon={XCircle} 
                   label="Reject" 
@@ -384,10 +460,9 @@ const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters })
                   variant="reject"
                   size="sm"
                 />
-              </>
-            )}
 
-            {isApproved && !recruiter && (
+
+            {isApproved && !recruiterInfo && (
               <ActionButton 
                 Icon={UserPlus} 
                 label="Assign Recruiter" 
@@ -1349,10 +1424,6 @@ useEffect(() => {
         }, [submissionMessage]);
       // actions
   // Filter candidates who are approved and not yet assigned
-  const approvedCandidates = useMemo(() => 
-    candidates.filter(c => c.status === 'approved' && !c.recruiterId && c.profile_id),
-    [candidates]
-  );
   
   // Calculate assigned candidates for the details modal
   const assignedCandidatesForDetails = useMemo(() => {
@@ -1581,17 +1652,7 @@ useEffect(() => {
         const result = await response.json(); 
         console.log(`Successfully assigned profile ${candidateProfileId} to recruiter ${recruiter.id}`, result);
 
-        // Update local state immediately upon success
-        setCandidates(prevC => {
-            const assignedCandidate = prevC.find(c => c.profile_id === candidateProfileId);
-            if (assignedCandidate) {
-                // Ensure the status is 'approved' and assign the recruiter's ID as the recruiterId
-                return prevC.map(c => 
-                    (c.profile_id === candidateProfileId ? { ...c, recruiterId: recruiter.id, status: 'approved' } : c)
-                );
-            }
-            return prevC;
-        });
+      fetchUsers()
 
     } catch (err) {
         console.error("API Assignment failed:", err);
@@ -1825,7 +1886,6 @@ useEffect(() => {
               <CandidatesView 
                 candidates={candidates} 
                 updateCandidateStatus={updateCandidateStatus} 
-                approvedCandidates={approvedCandidates}
                 openAssignModal={openAssignModal}
                 recruiters={recruiters}
                 isLoading={isLoading}
