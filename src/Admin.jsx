@@ -1207,8 +1207,8 @@ const PlansView = ({ plans, isLoading, error, refetchData }) => {
   const activePlansCount = plans.filter(p => p.is_active !== false).length;
 
   return (
-    <div className="plans-view">
-      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom p-2">
+    <div className="plans-view p-3">
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom ">
         <div>
           <h2 className="fw-bold mb-1" style={{ color: '#4F46E5', fontSize: '1.75rem' }}>
             Subscription Plans
@@ -1329,46 +1329,86 @@ const SubscriptionCard = ({ subscription }) => {
 
 
 const SubscriptionsView = ({ subscriptions, isLoading, error, refetchData }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   const activeCount = subscriptions.filter(s => s.status === 'active').length;
   const inactiveCount = subscriptions.filter(s => s.status === 'inactive').length;
   const totalRevenue = subscriptions
     .filter(s => s.status === 'active')
     .reduce((sum, s) => sum + parseFloat(s.price || 0), 0);
 
+  // Calculate pagination
+  const totalPages = Math.ceil(subscriptions.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentSubscriptions = subscriptions.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Reset to page 1 when subscriptions list changes
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [subscriptions.length, currentPage, totalPages]);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <div className="subscriptions-view">
-      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom p-2">
+    <div className="subscriptions-view p-3">
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
         <div>
           <h2 className="fw-bold mb-1" style={{ color: '#4F46E5', fontSize: '1.75rem' }}>
             User Subscriptions
           </h2>
           <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>Total: {subscriptions.length} subscriptions</p>
         </div>
-        <button
-          onClick={refetchData}
-          disabled={isLoading}
-          className="btn d-flex align-items-center gap-2 px-4 py-2 fw-semibold"
-          style={{
-            backgroundColor: '#4F46E5',
-            color: 'white',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '0.9rem',
-            transition: 'all 0.2s ease',
-            boxShadow: '0 2px 8px rgba(79, 70, 229, 0.2)'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#4338CA';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(79, 70, 229, 0.3)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#4F46E5';
-            e.currentTarget.style.boxShadow = '0 2px 8px rgba(79, 70, 229, 0.2)';
-          }}
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} style={{ width: '18px', height: '18px' }} />
-          {isLoading ? 'Refreshing...' : 'Refresh'}
-        </button>
+        <div className="d-flex align-items-center gap-3">
+          <div className="d-flex align-items-center gap-2">
+            <span className="text-muted small fw-medium">Show:</span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="form-select form-select-sm border-0 shadow-sm"
+              style={{ width: '70px', backgroundColor: '#f8fafc', borderRadius: '8px', fontWeight: '600' }}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={15}>15</option>
+              <option value={20}>20</option>
+            </select>
+          </div>
+          <button
+            onClick={refetchData}
+            disabled={isLoading}
+            className="btn d-flex align-items-center gap-2 px-4 py-2 fw-semibold"
+            style={{
+              backgroundColor: '#4F46E5',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: '0.9rem',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 8px rgba(79, 70, 229, 0.2)'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = '#4338CA';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(79, 70, 229, 0.3)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = '#4F46E5';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(79, 70, 229, 0.2)';
+            }}
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} style={{ width: '18px', height: '18px' }} />
+            {isLoading ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
       </div>
 
       <div className="metrics-grid">
@@ -1388,9 +1428,19 @@ const SubscriptionsView = ({ subscriptions, isLoading, error, refetchData }) => 
             <p className="text-muted small mb-0">User subscriptions will appear here once activated</p>
           </div>
         )}
-        {subscriptions.map(subscription => (
+        {currentSubscriptions.map(subscription => (
           <SubscriptionCard key={subscription.id} subscription={subscription} />
         ))}
+
+        {subscriptions.length > 0 && totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            itemsPerPage={itemsPerPage}
+            totalItems={subscriptions.length}
+          />
+        )}
       </div>
     </div>
   );
@@ -1483,8 +1533,8 @@ const BillingHistoryView = ({ history, isLoading, error, refetchData }) => {
   };
 
   return (
-    <div className="billing-view">
-      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom p-2">
+    <div className="billing-view p-3">
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
         <div>
           <h2 className="fw-bold mb-1" style={{ color: '#4F46E5', fontSize: '1.75rem' }}>
             Billing History
