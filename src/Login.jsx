@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 // Import the useNavigate hook
 import { Link, useNavigate } from 'react-router-dom';
 import { base_url } from "./commonAPI's.json";
@@ -77,7 +77,7 @@ const PasswordInput = ({ label, name, value, onChange, error }) => {
 // Text Input Component
 const TextInput = ({ label, name, type = 'text', value, onChange, error, icon: Icon, required = false }) => {
   const primaryColor = '#4682B4';
-  
+
   return (
     <div className="mb-4">
       <label className="form-label fw-semibold text-dark" htmlFor={name}>
@@ -111,8 +111,8 @@ const Login = ({ onLoginSuccess }) => {
   const primaryColor = '#4682B4'; // Steel Blue
   const paleBackground = '#F0F8FF'; // Alice Blue
 
-  const navigate = useNavigate(); 
-  
+  const navigate = useNavigate();
+
   const LOGIN_API_URL = `${base_url}/api/users/login/`;
 
   const [formData, setFormData] = useState({
@@ -223,22 +223,22 @@ const Login = ({ onLoginSuccess }) => {
     }
   };
 
-    // Auto-dismiss toast message
-    useEffect(() => {
-      if (submissionMessage) {
-        const timer = setTimeout(() => {
-          setSubmissionMessage('');
-        }, 3000); // Disappear after 3 seconds
-        return () => clearTimeout(timer);
-      }
-    }, [submissionMessage]);
-  
+  // Auto-dismiss toast message
+  useEffect(() => {
+    if (submissionMessage) {
+      const timer = setTimeout(() => {
+        setSubmissionMessage('');
+      }, 3000); // Disappear after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [submissionMessage]);
+
 
   return (
     <>
-        <style>
-      {
-        `
+      <style>
+        {
+          `
         /* Base toast style */
 .toast-alert {
   top: 70px;                 /* below navbar */
@@ -275,131 +275,130 @@ const Login = ({ onLoginSuccess }) => {
   }
 }
 `
-      }
-    </style>
-{/* Submission Message Area - Toast Style */}
-{submissionMessage && (
-  <div
-    className={`alert ${
-      isSubmitting
-        ? "alert-info"
-        : errors && Object.keys(errors).length > 0
-        ? "alert-danger"
-        : "alert-success"
-    } toast-alert shadow-sm position-fixed`}
-    role="alert"
-  >
-    {submissionMessage}
-  </div>
-)}
-    <div className="min-vh-100 d-flex align-items-center justify-content-center py-4" style={{ backgroundColor: paleBackground }}>
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-12 col-lg-8 col-xl-6">
-            <div className="card shadow-lg border-0 rounded-4">
-              <div className="card-body p-4 p-md-5">
-                
-                {/* Header */}
-                <div className="text-center mb-5">
-                  <div className="d-flex justify-content-center mb-4">
-                    <div className="p-3 rounded-circle" style={{ backgroundColor: primaryColor + '1A' }}>
-                      <LogIn className="h-8 w-8" style={{ color: primaryColor }} />
-                    </div>
-                  </div>
-                  <h2 className="card-title fw-bold mb-3" style={{ color: primaryColor }}>
-                    Candidate Sign In
-                  </h2>
-                  <p className="text-muted lead">
-                    Access your profile and track your application status.
-                  </p>
-                </div>
+        }
+      </style>
+      {/* Submission Message Area - Toast Style */}
+      {submissionMessage && (
+        <div
+          className={`alert ${isSubmitting
+              ? "alert-info"
+              : errors && Object.keys(errors).length > 0
+                ? "alert-danger"
+                : "alert-success"
+            } toast-alert shadow-sm position-fixed`}
+          role="alert"
+        >
+          {submissionMessage}
+        </div>
+      )}
+      <div className="min-vh-100 d-flex align-items-center justify-content-center py-4" style={{ backgroundColor: paleBackground }}>
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-12 col-lg-8 col-xl-6">
+              <div className="card shadow-lg border-0 rounded-4">
+                <div className="card-body p-4 p-md-5">
 
-                <form onSubmit={handleSubmit}>
-                  {/* General Error Alert */}
-                  {errors.general && (
-                    <div className="alert alert-danger d-flex align-items-center" role="alert">
-                      <span className="me-2 fw-bold fs-5">!</span>
-                      <div>
-                        {errors.general}
+                  {/* Header */}
+                  <div className="text-center mb-5">
+                    <div className="d-flex justify-content-center mb-4">
+                      <div className="p-3 rounded-circle" style={{ backgroundColor: primaryColor + '1A' }}>
+                        <LogIn className="h-8 w-8" style={{ color: primaryColor }} />
                       </div>
                     </div>
-                  )}
+                    <h2 className="card-title fw-bold mb-3" style={{ color: primaryColor }}>
+                      Candidate Sign In
+                    </h2>
+                    <p className="text-muted lead">
+                      Access your profile and track your application status.
+                    </p>
+                  </div>
 
-              
+                  <form onSubmit={handleSubmit}>
+                    {/* General Error Alert */}
+                    {errors.general && (
+                      <div className="alert alert-danger d-flex align-items-center" role="alert">
+                        <span className="me-2 fw-bold fs-5">!</span>
+                        <div>
+                          {errors.general}
+                        </div>
+                      </div>
+                    )}
 
-                  {/* Email Input */}
-                  <TextInput
-                    label="Email Address"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    error={errors.email}
-                    icon={Mail}
-                    required
-                  />
 
-                  {/* Password Input */}
-                  <PasswordInput
-                    label="Password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    error={errors.password}
-                  />
 
-                  {/* Remember Me & Forgot Password */}
-                  <div className="d-flex justify-content-between align-items-center mb-4">
-                    <div className="form-check">
-                      <input
-                        id="rememberMe"
-                        name="rememberMe"
-                        type="checkbox"
-                        checked={formData.rememberMe}
-                        onChange={handleChange}
-                        className="form-check-input"
-                        style={{ borderColor: primaryColor, color: primaryColor, backgroundColor: formData.rememberMe ? primaryColor : 'white' }}
-                      />
-                      <label htmlFor="rememberMe" className="form-check-label text-dark">
-                        Remember Me
-                      </label>
+                    {/* Email Input */}
+                    <TextInput
+                      label="Email Address"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      error={errors.email}
+                      icon={Mail}
+                      required
+                    />
+
+                    {/* Password Input */}
+                    <PasswordInput
+                      label="Password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      error={errors.password}
+                    />
+
+                    {/* Remember Me & Forgot Password */}
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                      <div className="form-check">
+                        <input
+                          id="rememberMe"
+                          name="rememberMe"
+                          type="checkbox"
+                          checked={formData.rememberMe}
+                          onChange={handleChange}
+                          className="form-check-input"
+                          style={{ borderColor: primaryColor, color: primaryColor, backgroundColor: formData.rememberMe ? primaryColor : 'white' }}
+                        />
+                        <label htmlFor="rememberMe" className="form-check-label text-dark">
+                          Remember Me
+                        </label>
+                      </div>
+
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => console.log('Forgot Password functionality triggered.')}
+                          className="btn btn-link text-decoration-none fw-semibold p-0"
+                          style={{ color: primaryColor }}
+                        >
+                          Forgot Password?
+                        </button>
+                      </div>
                     </div>
 
-                    <div>
+                    {/* Candidate Sign In Button */}
+                    <div className="d-grid mb-3">
                       <button
-                         type="button"
-                         onClick={() => console.log('Forgot Password functionality triggered.')}
-                         className="btn btn-link text-decoration-none fw-semibold p-0"
-                         style={{ color: primaryColor }}
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="btn btn-lg py-3 fw-bold rounded-pill"
+                        style={{ backgroundColor: primaryColor, borderColor: primaryColor, color: 'white' }}
                       >
-                        Forgot Password?
+                        {isSubmitting ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            {submissionMessage}
+                          </>
+                        ) : (
+                          <>
+                            <LogIn className="w-5 h-5 me-2" />
+                            Sign In
+                          </>
+                        )}
                       </button>
                     </div>
-                  </div>
 
-                  {/* Candidate Sign In Button */}
-                  <div className="d-grid mb-3">
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="btn btn-lg py-3 fw-bold rounded-pill"
-                      style={{ backgroundColor: primaryColor, borderColor: primaryColor, color: 'white' }}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          {submissionMessage}
-                        </>
-                      ) : (
-                        <>
-                          <LogIn className="w-5 h-5 me-2" />
-                          Sign In
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Admin Login Link (replaces recruiter button) 
+                    {/* Admin Login Link (replaces recruiter button) 
                   <div className="text-center mb-4">
                     <button
                       type="button"
@@ -412,53 +411,53 @@ const Login = ({ onLoginSuccess }) => {
                   </div>
                   */}
 
-                  {/* Registration Link */}
-                  <div className="text-center pt-3 border-top">
-                    <p className="text-muted mb-0">
-                      Don't have an account?{' '}
-                      <button
-                        type="button"
-                        onClick={() => navigate('/register')}
-                        className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
-                        style={{ color: primaryColor }}
-                      >
-                        Register Here
-                      </button>
-                    </p>
-                  </div>
-                  {/* Login as Recruiter and Admin  */}
-                  <div className="text-center pt-3 border-top d-flex justify-content-around  align-items-center">
-                    <p className="text-muted mb-0">
-                      Are you a recruiter?{' '} 
-                      <button
-                        type="button"
-                        onClick={() => navigate('/recruiter-login')}
-                        className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
-                        style={{ color: primaryColor }}
-                      >
-                        Login Here
-                      </button>
-                    </p>
-                    <p className="text-muted mb-0">
-                      Are you a Admin?{' '} 
-                      <button
-                        type="button"
-                        onClick={() => navigate('/AdminLogin')}
-                        className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
-                        style={{ color: primaryColor }}
-                      >
-                        Login Here
-                      </button>
-                    </p>
-                  </div>
-                </form>
+                    {/* Registration Link */}
+                    <div className="text-center pt-3 border-top">
+                      <p className="text-muted mb-0">
+                        Don't have an account?{' '}
+                        <button
+                          type="button"
+                          onClick={() => navigate('/register')}
+                          className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
+                          style={{ color: primaryColor }}
+                        >
+                          Register Here
+                        </button>
+                      </p>
+                    </div>
+                    {/* Login as Recruiter and Admin  */}
+                    <div className="text-center pt-3 border-top d-flex justify-content-around  align-items-center">
+                      <p className="text-muted mb-0">
+                        Are you a recruiter?{' '}
+                        <button
+                          type="button"
+                          onClick={() => navigate('/recruiter-login')}
+                          className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
+                          style={{ color: primaryColor }}
+                        >
+                          Login Here
+                        </button>
+                      </p>
+                      <p className="text-muted mb-0">
+                        Are you a Admin?{' '}
+                        <button
+                          type="button"
+                          onClick={() => navigate('/admin-login')}
+                          className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
+                          style={{ color: primaryColor }}
+                        >
+                          Login Here
+                        </button>
+                      </p>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-</>
+    </>
 
   );
 };

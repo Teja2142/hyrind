@@ -1,694 +1,753 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation , useNavigate} from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import image from "./assets/image.png";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
+  const [userName, setUserName] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
-
 
   const toggleMenu = () => setOpen(!open);
   const closeMenu = () => setOpen(false);
   const toggleProfileDropdown = () => setProfileDropdownOpen(!profileDropdownOpen);
   const closeProfileDropdown = () => setProfileDropdownOpen(false);
+  const toggleMoreDropdown = () => setMoreDropdownOpen(!moreDropdownOpen);
+  const closeMoreDropdown = () => setMoreDropdownOpen(false);
+
+  // Fetch user data when component mounts or when token changes
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("accessToken");
+      const profileType = localStorage.getItem("profileType");
+
+      if (token) {
+        try {
+          let apiUrl = "";
+
+          // Determine API endpoint based on profile type
+          if (profileType === "Candidate") {
+            apiUrl = "http://127.0.0.1:8000/api/users/me/";
+          } else if (profileType === "Recruiter") {
+            apiUrl = "http://127.0.0.1:8000/api/recruiters/me/";
+          } else if (profileType === "Admin") {
+            apiUrl = "http://127.0.0.1:8000/api/admin/me/";
+          }
+
+          if (apiUrl) {
+            const response = await fetch(apiUrl, {
+              method: "GET",
+              headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              // Set user name based on available fields
+              const name = data.full_name || data.name || data.first_name || data.email?.split('@')[0] || "User";
+              setUserName(name);
+            } else {
+              setUserName("User");
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setUserName("User");
+        }
+      } else {
+        setUserName("");
+      }
+    };
+
+    fetchUserData();
+  }, [location.pathname]); // Re-fetch when route changes
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("profileType");
+    setUserName("");
     closeProfileDropdown();
     navigate("/login");
   };
 
   const isActive = (path) => location.pathname === path;
 
-  // Close profile dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileDropdownOpen && !event.target.closest('.profile-container')) {
         closeProfileDropdown();
       }
+      if (moreDropdownOpen && !event.target.closest('.more-container')) {
+        closeMoreDropdown();
+      }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [profileDropdownOpen]);
+  }, [profileDropdownOpen, moreDropdownOpen]);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    closeMenu();
+    closeMoreDropdown();
+  }, [location.pathname]);
 
   return (
     <>
       <style>{`
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
+        .navbar-overlay {
+          position: fixed;
+          inset: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 40;
+          transition: opacity 0.3s;
         }
-
-        body {
-          background: #f8fafc;
-          color: #0d47a1;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-          padding-top: 80px;
+        
+        .navbar-overlay.visible {
+          opacity: 1;
+          visibility: visible;
+        }
+        
+        .navbar-overlay.hidden {
+          opacity: 0;
+          visibility: hidden;
         }
 
         .navbar {
-          width: 100%;
-          padding: 16px 5%;
-          background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
-          color: white;
+          background-color: white;
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+          position: sticky;
+          top: 0;
+          z-index: 50;
+        }
+
+        .navbar-container {
+          max-width: 1280px;
+          margin: 0 auto;
+          padding: 0 1rem;
+        }
+
+        .navbar-content {
           display: flex;
-          align-items: center;
           justify-content: space-between;
-          position: fixed;
-          top: 0;
-          left: 0;
-          z-index: 1000;
-          box-shadow: 0 4px 20px rgba(13, 71, 161, 0.25);
-          backdrop-filter: blur(10px);
-        }
-
-        .logo-container {
-          display: flex;
           align-items: center;
-          gap: 12px;
-          cursor: pointer;
+          height: 4rem;
         }
 
-        .logo {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          object-fit: fill;
-          border: 3px solid rgba(255, 255, 255, 0.3);
-          transition: transform 0.3s ease, border-color 0.3s ease;
+        .navbar-logo img {
+          height: 2.5rem;
+          width: auto;
         }
 
-        .logo:hover {
-          transform: scale(1.1) rotate(5deg);
-          border-color: rgba(255, 255, 255, 0.8);
-        }
-
-        .menu-icon {
-          font-size: 28px;
-          cursor: pointer;
-          user-select: none;
-          padding: 8px;
-          transition: transform 0.2s ease, color 0.2s ease;
-          display: none;
-          color: white;
-          border-radius: 8px;
-          background: rgba(255, 255, 255, 0.1);
-        }
-
-        .menu-icon:hover {
-          transform: scale(1.1);
-          background: rgba(255, 255, 255, 0.2);
-        }
-
-        .menu-icon:active {
-          transform: scale(0.95);
-        }
-
-        .desktop-menu {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-        }
-
-        .desktop-menu a,
-        .desktop-menu .nav-link {
-          color: white;
-          text-decoration: none;
-          font-size: 15px;
-          font-weight: 500;
-          padding: 10px 18px;
-          border-radius: 8px;
-          transition: all 0.3s ease;
-          position: relative;
-          white-space: nowrap;
-          cursor: pointer;
-        }
-
-        .desktop-menu a::before,
-        .desktop-menu .nav-link::before {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          width: 0;
-          height: 2px;
-          background: white;
-          transform: translateX(-50%);
-          transition: width 0.3s ease;
-        }
-
-        .desktop-menu a:hover,
-        .desktop-menu .nav-link:hover {
-          background: rgba(255, 255, 255, 0.15);
-          transform: translateY(-2px);
-        }
-
-        .desktop-menu a:hover::before,
-        .desktop-menu .nav-link:hover::before {
-          width: 70%;
-        }
-
-        .desktop-menu a.active,
-        .desktop-menu .nav-link.active {
-          background: rgba(255, 255, 255, 0.25);
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .register-button {
-          background: white;
-          color: #0d47a1;
-          border: none;
-          padding: 10px 24px;
-          border-radius: 8px;
-          font-weight: 600;
-          font-size: 15px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          white-space: nowrap;
-        }
-
-        .register-button:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-          background: #f0f7ff;
-        }
-
-        .register-button:active {
-          transform: translateY(0);
-        }
-
-        .overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100vh;
-          background: rgba(0, 0, 0, 0.6);
-          z-index: 998;
-          transition: opacity 0.3s ease, visibility 0.3s ease;
-          backdrop-filter: blur(4px);
-        }
-
-        .sidebar {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 300px;
-          max-width: 85vw;
-          height: 100vh;
-          background: white;
-          padding: 90px 24px 24px;
-          z-index: 999;
-          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          border-right: 4px solid #0d47a1;
-          overflow-y: auto;
-          box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .sidebar a,
-        .sidebar .nav-link {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 16px 20px;
-          margin: 6px 0;
-          font-size: 16px;
-          color: #0d47a1;
-          text-decoration: none;
-          border-radius: 10px;
-          font-weight: 500;
-          transition: all 0.3s ease;
-          border: 2px solid transparent;
-          cursor: pointer;
-        }
-
-        .sidebar a:hover,
-        .sidebar .nav-link:hover {
-          background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-          transform: translateX(5px);
-          border-color: #0d47a1;
-        }
-
-        .sidebar a.active,
-        .sidebar .nav-link.active {
-          background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
-          color: white;
-          box-shadow: 0 4px 12px rgba(13, 71, 161, 0.3);
-        }
-
-        .sidebar .register-button {
-          width: 100%;
-          margin-top: 16px;
-          padding: 14px 24px;
-          font-size: 16px;
-        }
-
-        /* Tablet styles */
-        @media(max-width: 1024px) {
-          .desktop-menu {
-            gap: 6px;
-          }
-          
-          .desktop-menu a {
-            padding: 10px 14px;
-            font-size: 14px;
-          }
-
-          .register-button {
-            padding: 10px 18px;
-            font-size: 14px;
-          }
-        }
-
-        /* Mobile styles */
-        @media(max-width: 768px) {
-          .menu-icon { 
-            display: block; 
-          }
-          
-          .desktop-menu { 
-            display: none; 
-          }
-
-          .navbar {
-            padding: 14px 20px;
-          }
-
-          .logo {
-            width: 45px;
-            height: 45px;
-          }
-        }
-
-        @media(max-width: 480px) {
-          .navbar {
-            padding: 12px 16px;
-          }
-
-          .logo {
-            width: 40px;
-            height: 40px;
-          }
-
-          .sidebar {
-            padding: 80px 20px 20px;
-          }
-
-          .sidebar a {
-            padding: 14px 16px;
-            font-size: 15px;
-          }
-        }
-
-        /* Smooth scrollbar for sidebar */
-        .sidebar::-webkit-scrollbar {
-          width: 6px;
-        }
-
-        .sidebar::-webkit-scrollbar-track {
-          background: #f1f1f1;
-        }
-
-        .sidebar::-webkit-scrollbar-thumb {
-          background: #0d47a1;
-          border-radius: 3px;
-        }
-
-        .sidebar::-webkit-scrollbar-thumb:hover {
-          background: #1565c0;
-        }
-
-        /* Profile Circle Styles */
-        .profile-container {
-          position: relative;
-          margin-left: 16px;
-        }
-
-        .profile-circle {
-          width: 42px;
-          height: 42px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          border: 3px solid rgba(255, 255, 255, 0.5);
-          transition: all 0.3s ease;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-          font-weight: 600;
-          font-size: 18px;
-          color: #0d47a1;
-          user-select: none;
-        }
-
-        .profile-circle:hover {
-          transform: scale(1.1);
-          border-color: rgba(255, 255, 255, 0.9);
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .profile-circle:active {
-          transform: scale(0.95);
-        }
-
-        .profile-dropdown {
-          position: absolute;
-          top: calc(100% + 12px);
-          right: 0;
-          background: white;
-          border-radius: 12px;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-          min-width: 200px;
-          overflow: hidden;
-          opacity: 0;
-          visibility: hidden;
-          transform: translateY(-10px);
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          z-index: 1001;
-        }
-
-        .profile-dropdown.open {
-          opacity: 1;
-          visibility: visible;
-          transform: translateY(0);
-        }
-
-        .profile-dropdown::before {
-          content: '';
-          position: absolute;
-          top: -6px;
-          right: 16px;
-          width: 12px;
-          height: 12px;
-          background: white;
-          transform: rotate(45deg);
-          box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .profile-dropdown-header {
-          padding: 16px 20px;
-          background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
-          color: white;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .profile-dropdown-header h4 {
-          margin: 0;
-          font-size: 16px;
-          font-weight: 600;
-        }
-
-        .profile-dropdown-header p {
-          margin: 4px 0 0 0;
-          font-size: 13px;
-          opacity: 0.9;
-        }
-
-        .profile-dropdown-menu {
-          padding: 8px 0;
-        }
-
-        .profile-dropdown-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 20px;
-          color: #0d47a1;
-          text-decoration: none;
-          font-size: 15px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          border: none;
-          background: none;
-          width: 100%;
-          text-align: left;
-        }
-
-        .profile-dropdown-item:hover {
-          background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-        }
-
-        .profile-dropdown-item.logout {
-          color: #d32f2f;
-          border-top: 1px solid #e0e0e0;
-        }
-
-        .profile-dropdown-item.logout:hover {
-          background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-        }
-
-        .profile-dropdown-item svg {
-          width: 20px;
-          height: 20px;
-        }
-
-        /* Mobile profile styles */
-        @media(max-width: 768px) {
-          .profile-container {
-            margin-left: 12px;
-          }
-
-          .profile-circle {
-            width: 38px;
-            height: 38px;
-            font-size: 16px;
-          }
-
-          .profile-dropdown {
-            min-width: 180px;
-          }
-        }
-
-        /* Mobile navbar controls */
-        .mobile-navbar-controls {
+        .navbar-desktop {
           display: none;
           align-items: center;
-          gap: 12px;
+          gap: 1.5rem;
         }
 
-        @media(max-width: 768px) {
-          .mobile-navbar-controls {
+        @media (min-width: 768px) {
+          .navbar-desktop {
             display: flex;
           }
         }
 
-        /* Sidebar profile section */
-        .sidebar-profile-section {
-          margin-top: 20px;
-          padding-top: 20px;
-          border-top: 2px solid #e0e0e0;
+        .nav-link {
+          padding: 0.5rem 0.75rem;
+          border-radius: 0.375rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          transition: all 0.2s;
+          text-decoration: none;
+          color: #374151;
         }
 
-        .sidebar-profile-header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 20px;
-          background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-          border-radius: 10px;
-          margin-bottom: 8px;
+        .nav-link:hover {
+          color: #2563eb;
+          background-color: #f9fafb;
         }
 
-        .sidebar-profile-circle {
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        .nav-link.active {
+          color: #2563eb;
+          background-color: #eff6ff;
+        }
+
+        .register-btn {
+          background-color: #2563eb;
           color: white;
-          font-size: 24px;
-          border: 3px solid rgba(13, 71, 161, 0.3);
+          padding: 0.5rem 1rem;
+          border-radius: 0.375rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.2s;
+          white-space: nowrap;
         }
 
-        .sidebar-profile-info h4 {
-          margin: 0;
-          font-size: 16px;
+        .register-btn:hover {
+          background-color: #1d4ed8;
+        }
+
+        .profile-container, .more-container {
+          position: relative;
+        }
+
+        .profile-button, .more-button {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 0.75rem;
+          border-radius: 0.375rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #374151;
+          background: none;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.2s;
+          white-space: nowrap;
+        }
+
+        .profile-button:hover, .more-button:hover {
+          background-color: #f9fafb;
+        }
+
+        .profile-icon {
+          font-size: 1.25rem;
+        }
+
+        .user-name {
+          max-width: 150px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .dropdown-arrow {
+          width: 1rem;
+          height: 1rem;
+          transition: transform 0.2s;
+        }
+
+        .dropdown-arrow.rotate {
+          transform: rotate(180deg);
+        }
+
+        .profile-dropdown, .more-dropdown {
+          position: absolute;
+          right: 0;
+          margin-top: 0.5rem;
+          width: 14rem;
+          background-color: white;
+          border-radius: 0.375rem;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+          padding: 0.25rem 0;
+          border: 1px solid rgba(0, 0, 0, 0.05);
+          max-height: 400px;
+          overflow-y: auto;
+        }
+
+        .dropdown-header {
+          padding: 0.5rem 1rem;
+          font-size: 0.75rem;
+          color: #6b7280;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .dropdown-item {
+          width: 100%;
+          text-align: left;
+          padding: 0.5rem 1rem;
+          font-size: 0.875rem;
+          color: #374151;
+          background: none;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.2s;
+          text-decoration: none;
+          display: block;
+        }
+
+        .dropdown-item:hover {
+          background-color: #f3f4f6;
+        }
+
+        .dropdown-item.logout {
+          color: #dc2626;
+        }
+
+        .dropdown-item.logout:hover {
+          background-color: #fef2f2;
+        }
+
+        .mobile-menu-button {
+          display: block;
+          font-size: 1.5rem;
+          padding: 0.5rem;
+          color: #374151;
+          background: none;
+          border: none;
+          cursor: pointer;
+          transition: color 0.2s;
+        }
+
+        @media (min-width: 768px) {
+          .mobile-menu-button {
+            display: none;
+          }
+        }
+
+        .mobile-menu-button:hover {
+          color: #2563eb;
+        }
+
+        .mobile-sidebar {
+          position: fixed;
+          top: 0;
+          right: 0;
+          height: 100%;
+          width: 16rem;
+          background-color: white;
+          box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+          z-index: 50;
+          transform: translateX(100%);
+          transition: transform 0.3s ease-in-out;
+          overflow-y: auto;
+        }
+
+        .mobile-sidebar.open {
+          transform: translateX(0);
+        }
+
+        .mobile-sidebar-content {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          padding-bottom: 2rem;
+        }
+
+        .mobile-close-button {
+          display: flex;
+          justify-content: flex-end;
+          padding: 1rem;
+        }
+
+        .close-btn {
+          font-size: 1.5rem;
+          color: #374151;
+          background: none;
+          border: none;
+          cursor: pointer;
+          transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+          color: #dc2626;
+        }
+
+        .mobile-nav-links {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          padding: 0 1rem;
+        }
+
+        .mobile-nav-link {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.75rem 1rem;
+          border-radius: 0.375rem;
+          transition: all 0.2s;
+          text-decoration: none;
+          color: #374151;
+        }
+
+        .mobile-nav-link:hover {
+          background-color: #f9fafb;
+        }
+
+        .mobile-nav-link.active {
+          background-color: #eff6ff;
+          color: #2563eb;
+        }
+
+        .mobile-section-header {
+          padding: 0.75rem 1rem;
+          font-size: 0.75rem;
           font-weight: 600;
-          color: #0d47a1;
+          color: #6b7280;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-top: 1rem;
         }
 
-        .sidebar-profile-info p {
-          margin: 4px 0 0 0;
-          font-size: 13px;
-          color: #1565c0;
+        .mobile-profile-section {
+          margin-top: 1.5rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid #e5e7eb;
         }
 
-        .sidebar .profile-dropdown-item {
-          margin: 4px 0;
+        .mobile-profile-card {
+          background-color: #f9fafb;
+          border-radius: 0.375rem;
+          padding: 1rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .mobile-profile-header {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .mobile-profile-title {
+          font-weight: 500;
+          color: #111827;
+        }
+
+        .mobile-profile-subtitle {
+          font-size: 0.75rem;
+          color: #6b7280;
+        }
+
+        .mobile-profile-button {
+          width: 100%;
+          text-align: left;
+          padding: 0.75rem 1rem;
+          border-radius: 0.375rem;
+          color: #374151;
+          background: none;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+
+        .mobile-profile-button:hover {
+          background-color: #f3f4f6;
+        }
+
+        .mobile-logout-button {
+          width: 100%;
+          text-align: left;
+          padding: 0.75rem 1rem;
+          border-radius: 0.375rem;
+          color: #dc2626;
+          background: none;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+
+        .mobile-logout-button:hover {
+          background-color: #fef2f2;
         }
       `}</style>
 
       {/* overlay */}
       <div
-        className="overlay"
+        className={`navbar-overlay ${open ? "visible" : "hidden"}`}
         onClick={closeMenu}
-        style={{
-          opacity: open ? 1 : 0,
-          visibility: open ? "visible" : "hidden",
-        }}
       />
 
       {/* navbar */}
-      <div className="navbar">
-        <div className="logo-container">
-          <img className="logo" src={image} alt="logo"/>
-        </div>
+      <nav className="navbar">
+        <div className="navbar-container">
+          <div className="navbar-content">
+            {/* Logo */}
+            <Link to="/" className="navbar-logo">
+              <img src={image} alt="Logo" />
+            </Link>
 
-        <div className="desktop-menu">
-          <Link to="/" className={isActive("/") ? "active" : ""}>Home</Link>
-          <Link to="/about" className={isActive("/about") ? "active" : ""}>About</Link>
-          <Link to="/services" className={isActive("/services") ? "active" : ""}>Services</Link>
-          <Link to="/how-it-works" className={isActive("/how-it-works") ? "active" : ""}>How it works?</Link>
-          <Link to="/reviews" className={isActive("/reviews") ? "active" : ""}>Reviews</Link>
-          <Link to="/Contact" className={isActive("/Contact") ? "active" : ""}>Contact</Link>
-          {!localStorage.getItem("accessToken")&& <button className="register-button" onClick={() => navigate("/Register")}> Register Now</button>}
-          
-          {localStorage.getItem("accessToken") && (
-            <div className="profile-container">
-              <div className="profile-circle" onClick={toggleProfileDropdown}>
-                👤
-              </div>
-              <div className={`profile-dropdown ${profileDropdownOpen ? 'open' : ''}`}>
-                <div className="profile-dropdown-header">
-                  <h4>My Account</h4>
-                  <p>Manage your profile</p>
-                </div>
-                <div className="profile-dropdown-menu">
-                  <button 
-                    className="profile-dropdown-item"
-                    onClick={() => {
-                      closeProfileDropdown();
-                      const profileType = localStorage.getItem('profileType');
-                      if(profileType === 'Candidate')
-                      {
-                        navigate('/profile');
-                      }
-                      else if(profileType === 'Recruiter')
-                      {
-                        navigate('/recruiter-dashboard');
-                      }
-                      else if(profileType === 'Admin')
-                      {
-                        navigate('/admin');
-                      }
-                    }}
+            {/* Desktop Navigation */}
+            <div className="navbar-desktop">
+              <Link to="/" className={`nav-link ${isActive("/") || isActive("/home") ? "active" : ""}`}>
+                Home
+              </Link>
+              <Link to="/about" className={`nav-link ${isActive("/about") ? "active" : ""}`}>
+                About
+              </Link>
+              <Link to="/services" className={`nav-link ${isActive("/services") ? "active" : ""}`}>
+                Services
+              </Link>
+              <Link to="/how-it-works" className={`nav-link ${isActive("/how-it-works") ? "active" : ""}`}>
+                How it works?
+              </Link>
+              <Link to="/reviews" className={`nav-link ${isActive("/reviews") ? "active" : ""}`}>
+                Reviews
+              </Link>
+              <Link to="/contact" className={`nav-link ${isActive("/contact") ? "active" : ""}`}>
+                Contact
+              </Link>
+
+              {/* More Dropdown */}
+              <div className="more-container">
+                <button onClick={toggleMoreDropdown} className="more-button">
+                  <span>More</span>
+                  <svg
+                    className={`dropdown-arrow ${moreDropdownOpen ? "rotate" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {moreDropdownOpen && (
+                  <div className="more-dropdown">
+                    <div className="dropdown-header">Additional</div>
+                    <Link to="/interest" onClick={closeMoreDropdown} className="dropdown-item">
+                      Interest
+                    </Link>
+                    <div className="dropdown-header" style={{ marginTop: '0.5rem' }}>For Recruiters</div>
+                    <Link to="/recruiter-register" onClick={closeMoreDropdown} className="dropdown-item">
+                      Recruiter Register
+                    </Link>
+                    <Link to="/recruiter-login" onClick={closeMoreDropdown} className="dropdown-item">
+                      Recruiter Login
+                    </Link>
+                    <div className="dropdown-header" style={{ marginTop: '0.5rem' }}>Admin</div>
+                    <Link to="/admin-login" onClick={closeMoreDropdown} className="dropdown-item">
+                      Admin Login
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {!localStorage.getItem("accessToken") ? (
+                <button
+                  onClick={() => navigate("/register")}
+                  className="register-btn"
+                >
+                  Register Now
+                </button>
+              ) : (
+                <div className="profile-container">
+                  <button onClick={toggleProfileDropdown} className="profile-button">
+                    <span className="profile-icon">👤</span>
+                    <span className="user-name">{userName || "User"}</span>
+                    <svg
+                      className={`dropdown-arrow ${profileDropdownOpen ? "rotate" : ""}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
-                    Profile
                   </button>
-                  <button 
-                    className="profile-dropdown-item logout"
-                    onClick={handleLogout}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Logout
-                  </button>
+
+                  {/* Desktop Dropdown */}
+                  {profileDropdownOpen && (
+                    <div className="profile-dropdown">
+                      <div className="dropdown-header">
+                        {userName || "User"}
+                      </div>
+                      <button
+                        onClick={() => {
+                          closeProfileDropdown();
+                          const profileType = localStorage.getItem('profileType');
+                          if (profileType === 'Candidate') {
+                            navigate('/profile');
+                          } else if (profileType === 'Recruiter') {
+                            navigate('/recruiter-dashboard');
+                          } else if (profileType === 'Admin') {
+                            navigate('/admin');
+                          }
+                        }}
+                        className="dropdown-item"
+                      >
+                        Profile
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="dropdown-item logout"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
-          )}
-        </div>  
 
-        <div className="mobile-navbar-controls">
-          {localStorage.getItem("accessToken") && (
-            <div className="profile-circle" onClick={toggleProfileDropdown}>
-              👤
-            </div>
-          )}
-          <div className="menu-icon" onClick={toggleMenu}>
-            {open ? "✖" : "☰"}
-          </div>
-        </div>
-      </div>
-
-      {/* sidebar */}
-      <div
-        className="sidebar"
-        style={{
-          transform: open ? "translateX(0)" : "translateX(-100%)",
-        }}
-      >
-        <Link to="/" className={isActive("/") ? "active" : ""} onClick={closeMenu}>
-          🏠 Home
-        </Link>
-        <Link to="/about" className={isActive("/about") ? "active" : ""} onClick={closeMenu}>
-          ℹ️ About
-        </Link>
-        <Link to="/services" className={isActive("/services") ? "active" : ""} onClick={closeMenu}>
-          ⚙️ Services
-        </Link>
-        <Link to="/how-it-works" className={isActive("/how-it-works") ? "active" : ""} onClick={closeMenu}>
-          🔧 How it works?
-        </Link>
-        <Link to="/reviews" className={isActive("/reviews") ? "active" : ""} onClick={closeMenu}>
-          ⭐ Reviews
-        </Link>
-        <Link to="/Contact" className={isActive("/Contact") ? "active" : ""} onClick={closeMenu}>
-          📧 Contact
-        </Link>
-        
-        {!localStorage.getItem("accessToken") && (
-          <button className="register-button" onClick={() => { closeMenu(); navigate("/Register"); }}>Register Now</button>
-        )}
-
-        {localStorage.getItem("accessToken") && (
-          <div className="sidebar-profile-section">
-            <div className="sidebar-profile-header">
-              <div className="sidebar-profile-circle">👤</div>
-              <div className="sidebar-profile-info">
-                <h4>My Account</h4>
-                <p>Manage your profile</p>
-              </div>
-            </div>
-            <button 
-              className="profile-dropdown-item"
-              onClick={() => {
-                closeMenu();
-                const profileType = localStorage.getItem('profileType');
-                if(profileType === 'Candidate') {
-                  navigate('/profile');
-                } else if(profileType === 'Recruiter') {
-                  navigate('/recruiter-profile');
-                } else if(profileType === 'Admin') {
-                  navigate('/admin');
-                }
-              }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              Profile
-            </button>
-            <button 
-              className="profile-dropdown-item logout"
-              onClick={() => {
-                closeMenu();
-                handleLogout();
-              }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Logout
+            {/* Mobile menu button */}
+            <button onClick={toggleMenu} className="mobile-menu-button">
+              {open ? "✖" : "☰"}
             </button>
           </div>
-        )}
+        </div>
+      </nav>
+
+      {/* Mobile sidebar */}
+      <div className={`mobile-sidebar ${open ? "open" : ""}`}>
+        <div className="mobile-sidebar-content">
+          {/* Close button */}
+          <div className="mobile-close-button">
+            <button onClick={closeMenu} className="close-btn">
+              ✖
+            </button>
+          </div>
+
+          {/* Mobile Navigation Links */}
+          <div className="mobile-nav-links">
+            <div className="mobile-section-header">Main Menu</div>
+            <Link
+              to="/"
+              onClick={closeMenu}
+              className={`mobile-nav-link ${isActive("/") || isActive("/home") ? "active" : ""}`}
+            >
+              <span>🏠</span>
+              <span>Home</span>
+            </Link>
+            <Link
+              to="/about"
+              onClick={closeMenu}
+              className={`mobile-nav-link ${isActive("/about") ? "active" : ""}`}
+            >
+              <span>ℹ️</span>
+              <span>About</span>
+            </Link>
+            <Link
+              to="/services"
+              onClick={closeMenu}
+              className={`mobile-nav-link ${isActive("/services") ? "active" : ""}`}
+            >
+              <span>⚙️</span>
+              <span>Services</span>
+            </Link>
+            <Link
+              to="/how-it-works"
+              onClick={closeMenu}
+              className={`mobile-nav-link ${isActive("/how-it-works") ? "active" : ""}`}
+            >
+              <span>🔧</span>
+              <span>How it works?</span>
+            </Link>
+            <Link
+              to="/reviews"
+              onClick={closeMenu}
+              className={`mobile-nav-link ${isActive("/reviews") ? "active" : ""}`}
+            >
+              <span>⭐</span>
+              <span>Reviews</span>
+            </Link>
+            <Link
+              to="/contact"
+              onClick={closeMenu}
+              className={`mobile-nav-link ${isActive("/contact") ? "active" : ""}`}
+            >
+              <span>📧</span>
+              <span>Contact</span>
+            </Link>
+
+            <div className="mobile-section-header">Additional</div>
+            <Link
+              to="/interest"
+              onClick={closeMenu}
+              className={`mobile-nav-link ${isActive("/interest") ? "active" : ""}`}
+            >
+              <span>💡</span>
+              <span>Interest</span>
+            </Link>
+
+            <div className="mobile-section-header">For Recruiters</div>
+            <Link
+              to="/recruiter-register"
+              onClick={closeMenu}
+              className={`mobile-nav-link ${isActive("/recruiter-register") ? "active" : ""}`}
+            >
+              <span>✍️</span>
+              <span>Recruiter Register</span>
+            </Link>
+            <Link
+              to="/recruiter-login"
+              onClick={closeMenu}
+              className={`mobile-nav-link ${isActive("/recruiter-login") ? "active" : ""}`}
+            >
+              <span>🔑</span>
+              <span>Recruiter Login</span>
+            </Link>
+
+            <div className="mobile-section-header">Admin</div>
+            <Link
+              to="/admin-login"
+              onClick={closeMenu}
+              className={`mobile-nav-link ${isActive("/admin-login") ? "active" : ""}`}
+            >
+              <span>🛡️</span>
+              <span>Admin Login</span>
+            </Link>
+
+            {!localStorage.getItem("accessToken") && (
+              <button
+                onClick={() => {
+                  closeMenu();
+                  navigate("/register");
+                }}
+                className="register-btn"
+                style={{ marginTop: '1rem' }}
+              >
+                Register Now
+              </button>
+            )}
+
+            {localStorage.getItem("accessToken") && (
+              <div className="mobile-profile-section">
+                <div className="mobile-profile-card">
+                  <div className="mobile-profile-header">
+                    <span style={{ fontSize: '1.5rem' }}>👤</span>
+                    <span className="mobile-profile-title">{userName || "User"}</span>
+                  </div>
+                  <p className="mobile-profile-subtitle">Manage your profile</p>
+                </div>
+                <button
+                  onClick={() => {
+                    closeMenu();
+                    const profileType = localStorage.getItem('profileType');
+                    if (profileType === 'Candidate') {
+                      navigate('/profile');
+                    } else if (profileType === 'Recruiter') {
+                      navigate('/recruiter-dashboard');
+                    } else if (profileType === 'Admin') {
+                      navigate('/admin');
+                    }
+                  }}
+                  className="mobile-profile-button"
+                >
+                  Profile
+                </button>
+                <button
+                  onClick={() => {
+                    closeMenu();
+                    handleLogout();
+                  }}
+                  className="mobile-logout-button"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </>
   );

@@ -1611,7 +1611,7 @@ export default function Admin() {
       if (!token) {
         setError("You are not logged in. Redirecting to login...");
         setLoading(false);
-        setTimeout(() => navigate('/AdminLogin'), 2000);
+        setTimeout(() => navigate('/admin-login'), 2000);
         return;
       }
 
@@ -1619,7 +1619,7 @@ export default function Admin() {
         const storedToken = localStorage.getItem("accessToken");
         if (!storedToken) {
           setError("Not logged in.");
-          navigate("/AdminLogin");
+          navigate("/admin-login");
           return;
         }
 
@@ -1959,7 +1959,7 @@ export default function Admin() {
       const storedToken = localStorage.getItem("accessToken");
       if (!storedToken) {
         setError("Not logged in.");
-        navigate("/AdminLogin");
+        navigate("/admin-login");
         return;
       }
 
@@ -2016,7 +2016,7 @@ export default function Admin() {
       const storedToken = localStorage.getItem("accessToken");
       if (!storedToken) {
         setError("Not logged in.");
-        navigate("/AdminLogin");
+        navigate("/admin-login");
         return;
       }
 
@@ -2076,7 +2076,7 @@ export default function Admin() {
   }, []);
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
-    navigate('/AdminLogin');
+    navigate('/admin-login');
   };
   if (loading) {
     return (

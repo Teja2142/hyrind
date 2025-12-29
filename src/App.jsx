@@ -1,9 +1,11 @@
-import React , { useEffect } from 'react';
-// Import BrowserRouter, Routes, and Route
-import { BrowserRouter as Router, Routes, Route , useLocation } from 'react-router-dom'; 
 
 
-import Navbar from './Navbar'; 
+import React, { useEffect } from 'react';
+// Import Routes, Route, and useLocation
+import { Routes, Route, useLocation } from 'react-router-dom';
+
+
+import Navbar from './Navbar';
 import Home from './Home';
 import About from './About';
 import Service from './Services';
@@ -35,8 +37,7 @@ function ScrollToTop() {
 
 function App() {
   return (
-    // Use Router wrapper
-    <Router>
+    <>
       <ScrollToTop />
       <Navbar />
       <main>
@@ -45,7 +46,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/admin" element={<Admin />} />
-          <Route path="/AdminLogin" element={<AdminLogin />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/About" element={<About />} />
           <Route path="/services" element={<Service />} />
           <Route path="/apply" element={<Register />} /> {/* Assuming Apply is Register */}
@@ -65,7 +66,7 @@ function App() {
         </Routes>
       </main>
       <Footer />
-    </Router>
+    </>
   );
 }
 
