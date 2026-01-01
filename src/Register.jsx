@@ -1000,7 +1000,7 @@ const Register = () => {
                           >
                             Terms of Service
                           </a>{' '}
-                          ,{' '}
+                          and{' '}
                           <a
                             href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/privacy"
                             target="_blank"
@@ -1010,7 +1010,8 @@ const Register = () => {
                           >
                             Privacy Policy
                           </a>
-                          , and{' '}
+                          {/* , 
+                          and{' '}
                           <a
                             href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/refund"
                             target="_blank"
@@ -1019,7 +1020,7 @@ const Register = () => {
                             style={{ color: primaryColor }}
                           >
                             Refund Policy
-                          </a>
+                          </a> */}
                           .
                           <span className="text-danger ms-1">*</span>
                         </label>

@@ -286,6 +286,53 @@ body {
   max-height: 90vh; /* Prevent overflow on small screens */
 }
 
+/* Client Intake Sheet Message - Enhanced UI */
+.client-intake-sheet-message {
+  background: linear-gradient(to right, #EFF6FF 0%, #DBEAFE 100%);
+  border-left: 4px solid #4f46e5;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #E0E7FF;
+}
+
+.client-intake-sheet-message::before {
+  content: "ℹ️";
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  filter: grayscale(0);
+}
+
+.client-intake-sheet-message p {
+  margin: 0;
+  color: #1e293b;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  line-height: 1.6;
+  text-align: left;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .client-intake-sheet-message {
+    padding: 1rem;
+    gap: 0.5rem;
+  }
+  
+  .client-intake-sheet-message::before {
+    font-size: 1.1rem;
+  }
+  
+  .client-intake-sheet-message p {
+    font-size: 0.85rem;
+  }
+}
+
 .payment-header {
   background: #ffffff;
   padding: 1.5rem;
@@ -620,12 +667,12 @@ const AdminSidebar = ({ fullName, onLogout, onclientIntakeSheet, onToggleEdit, i
           isEditing={isEditing}
         />
         {/* client intake sheet*/}
-        <SidebarButton
+        {!isSubscribed && <SidebarButton
           Icon={Target}
-          label="client intake sheet"
+          label="Client Intake Sheet"
           onClick={onclientIntakeSheet}
           variant="normal"
-        />
+        />}
         {/* Upgrade Profile - Show for non-subscribers OR Add Services for subscribers with addon plans */}
         {!isSubscribed ? (
           <SidebarButton
@@ -895,6 +942,11 @@ const Profile = () => {
     expiryDate: '',
     cvv: ''
   });
+
+  // Consent checkboxes state
+  const [acceptedRefundPolicy, setAcceptedRefundPolicy] = useState(false);
+  const [acceptedTermsConditions, setAcceptedTermsConditions] = useState(false);
+  const [acceptedPrivacyPolicy, setAcceptedPrivacyPolicy] = useState(false);
 
   const degreeOptions = ["Bachelor's", "Master's", 'PhD'];
   const visaOptions = ['F1-OPT', 'F1-CPT', 'H1B', 'Green Card', 'Citizen', 'Other'];
@@ -1170,7 +1222,10 @@ const Profile = () => {
   };
 
   const handleclientIntakeSheet = () => {
-    // navigate('/interest');
+    const a = document.createElement('a');
+    a.href = 'https://docs.google.com/forms/d/e/1FAIpQLSfOj-0T7lssR4jSsV4wQ2QjctpSvnsMQ_G7TJrUKNCKPMWI-A/viewform';
+    a.target = '_blank';
+    a.click();
   };
 
   const handleEditChange = (e) => {
@@ -1408,6 +1463,10 @@ const Profile = () => {
       // For add-ons, start with empty selection
       setSelectedServices([]);
     }
+    // Reset all consent checkboxes
+    setAcceptedRefundPolicy(false);
+    setAcceptedTermsConditions(false);
+    setAcceptedPrivacyPolicy(false);
     setShowPaymentModal(true);
   };
 
@@ -1946,8 +2005,11 @@ const Profile = () => {
             {/* Payment Modal */}
             {showPaymentModal && (
               <div className="d-flex justify-content-center align-items-center" >
-                <div className="payment-card  bg-white w-100" style={{ maxWidth: '480px' }}>
-
+                <div className="payment-card  bg-white w-100" style={{ maxWidth: '80%' }}>
+                  {/* client intake sheet message */}
+                  <div hidden={isSubscribed} className="client-intake-sheet-message">
+                    <p> Please fill the Client Intake Sheet before proceeding to payment.</p>
+                  </div>
                   {/* Header */}
                   <div className="payment-header">
                     {/* <button
@@ -1974,6 +2036,7 @@ const Profile = () => {
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button> */}
+
                     <div className="payment-title">{isSubscribed ? 'Add Services' : 'Upgrade Profile'}</div>
                     <div className="payment-amount-large">${cartTotal}</div>
                     <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
@@ -2100,34 +2163,128 @@ const Profile = () => {
                     <span>${cartTotal}</span>
                   </div> */}
 
-                    {/* Refund Policy Link */}
-                    <div className="text-center mt-3 mb-2" style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                      By proceeding, you agree to our{' '}
-                      <a
-                        href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/refund"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: primaryColor, textDecoration: 'underline', fontWeight: '600' }}
-                      >
-                        Refund Policy
-                      </a>
+                    {/* Consent Checkboxes */}
+                    <div className="mt-3 mb-2">
+                      {/* Terms and Conditions Checkbox */}
+                      <div className="form-check d-flex align-items-start gap-2 mb-3">
+                        <input
+                          type="checkbox"
+                          className="form-check-input mt-1"
+                          id="termsConditionsCheckbox"
+                          checked={acceptedTermsConditions}
+                          onChange={(e) => setAcceptedTermsConditions(e.target.checked)}
+                          style={{
+                            width: '20px',
+                            height: '20px',
+                            cursor: 'pointer',
+                            borderColor: primaryColor,
+                            flexShrink: 0
+                          }}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor="termsConditionsCheckbox"
+                          style={{ fontSize: '0.9rem', color: '#1e293b', cursor: 'pointer', lineHeight: '1.5' }}
+                        >
+                          I confirm that I have read, understood, and agree to the {' '}
+                          <a
+                            href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/terms"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: primaryColor, textDecoration: 'underline', fontWeight: '600' }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Terms and Conditions
+                          </a>
+                        </label>
+                      </div>
+
+                      {/* Privacy Policy Checkbox */}
+                      <div className="form-check d-flex align-items-start gap-2 mb-3">
+                        <input
+                          type="checkbox"
+                          className="form-check-input mt-1"
+                          id="privacyPolicyCheckbox"
+                          checked={acceptedPrivacyPolicy}
+                          onChange={(e) => setAcceptedPrivacyPolicy(e.target.checked)}
+                          style={{
+                            width: '20px',
+                            height: '20px',
+                            cursor: 'pointer',
+                            borderColor: primaryColor,
+                            flexShrink: 0
+                          }}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor="privacyPolicyCheckbox"
+                          style={{ fontSize: '0.9rem', color: '#1e293b', cursor: 'pointer', lineHeight: '1.5' }}
+                        >
+                          I hereby consent to the{' '}                           <a
+                            href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/privacy"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: primaryColor, textDecoration: 'underline', fontWeight: '600' }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Privacy Policy
+                          </a> {' '} governing the use of this website
+                        </label>
+                      </div>
+
+                      {/* Refund Policy Checkbox */}
+                      <div className="form-check d-flex align-items-start gap-2">
+                        <input
+                          type="checkbox"
+                          className="form-check-input mt-1"
+                          id="refundPolicyCheckbox"
+                          checked={acceptedRefundPolicy}
+                          onChange={(e) => setAcceptedRefundPolicy(e.target.checked)}
+                          style={{
+                            width: '20px',
+                            height: '20px',
+                            cursor: 'pointer',
+                            borderColor: primaryColor,
+                            flexShrink: 0
+                          }}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor="refundPolicyCheckbox"
+                          style={{ fontSize: '0.9rem', color: '#1e293b', cursor: 'pointer', lineHeight: '1.5' }}
+                        >
+                          I understand and agree to the{' '}
+                          <a
+                            href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/refund"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: primaryColor, textDecoration: 'underline', fontWeight: '600' }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Payment Refund Policy
+                          </a> {' '}, including any non-refundable charges.
+                        </label>
+                      </div>
                     </div>
 
                     <button
                       onClick={handlePaymentSubmit}
+                      disabled={!acceptedRefundPolicy || !acceptedTermsConditions || !acceptedPrivacyPolicy}
                       className="btn w-100 py-3 fw-bold shadow-sm"
                       style={{
-                        background: primaryColor,
+                        background: (acceptedRefundPolicy && acceptedTermsConditions && acceptedPrivacyPolicy) ? primaryColor : '#9CA3AF',
                         border: 'none',
                         color: 'white',
                         fontSize: '1.1rem',
                         borderRadius: '12px',
                         transition: 'all 0.2s ease',
-                        marginTop: '1.5rem'
+                        marginTop: '1.5rem',
+                        cursor: (acceptedRefundPolicy && acceptedTermsConditions && acceptedPrivacyPolicy) ? 'pointer' : 'not-allowed',
+                        opacity: (acceptedRefundPolicy && acceptedTermsConditions && acceptedPrivacyPolicy) ? 1 : 0.6
                       }}
-                      onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
-                      onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
-                      onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                      onMouseDown={(e) => (acceptedRefundPolicy && acceptedTermsConditions && acceptedPrivacyPolicy) && (e.target.style.transform = 'scale(0.98)')}
+                      onMouseUp={(e) => (acceptedRefundPolicy && acceptedTermsConditions && acceptedPrivacyPolicy) && (e.target.style.transform = 'scale(1)')}
+                      onMouseLeave={(e) => (acceptedRefundPolicy && acceptedTermsConditions && acceptedPrivacyPolicy) && (e.target.style.transform = 'scale(1)')}
                     >
                       Proceed to Pay
                     </button>
