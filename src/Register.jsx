@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // Import Link and useNavigate
-import { Link, useNavigate } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom';
 import { base_url } from "./commonAPI's.json";
 
 // --- Start: Inline SVG Icon Definitions (Lucide Icons used for aesthetics) ---
@@ -126,7 +126,7 @@ const TextInput = ({
     { name: "UK", code: "+44", iso: "gb" },
     { name: "Mexico", code: "+52", iso: "mx" },
   ];
-  
+
   return (
     <div className="mb-3">
       <label className="form-label fw-semibold text-dark" htmlFor={name}>
@@ -139,7 +139,7 @@ const TextInput = ({
         )}
       </label>
 
-      <div className={`input-group ${name ==='phone'?'flex-nowrap':''}`}>
+      <div className={`input-group ${name === 'phone' ? 'flex-nowrap' : ''}`}>
         {Icon && (
           <span className="input-group-text bg-white border-end-0">
             <Icon className="h-5 w-5 text-primary opacity-75" />
@@ -160,43 +160,42 @@ const TextInput = ({
           />
         ) : name === 'phone' ? (
           <>
-          <div className="row w-100">
-            {/* Country code select - Not used in curl, but good practice */}
-            <div className="col-4">
-              <select
-              className="form-select form-select-lg border-start-0 border-end-0 w-100"
-              aria-label="Country Code"
-              name='countryCode'
-              value={countryCode} // Controlled by parent state
-              onChange={onChange}
-              required
-            >
-              {countryCodes.map((country) => (
-                // Only showing the code for brevity in the select
-                <option key={`${country.iso}-${country.code}`} value={country.code}>
-                   {country.code}
-                </option>
-              ))}
-            </select>
-            </div>
+            <div className="row w-100">
+              {/* Country code select - Not used in curl, but good practice */}
+              <div className="col-4">
+                <select
+                  className="form-select form-select-lg border-start-0 border-end-0 w-100"
+                  aria-label="Country Code"
+                  name='countryCode'
+                  value={countryCode} // Controlled by parent state
+                  onChange={onChange}
+                  required
+                >
+                  {countryCodes.map((country) => (
+                    // Only showing the code for brevity in the select
+                    <option key={`${country.iso}-${country.code}`} value={country.code}>
+                      {country.code}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Phone number input (10 digits expected by curl) */}
-         <div className="col-8">
-             <input
-              type='tel'
-              id={name}
-              name={name}
-              value={value}
-              onChange={onChange}
-              maxLength={maxLength}
-              placeholder={placeholder}
-              className={`form-control form-control-lg col-9 ${
-                error ? 'is-invalid border-danger' : 'border-start-0'
-              }`}
-              required={required}
-              inputMode="numeric"
-            />
-         </div>
+              {/* Phone number input (10 digits expected by curl) */}
+              <div className="col-8">
+                <input
+                  type='tel'
+                  id={name}
+                  name={name}
+                  value={value}
+                  onChange={onChange}
+                  maxLength={maxLength}
+                  placeholder={placeholder}
+                  className={`form-control form-control-lg col-9 ${error ? 'is-invalid border-danger' : 'border-start-0'
+                    }`}
+                  required={required}
+                  inputMode="numeric"
+                />
+              </div>
             </div>
           </>
         ) : (
@@ -209,12 +208,11 @@ const TextInput = ({
             onChange={onChange}
             maxLength={maxLength}
             placeholder={placeholder}
-            className={`form-control form-control-lg ${
-              error ? 'is-invalid border-danger' : 'border-start-0'
-            }`}
+            className={`form-control form-control-lg ${error ? 'is-invalid border-danger' : 'border-start-0'
+              }`}
             required={required}
             // For password fields, 'password' type keeps the input secure
-            inputMode={type === 'password' ? 'text' : 'text'} 
+            inputMode={type === 'password' ? 'text' : 'text'}
             min={isDate ? '1950-01' : undefined}
             max={isDate ? '2050-12' : undefined}
           />
@@ -228,18 +226,18 @@ const TextInput = ({
 
 // Utility function to convert YYYY-MM format from type='month' input to MM/YYYY format
 const formatDateToMMYYYY = (dateString) => {
-    if (!dateString || dateString.length !== 7 || dateString.indexOf('-') !== 4) return dateString;
-    const [year, month] = dateString.split('-');
-    return `${month}/${year}`;
+  if (!dateString || dateString.length !== 7 || dateString.indexOf('-') !== 4) return dateString;
+  const [year, month] = dateString.split('-');
+  return `${month}/${year}`;
 };
 
 
 // Main Register Component
 const Register = () => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   // CORRECTED API endpoint to match user's curl request
-  const REGISTER_API_URL = `${base_url}/api/users/register/`; 
-  
+  const REGISTER_API_URL = `${base_url}/api/users/register/`;
+
   const initialFormState = {
     firstName: '',
     lastName: '',
@@ -270,7 +268,7 @@ const Register = () => {
   const degreeOptions = ['Bachelor\'s', 'Master\'s', 'PhD'];
   const visaOptions = ['F1-OPT', 'F1-CPT', 'H1B', 'Green Card', 'Citizen', 'Other'];
   const referralOptions = ['Google', 'LinkedIn', 'Friend', 'University', 'Other'];
-  
+
   // Custom pale blue/white theme colors
   const primaryColor = '#4682B4'; // Steel Blue
   const paleBackground = '#F0F8FF'; // Alice Blue
@@ -278,20 +276,20 @@ const Register = () => {
   // Utility function for validation
   const validate = () => {
     let newErrors = {};
-    
+
     // Regex Definitions
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; 
-    const nameRegex = /^[a-zA-Z\s'-]+$/; 
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const nameRegex = /^[a-zA-Z\s'-]+$/;
     const dateRegex = /^\d{4}-\d{2}$/; // YYYY-MM format from input type="month"
     const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
 
     // --- A. Required Fields Check ---
     const requiredFields = [
-        'firstName', 'lastName', 'email', 'phone', 'university', 'degree', 
-        'major', 'visaStatus', 'graduationDate', 'consentToTerms', 
-        'password', 'confirmPassword' // NEW: Added password fields
+      'firstName', 'lastName', 'email', 'phone', 'university', 'degree',
+      'major', 'visaStatus', 'graduationDate', 'consentToTerms',
+      'password', 'confirmPassword' // NEW: Added password fields
     ];
-    
+
     if (formData.visaStatus === 'F1-OPT') {
       requiredFields.push('optEndDate');
     }
@@ -305,17 +303,17 @@ const Register = () => {
     });
 
     if (!formData.resumeFile) {
-        newErrors.resumeFile = 'Resume file upload is required.';
+      newErrors.resumeFile = 'Resume file upload is required.';
     }
 
     // --- B. Specific Format/Length Validations ---
 
     // Name Validation
     if (formData.firstName && (!nameRegex.test(formData.firstName.trim()) || formData.firstName.length > 50)) {
-        newErrors.firstName = 'Invalid name or max 50 characters.';
+      newErrors.firstName = 'Invalid name or max 50 characters.';
     }
     if (formData.lastName && (!nameRegex.test(formData.lastName.trim()) || formData.lastName.length > 50)) {
-        newErrors.lastName = 'Invalid name or max 50 characters.';
+      newErrors.lastName = 'Invalid name or max 50 characters.';
     }
 
     // Email Validation
@@ -325,25 +323,25 @@ const Register = () => {
 
     // Password Validation (must match curl requirements: Naveen@2142 suggests special chars and complexity)
     if (formData.password) {
-        if (formData.password.length < 8) {
-            newErrors.password = 'Password must be at least 8 characters.';
-        }
-        // Check for complexity (optional but good practice, the curl password implies it)
-        if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/.test(formData.password)) {
-            newErrors.password = 'Must contain upper, lower, number, and special character.';
-        }
+      if (formData.password.length < 8) {
+        newErrors.password = 'Password must be at least 8 characters.';
+      }
+      // Check for complexity (optional but good practice, the curl password implies it)
+      if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/.test(formData.password)) {
+        newErrors.password = 'Must contain upper, lower, number, and special character.';
+      }
     }
     if (formData.confirmPassword && formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match.';
+      newErrors.confirmPassword = 'Passwords do not match.';
     }
 
 
     // Phone Validation (Expect 10 digits as per curl)
     if (formData.phone) {
-        const digitsOnly = formData.phone.replace(/[^\d]/g, '');
-        if (digitsOnly.length !== 10) { 
-            newErrors.phone = 'Phone number must be exactly 10 digits.';
-        }
+      const digitsOnly = formData.phone.replace(/[^\d]/g, '');
+      if (digitsOnly.length !== 10) {
+        newErrors.phone = 'Phone number must be exactly 10 digits.';
+      }
     }
 
     // University/Major length
@@ -376,7 +374,7 @@ const Register = () => {
     if (formData.githubUrl && !urlRegex.test(formData.githubUrl)) {
       newErrors.githubUrl = 'Invalid URL format (must start with http:// or https://).';
     }
-    
+
     // Notes length
     if (formData.additionalNotes.length > 500) {
       newErrors.additionalNotes = 'Max 500 characters.';
@@ -392,17 +390,17 @@ const Register = () => {
     let newValue = value;
 
     if (type === 'file') {
-        newValue = files[0];
+      newValue = files[0];
     } else if (type === 'checkbox') {
-        newValue = checked;
+      newValue = checked;
     } else if (name === 'phone') {
-        // Only allow digits for phone input
-        const digitsOnly = value.replace(/[^\d]/g, '');
-        newValue = digitsOnly.substring(0, 10); // Limit to 10 digits
+      // Only allow digits for phone input
+      const digitsOnly = value.replace(/[^\d]/g, '');
+      newValue = digitsOnly.substring(0, 10); // Limit to 10 digits
     } else if (name === 'firstName' || name === 'lastName') {
-        // Name validation during input
-        const cleanValue = value.replace(/[^a-zA-Z\s'-]/g, '');
-        newValue = cleanValue;
+      // Name validation during input
+      const cleanValue = value.replace(/[^a-zA-Z\s'-]/g, '');
+      newValue = cleanValue;
     }
 
 
@@ -410,7 +408,7 @@ const Register = () => {
       ...prev,
       [name]: newValue,
     }));
-    
+
     // Clear validation error on change
     setErrors(prev => ({ ...prev, [name]: '' }));
     setSubmissionMessage(''); // Clear previous message
@@ -419,8 +417,8 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) {
-        setSubmissionMessage('Please correct the highlighted errors before submitting.');
-        return;
+      setSubmissionMessage('Please correct the highlighted errors before submitting.');
+      return;
     }
 
     setIsSubmitting(true);
@@ -432,114 +430,114 @@ const Register = () => {
 
     // Mapping object for camelCase (React state) to snake_case (API/curl)
     const fieldMap = {
-        firstName: 'first_name',
-        lastName: 'last_name',
-        email: 'email',
-        password: 'password', // Matching curl field
-        confirmPassword: 'confirm_password', // Matching curl field
-        phone: 'phone', // Matching curl field
-        university: 'university',
-        degree: 'degree',
-        major: 'major',
-        visaStatus: 'visa_status',
-        graduationDate: 'graduation_date',
-        optEndDate: 'opt_end_date',
-        referralSource: 'referral_source',
-        // consentToTerms is handled explicitly below to send 'true'/'false'
-        consentToTerms: 'consent_to_terms',
-        // LinkedIn and Github URLs were not in the curl but included in the form/logic, keeping them as optional
-        linkedinUrl: 'linkedin_url', 
-        githubUrl: 'github_url', 
-        additionalNotes: 'additional_notes',
+      firstName: 'first_name',
+      lastName: 'last_name',
+      email: 'email',
+      password: 'password', // Matching curl field
+      confirmPassword: 'confirm_password', // Matching curl field
+      phone: 'phone', // Matching curl field
+      university: 'university',
+      degree: 'degree',
+      major: 'major',
+      visaStatus: 'visa_status',
+      graduationDate: 'graduation_date',
+      optEndDate: 'opt_end_date',
+      referralSource: 'referral_source',
+      // consentToTerms is handled explicitly below to send 'true'/'false'
+      consentToTerms: 'consent_to_terms',
+      // LinkedIn and Github URLs were not in the curl but included in the form/logic, keeping them as optional
+      linkedinUrl: 'linkedin_url',
+      githubUrl: 'github_url',
+      additionalNotes: 'additional_notes',
     };
 
     for (const [stateKey, apiKey] of Object.entries(fieldMap)) {
-        let value = formData[stateKey];
-        
-        // Handle phone (strip mask/non-digits before sending to match curl 10-digit format)
-        if (stateKey === 'phone') {
-            value = value.replace(/[^\d]/g, ''); 
-        } 
-        
-        // Handle dates (convert YYYY-MM to MM/YYYY to match curl format)
-        else if (stateKey === 'graduationDate' || stateKey === 'optEndDate') {
-            value = formatDateToMMYYYY(value);
-        }
-        
-        // Handle optional optEndDate
-        if (stateKey === 'optEndDate' && formData.visaStatus !== 'F1-OPT') {
-            continue; // Skip if not F1-OPT
-        }
+      let value = formData[stateKey];
 
-        // Handle boolean (FormData requires string representation 'true'/'false')
-        if (typeof value === 'boolean') {
-            value = value ? 'true' : 'false';
-        }
-        
-        if (value !== null && value !== '') {
-            data.append(apiKey, value);
-        }
+      // Handle phone (strip mask/non-digits before sending to match curl 10-digit format)
+      if (stateKey === 'phone') {
+        value = value.replace(/[^\d]/g, '');
+      }
+
+      // Handle dates (convert YYYY-MM to MM/YYYY to match curl format)
+      else if (stateKey === 'graduationDate' || stateKey === 'optEndDate') {
+        value = formatDateToMMYYYY(value);
+      }
+
+      // Handle optional optEndDate
+      if (stateKey === 'optEndDate' && formData.visaStatus !== 'F1-OPT') {
+        continue; // Skip if not F1-OPT
+      }
+
+      // Handle boolean (FormData requires string representation 'true'/'false')
+      if (typeof value === 'boolean') {
+        value = value ? 'true' : 'false';
+      }
+
+      if (value !== null && value !== '') {
+        data.append(apiKey, value);
+      }
     }
-    
+
     // Mandatory: Append the actual resume file with the correct key 'resume_file'
     if (formData.resumeFile) {
-        // The curl uses 'resume_file' as the key and expects the file data
-        data.append('resume_file', formData.resumeFile, formData.resumeFile.name);
+      // The curl uses 'resume_file' as the key and expects the file data
+      data.append('resume_file', formData.resumeFile, formData.resumeFile.name);
     }
-    
+
     console.log("FormData Payload ready for API.");
 
     try {
-        // Use an empty string for the CSRF token since we are running in an iframe, 
-        // the actual token might need to be retrieved via another API call or cookie, 
-        // but for a public registration endpoint, it might not be required.
-        const csrfToken = ''; 
-        const response = await fetch(REGISTER_API_URL, {
-            method: 'POST',
-            // IMPORTANT: Do NOT set Content-Type header when using FormData. 
-            // Fetch sets the correct 'multipart/form-data' boundary automatically.
-            headers: {
-                'Accept': 'application/json',
-                // 'X-CSRFTOKEN': csrfToken, 
-            },
-            body: data, 
-        });
+      // Use an empty string for the CSRF token since we are running in an iframe, 
+      // the actual token might need to be retrieved via another API call or cookie, 
+      // but for a public registration endpoint, it might not be required.
+      const csrfToken = '';
+      const response = await fetch(REGISTER_API_URL, {
+        method: 'POST',
+        // IMPORTANT: Do NOT set Content-Type header when using FormData. 
+        // Fetch sets the correct 'multipart/form-data' boundary automatically.
+        headers: {
+          'Accept': 'application/json',
+          // 'X-CSRFTOKEN': csrfToken, 
+        },
+        body: data,
+      });
 
-        if (response.ok) {
-            const result = await response.json();
-            setIsSubmitting(false);
-            setSubmissionMessage(`Registration successful! ${result.message || 'Check your email for confirmation.'}`);
-            console.log("API Success:", result);
-            resetForm();  
-            // Optionally clear the form or redirect
-            // setFormData(initialFormState); 
-            
-        } else {
-            // Handle HTTP error status (e.g., 400 Bad Request)
-            const errorData = await response.json();
-            setIsSubmitting(false);
-            let errorMessage = errorData.detail || errorData.error || 'Registration failed due to server error.';
-            
-            // Try to extract validation errors from the backend response
-            if (errorData) {
-                const backendErrors = {};
-                for (const key in errorData) {
-                    // Try to map backend snake_case keys back to camelCase state keys if possible
-                    const frontendKey = Object.keys(fieldMap).find(k => fieldMap[k] === key) || key; 
-                    backendErrors[frontendKey] = Array.isArray(errorData[key]) ? errorData[key].join(', ') : errorData[key];
-                }
-                setErrors(prev => ({ ...prev, ...backendErrors }));
-                errorMessage = errorData.detail || 'Registration failed. Please review the errors.';
-            }
-
-            setSubmissionMessage(errorMessage);
-            console.error("API Error:", errorData);
-        }
-    } catch (error) {
-        // Handle network errors (e.g., server offline, CORS issue)
+      if (response.ok) {
+        const result = await response.json();
         setIsSubmitting(false);
-        setSubmissionMessage(`Network error. Could not connect to the backend at ${REGISTER_API_URL}.`);
-        console.error("Network Fetch Error:", error);
+        setSubmissionMessage(`Registration successful! ${result.message || 'Check your email for confirmation.'}`);
+        console.log("API Success:", result);
+        resetForm();
+        // Optionally clear the form or redirect
+        // setFormData(initialFormState); 
+
+      } else {
+        // Handle HTTP error status (e.g., 400 Bad Request)
+        const errorData = await response.json();
+        setIsSubmitting(false);
+        let errorMessage = errorData.detail || errorData.error || 'Registration failed due to server error.';
+
+        // Try to extract validation errors from the backend response
+        if (errorData) {
+          const backendErrors = {};
+          for (const key in errorData) {
+            // Try to map backend snake_case keys back to camelCase state keys if possible
+            const frontendKey = Object.keys(fieldMap).find(k => fieldMap[k] === key) || key;
+            backendErrors[frontendKey] = Array.isArray(errorData[key]) ? errorData[key].join(', ') : errorData[key];
+          }
+          setErrors(prev => ({ ...prev, ...backendErrors }));
+          errorMessage = errorData.detail || 'Registration failed. Please review the errors.';
+        }
+
+        setSubmissionMessage(errorMessage);
+        console.error("API Error:", errorData);
+      }
+    } catch (error) {
+      // Handle network errors (e.g., server offline, CORS issue)
+      setIsSubmitting(false);
+      setSubmissionMessage(`Network error. Could not connect to the backend at ${REGISTER_API_URL}.`);
+      console.error("Network Fetch Error:", error);
     }
   };
 
@@ -564,9 +562,9 @@ const Register = () => {
   return (
     // Pale Blue/White Background Theme
     <>
-    <style>
-      {
-        `
+      <style>
+        {
+          `
         /* Base toast style */
 .toast-alert {
   top: 70px;                 /* below navbar */
@@ -603,218 +601,217 @@ const Register = () => {
   }
 }
 `
-      }
-    </style>
-{/* Submission Message Area - Toast Style */}
-{submissionMessage && (
-  <div
-    className={`alert ${
-      isSubmitting
-        ? "alert-info"
-        : errors && Object.keys(errors).length > 0
-        ? "alert-danger"
-        : "alert-success"
-    } toast-alert shadow-sm position-fixed`}
-    role="alert"
-  >
-    {submissionMessage}
-  </div>
-)}
+        }
+      </style>
+      {/* Submission Message Area - Toast Style */}
+      {submissionMessage && (
+        <div
+          className={`alert ${isSubmitting
+            ? "alert-info"
+            : errors && Object.keys(errors).length > 0
+              ? "alert-danger"
+              : "alert-success"
+            } toast-alert shadow-sm position-fixed`}
+          role="alert"
+        >
+          {submissionMessage}
+        </div>
+      )}
 
 
-    <div className="min-vh-100 d-flex align-items-center justify-content-center py-4" style={{ backgroundColor: paleBackground }}>
-      <div className="container my-5">
-        <div className="row justify-content-center">
-          <div className="col-12 col-lg-10 col-xl-9">
-            <div className="card shadow-lg border-0 rounded-4">
-              <div className="card-body p-4 p-md-5">
-                
-                {/* Header */}
-                <div className="text-center mb-5">
-                  <div className="d-flex justify-content-center mb-4">
-                    <div className="p-3 rounded-circle" style={{ backgroundColor: primaryColor + '1A' }}>
-                      <GraduationCap className="h-8 w-8" style={{ color: primaryColor }} />
-                    </div>
-                  </div>
-                  <h2 className="card-title fw-bold mb-2" style={{ color: primaryColor }}>
-                    Candidate Application Form
-                  </h2>
-                  <p className="text-muted lead">
-                    Please provide your professional and academic details.
-                  </p>
-                </div>
+      <div className="min-vh-100 d-flex align-items-center justify-content-center py-4" style={{ backgroundColor: paleBackground }}>
+        <div className="container my-5">
+          <div className="row justify-content-center">
+            <div className="col-12 col-lg-10 col-xl-9">
+              <div className="card shadow-lg border-0 rounded-4">
+                <div className="card-body p-4 p-md-5">
 
-               
-
-                <form noValidate onSubmit={handleSubmit}>
-                  <div className="row g-4">
-                    
-                    {/* --- ACCOUNT AND PERSONAL DETAILS SECTION --- */}
-
-                    {/* First Name */}
-                    <div className="col-md-6">
-                      <TextInput
-                        label="First Name"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        error={errors.firstName}
-                        icon={User}
-                        required
-                        maxLength={50}
-                        placeholder="John"
-                      />
-                    </div>
-
-                    {/* Last Name */}
-                    <div className="col-md-6">
-                      <TextInput
-                        label="Last Name"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        error={errors.lastName}
-                        icon={User}
-                        required
-                        maxLength={50}
-                        placeholder="Doe"
-                      />
-                    </div>
-
-                    {/* Email Address */}
-                    <div className="col-md-6">
-                      <TextInput
-                        label="Email Address"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        error={errors.email}
-                        icon={Mail}
-                        required
-                        placeholder="you@example.com"
-                      />
-                    </div>
-
-                    {/* Phone Number */}
-                    <div className="col-md-6">
-                      <TextInput
-                        label="Phone (10 Digits)"
-                        name="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        error={errors.phone}
-                        icon={Phone}
-                        required
-                        countryCode={formData.countryCode}
-                        placeholder="0000000000"
-                        maxLength={10} // Display/input limit
-                      />
-                    </div>
-                    
-                    {/* Password */}
-                    <div className="col-md-6">
-                      <TextInput
-                        label="Password"
-                        name="password"
-                        type="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        error={errors.password}
-                        icon={Lock}
-                        required
-                        placeholder="Secure Password (Min 8 chars)"
-                      />
-                    </div>
-                    
-                    {/* Confirm Password */}
-                    <div className="col-md-6">
-                      <TextInput
-                        label="Confirm Password"
-                        name="confirmPassword"
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        error={errors.confirmPassword}
-                        icon={Lock}
-                        required
-                        placeholder="Confirm Secure Password"
-                      />
-                    </div>
-
-                    <hr className="my-3"/>
-
-                    {/* --- ACADEMIC DETAILS SECTION --- */}
-
-                    {/* University */}
-                    <div className="col-md-6">
-                      <TextInput
-                        label="University (Max 100 chars)"
-                        name="university"
-                        value={formData.university}
-                        onChange={handleChange}
-                        error={errors.university}
-                        icon={GraduationCap}
-                        required
-                        maxLength={100}
-                        placeholder="State University"
-                      />
-                    </div>
-
-                    {/* Major */}
-                    <div className="col-md-6">
-                      <TextInput
-                        label="Major (Max 100 chars)"
-                        name="major"
-                        value={formData.major}
-                        onChange={handleChange}
-                        error={errors.major}
-                        icon={GraduationCap}
-                        required
-                        maxLength={100}
-                        placeholder="Computer Science"
-                      />
-                    </div>
-
-                    {/* Degree Dropdown */}
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <label className="form-label fw-semibold text-dark" htmlFor="degree">
-                          Degree<span className="text-danger ms-1">*</span>
-                        </label>
-                        <select
-                          id="degree"
-                          name="degree"
-                          value={formData.degree}
-                          onChange={handleChange}
-                          className={`form-select form-select-lg ${errors.degree ? 'is-invalid' : ''}`}
-                          required
-                        >
-                          <option value="" disabled>Select Degree</option>
-                          {degreeOptions.map(degree => (
-                            <option key={degree} value={degree}>{degree}</option>
-                          ))}
-                        </select>
-                        {errors.degree && <div className="invalid-feedback d-block">{errors.degree}</div>}
+                  {/* Header */}
+                  <div className="text-center mb-5">
+                    <div className="d-flex justify-content-center mb-4">
+                      <div className="p-3 rounded-circle" style={{ backgroundColor: primaryColor + '1A' }}>
+                        <GraduationCap className="h-8 w-8" style={{ color: primaryColor }} />
                       </div>
                     </div>
+                    <h2 className="card-title fw-bold mb-2" style={{ color: primaryColor }}>
+                      Candidate Application Form
+                    </h2>
+                    <p className="text-muted lead">
+                      Please provide your professional and academic details.
+                    </p>
+                  </div>
 
-                    {/* Graduation Date (MM/YYYY) */}
-                    <div className="col-md-6">
-                      <TextInput
-                        label="Graduation (MM/YYYY)"
-                        name="graduationDate"
-                        type="date" // This uses type='month' for YYYY-MM which is converted in handleSubmit
-                        value={formData.graduationDate}
-                        onChange={handleChange}
-                        error={errors.graduationDate}
-                        icon={Calendar}
-                        required
-                      />
-                    </div>
-                    
-                    {/* Graduation Date (MM/YYYY)
+
+
+                  <form noValidate onSubmit={handleSubmit}>
+                    <div className="row g-4">
+
+                      {/* --- ACCOUNT AND PERSONAL DETAILS SECTION --- */}
+
+                      {/* First Name */}
+                      <div className="col-md-6">
+                        <TextInput
+                          label="First Name"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          error={errors.firstName}
+                          icon={User}
+                          required
+                          maxLength={50}
+                          placeholder="John"
+                        />
+                      </div>
+
+                      {/* Last Name */}
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Last Name"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          error={errors.lastName}
+                          icon={User}
+                          required
+                          maxLength={50}
+                          placeholder="Doe"
+                        />
+                      </div>
+
+                      {/* Email Address */}
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Email Address"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          error={errors.email}
+                          icon={Mail}
+                          required
+                          placeholder="you@example.com"
+                        />
+                      </div>
+
+                      {/* Phone Number */}
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Phone (10 Digits)"
+                          name="phone"
+                          type="tel"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          error={errors.phone}
+                          icon={Phone}
+                          required
+                          countryCode={formData.countryCode}
+                          placeholder="0000000000"
+                          maxLength={10} // Display/input limit
+                        />
+                      </div>
+
+                      {/* Password */}
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Password"
+                          name="password"
+                          type="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          error={errors.password}
+                          icon={Lock}
+                          required
+                          placeholder="Secure Password (Min 8 chars)"
+                        />
+                      </div>
+
+                      {/* Confirm Password */}
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Confirm Password"
+                          name="confirmPassword"
+                          type="password"
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          error={errors.confirmPassword}
+                          icon={Lock}
+                          required
+                          placeholder="Confirm Secure Password"
+                        />
+                      </div>
+
+                      <hr className="my-3" />
+
+                      {/* --- ACADEMIC DETAILS SECTION --- */}
+
+                      {/* University */}
+                      <div className="col-md-6">
+                        <TextInput
+                          label="University (Max 100 chars)"
+                          name="university"
+                          value={formData.university}
+                          onChange={handleChange}
+                          error={errors.university}
+                          icon={GraduationCap}
+                          required
+                          maxLength={100}
+                          placeholder="State University"
+                        />
+                      </div>
+
+                      {/* Major */}
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Major (Max 100 chars)"
+                          name="major"
+                          value={formData.major}
+                          onChange={handleChange}
+                          error={errors.major}
+                          icon={GraduationCap}
+                          required
+                          maxLength={100}
+                          placeholder="Computer Science"
+                        />
+                      </div>
+
+                      {/* Degree Dropdown */}
+                      <div className="col-md-6">
+                        <div className="mb-3">
+                          <label className="form-label fw-semibold text-dark" htmlFor="degree">
+                            Degree<span className="text-danger ms-1">*</span>
+                          </label>
+                          <select
+                            id="degree"
+                            name="degree"
+                            value={formData.degree}
+                            onChange={handleChange}
+                            className={`form-select form-select-lg ${errors.degree ? 'is-invalid' : ''}`}
+                            required
+                          >
+                            <option value="" disabled>Select Degree</option>
+                            {degreeOptions.map(degree => (
+                              <option key={degree} value={degree}>{degree}</option>
+                            ))}
+                          </select>
+                          {errors.degree && <div className="invalid-feedback d-block">{errors.degree}</div>}
+                        </div>
+                      </div>
+
+                      {/* Graduation Date (MM/YYYY) */}
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Graduation (MM/YYYY)"
+                          name="graduationDate"
+                          type="date" // This uses type='month' for YYYY-MM which is converted in handleSubmit
+                          value={formData.graduationDate}
+                          onChange={handleChange}
+                          error={errors.graduationDate}
+                          icon={Calendar}
+                          required
+                        />
+                      </div>
+
+                      {/* Graduation Date (MM/YYYY)
                     <div className="col-md-6">
                       <TextInput
                         label="End Date (MM/YYYY)"
@@ -828,242 +825,252 @@ const Register = () => {
                       />
                     </div>
                      */}
-                    
-                    <hr className="my-3"/>
 
-                    {/* --- LEGAL/VISA/RESUME SECTION --- */}
+                      <hr className="my-3" />
 
-                    {/* Visa Status Dropdown */}
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <label className="form-label fw-semibold text-dark" htmlFor="visaStatus">
-                          Visa Status<span className="text-danger ms-1">*</span>
-                        </label>
-                        <select
-                          id="visaStatus"
-                          name="visaStatus"
-                          value={formData.visaStatus}
-                          onChange={handleChange}
-                          className={`form-select form-select-lg ${errors.visaStatus ? 'is-invalid' : ''}`}
-                          required
-                        >
-                          {visaOptions.map(status => (
-                            <option key={status} value={status}>{status}</option>
-                          ))}
-                        </select>
-                        {errors.visaStatus && <div className="invalid-feedback d-block">{errors.visaStatus}</div>}
+                      {/* --- LEGAL/VISA/RESUME SECTION --- */}
+
+                      {/* Visa Status Dropdown */}
+                      <div className="col-md-6">
+                        <div className="mb-3">
+                          <label className="form-label fw-semibold text-dark" htmlFor="visaStatus">
+                            Visa Status<span className="text-danger ms-1">*</span>
+                          </label>
+                          <select
+                            id="visaStatus"
+                            name="visaStatus"
+                            value={formData.visaStatus}
+                            onChange={handleChange}
+                            className={`form-select form-select-lg ${errors.visaStatus ? 'is-invalid' : ''}`}
+                            required
+                          >
+                            {visaOptions.map(status => (
+                              <option key={status} value={status}>{status}</option>
+                            ))}
+                          </select>
+                          {errors.visaStatus && <div className="invalid-feedback d-block">{errors.visaStatus}</div>}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* OPT End Date (Conditional) */}
-                    {(formData.visaStatus === 'F1-OPT') && (
+                      {/* OPT End Date (Conditional) */}
+                      {(formData.visaStatus === 'F1-OPT') && (
+                        <div className="col-md-6">
+                          <TextInput
+                            label="OPT End Date (MM/YYYY)"
+                            name="optEndDate"
+                            type="date" // This uses type='month' for YYYY-MM which is converted in handleSubmit
+                            value={formData.optEndDate}
+                            onChange={handleChange}
+                            error={errors.optEndDate}
+                            icon={Calendar}
+                            required={formData.visaStatus === 'F1-OPT'}
+                          />
+                        </div>
+                      )}
+
+                      {/* Referral Source Dropdown */}
+                      <div className="col-md-6">
+                        <div className="mb-3">
+                          <label className="form-label fw-semibold text-dark" htmlFor="referralSource">
+                            Referral Source
+                          </label>
+                          <select
+                            id="referralSource"
+                            name="referralSource"
+                            value={formData.referralSource}
+                            onChange={handleChange}
+                            className={`form-select form-select-lg ${errors.referralSource ? 'is-invalid' : ''}`}
+                          >
+                            {referralOptions.map(source => (
+                              <option key={source} value={source}>{source}</option>
+                            ))}
+                          </select>
+                          {errors.referralSource && <div className="invalid-feedback d-block">{errors.referralSource}</div>}
+                        </div>
+                      </div>
+
+                      {/* Resume Upload */}
+                      <div className="col-12">
+                        <div className="mb-3">
+                          <label className="form-label fw-semibold text-dark" htmlFor="resumeFile">
+                            Resume Upload (PDF/DOCX, Max 5MB)<span className="text-danger ms-1">*</span>
+                          </label>
+                          <div className={`border rounded-3 p-3 ${errors.resumeFile ? 'border-danger bg-danger bg-opacity-10' : 'border-secondary border-opacity-25'}`}>
+                            <div className="d-flex align-items-center">
+                              <div className="p-2 rounded-2 me-3" style={{ backgroundColor: primaryColor + '1A' }}>
+                                <Upload className="h-5 w-5" style={{ color: primaryColor }} />
+                              </div>
+                              <div className="flex-grow-1">
+                                <input
+                                  type="file"
+                                  id="resumeFile"
+                                  name="resumeFile"
+                                  onChange={handleChange}
+                                  className="form-control form-control-lg"
+                                  accept=".pdf,.docx,.doc"
+                                  required
+                                />
+                              </div>
+                              <div className="ms-3">
+                                {formData.resumeFile ? (
+                                  <span className="badge bg-success rounded-pill px-3 py-2">Uploaded</span>
+                                ) : (
+                                  <span className="badge bg-secondary rounded-pill px-3 py-2">Pending</span>
+                                )}
+                              </div>
+                            </div>
+                            {formData.resumeFile && (
+                              <p className="text-success mt-2 mb-0 d-flex align-items-center fw-semibold">
+                                <span className="me-2" style={{ color: primaryColor }}>&bull;</span>
+                                Selected: {formData.resumeFile.name} ({(formData.resumeFile.size / 1024 / 1024).toFixed(2)} MB)
+                              </p>
+                            )}
+                          </div>
+                          {errors.resumeFile && <div className="invalid-feedback d-block">{errors.resumeFile}</div>}
+                        </div>
+                      </div>
+
+                      <hr className="my-3" />
+
+                      {/* --- OPTIONAL LINKS / NOTES SECTION --- */}
+
+                      {/* LinkedIn URL */}
                       <div className="col-md-6">
                         <TextInput
-                          label="OPT End Date (MM/YYYY)"
-                          name="optEndDate"
-                          type="date" // This uses type='month' for YYYY-MM which is converted in handleSubmit
-                          value={formData.optEndDate}
+                          label="LinkedIn Profile URL (Optional)"
+                          name="linkedinUrl"
+                          type="url"
+                          value={formData.linkedinUrl}
                           onChange={handleChange}
-                          error={errors.optEndDate}
-                          icon={Calendar}
-                          required={formData.visaStatus === 'F1-OPT'}
+                          error={errors.linkedinUrl}
+                          icon={LinkIcon}
+                          placeholder="https://linkedin.com/in/..."
                         />
                       </div>
-                    )}
-                    
-                    {/* Referral Source Dropdown */}
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <label className="form-label fw-semibold text-dark" htmlFor="referralSource">
-                          Referral Source
-                        </label>
-                        <select
-                          id="referralSource"
-                          name="referralSource"
-                          value={formData.referralSource}
+
+                      {/* GitHub URL */}
+                      <div className="col-md-6">
+                        <TextInput
+                          label="GitHub Profile URL (Optional)"
+                          name="githubUrl"
+                          type="url"
+                          value={formData.githubUrl}
                           onChange={handleChange}
-                          className={`form-select form-select-lg ${errors.referralSource ? 'is-invalid' : ''}`}
-                        >
-                          {referralOptions.map(source => (
-                            <option key={source} value={source}>{source}</option>
-                          ))}
-                        </select>
-                        {errors.referralSource && <div className="invalid-feedback d-block">{errors.referralSource}</div>}
+                          error={errors.githubUrl}
+                          icon={GitBranch}
+                          placeholder="https://github.com/..."
+                        />
+                      </div>
+
+                      {/* Additional Notes */}
+                      <div className="col-12">
+                        <TextInput
+                          label="Additional Notes (Max 500 chars, Optional)"
+                          name="additionalNotes"
+                          value={formData.additionalNotes}
+                          onChange={handleChange}
+                          error={errors.additionalNotes}
+                          icon={ScrollText}
+                          isTextArea
+                          maxLength={500}
+                        />
                       </div>
                     </div>
 
-                    {/* Resume Upload */}
-                    <div className="col-12">
-                      <div className="mb-3">
-                        <label className="form-label fw-semibold text-dark" htmlFor="resumeFile">
-                          Resume Upload (PDF/DOCX, Max 5MB)<span className="text-danger ms-1">*</span>
+                    {/* Terms & Conditions Checkbox */}
+                    <div className="mt-4 p-4 rounded-3 border" style={{ backgroundColor: primaryColor + '0A', borderColor: primaryColor + '33' }}>
+                      <div className="form-check">
+                        <input
+                          id="consentToTerms"
+                          name="consentToTerms"
+                          type="checkbox"
+                          checked={formData.consentToTerms}
+                          onChange={handleChange}
+                          className={`form-check-input ${errors.consentToTerms ? 'is-invalid' : ''}`}
+                          style={{ borderColor: primaryColor, color: primaryColor, backgroundColor: formData.consentToTerms ? primaryColor : 'white' }}
+                        />
+                        <label htmlFor="consentToTerms" className="form-check-label text-dark fw-medium">
+                          I hereby confirm that all information provided is accurate and agree to the{' '}
+                          <a
+                            href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/terms"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-decoration-none fw-bold"
+                            style={{ color: primaryColor }}
+                          >
+                            Terms of Service
+                          </a>{' '}
+                          ,{' '}
+                          <a
+                            href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/privacy"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-decoration-none fw-bold"
+                            style={{ color: primaryColor }}
+                          >
+                            Privacy Policy
+                          </a>
+                          , and{' '}
+                          <a
+                            href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/refund"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-decoration-none fw-bold"
+                            style={{ color: primaryColor }}
+                          >
+                            Refund Policy
+                          </a>
+                          .
+                          <span className="text-danger ms-1">*</span>
                         </label>
-                        <div className={`border rounded-3 p-3 ${errors.resumeFile ? 'border-danger bg-danger bg-opacity-10' : 'border-secondary border-opacity-25'}`}>
-                          <div className="d-flex align-items-center">
-                            <div className="p-2 rounded-2 me-3" style={{ backgroundColor: primaryColor + '1A' }}>
-                              <Upload className="h-5 w-5" style={{ color: primaryColor }} />
-                            </div>
-                            <div className="flex-grow-1">
-                              <input
-                                type="file"
-                                id="resumeFile"
-                                name="resumeFile"
-                                onChange={handleChange}
-                                className="form-control form-control-lg"
-                                accept=".pdf,.docx,.doc"
-                                required
-                              />
-                            </div>
-                            <div className="ms-3">
-                              {formData.resumeFile ? (
-                                <span className="badge bg-success rounded-pill px-3 py-2">Uploaded</span>
-                              ) : (
-                                <span className="badge bg-secondary rounded-pill px-3 py-2">Pending</span>
-                              )}
-                            </div>
-                          </div>
-                          {formData.resumeFile && (
-                            <p className="text-success mt-2 mb-0 d-flex align-items-center fw-semibold">
-                              <span className="me-2" style={{ color: primaryColor }}>&bull;</span>
-                              Selected: {formData.resumeFile.name} ({(formData.resumeFile.size / 1024 / 1024).toFixed(2)} MB)
-                            </p>
-                          )}
-                        </div>
-                        {errors.resumeFile && <div className="invalid-feedback d-block">{errors.resumeFile}</div>}
+                        {errors.consentToTerms && <div className="invalid-feedback d-block">{errors.consentToTerms}</div>}
                       </div>
                     </div>
-                    
-                    <hr className="my-3"/>
 
-                    {/* --- OPTIONAL LINKS / NOTES SECTION --- */}
-
-                    {/* LinkedIn URL */}
-                    <div className="col-md-6">
-                      <TextInput
-                        label="LinkedIn Profile URL (Optional)"
-                        name="linkedinUrl"
-                        type="url"
-                        value={formData.linkedinUrl}
-                        onChange={handleChange}
-                        error={errors.linkedinUrl}
-                        icon={LinkIcon}
-                        placeholder="https://linkedin.com/in/..."
-                      />
-                    </div>
-
-                    {/* GitHub URL */}
-                    <div className="col-md-6">
-                      <TextInput
-                        label="GitHub Profile URL (Optional)"
-                        name="githubUrl"
-                        type="url"
-                        value={formData.githubUrl}
-                        onChange={handleChange}
-                        error={errors.githubUrl}
-                        icon={GitBranch}
-                        placeholder="https://github.com/..."
-                      />
-                    </div>
-
-                    {/* Additional Notes */}
-                    <div className="col-12">
-                      <TextInput
-                        label="Additional Notes (Max 500 chars, Optional)"
-                        name="additionalNotes"
-                        value={formData.additionalNotes}
-                        onChange={handleChange}
-                        error={errors.additionalNotes}
-                        icon={ScrollText}
-                        isTextArea
-                        maxLength={500}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Terms & Conditions Checkbox */}
-                  <div className="mt-4 p-4 rounded-3 border" style={{ backgroundColor: primaryColor + '0A', borderColor: primaryColor + '33' }}>
-                    <div className="form-check">
-                      <input
-                        id="consentToTerms"
-                        name="consentToTerms"
-                        type="checkbox"
-                        checked={formData.consentToTerms}
-                        onChange={handleChange}
-                        className={`form-check-input ${errors.consentToTerms ? 'is-invalid' : ''}`}
-                        style={{ borderColor: primaryColor, color: primaryColor, backgroundColor: formData.consentToTerms ? primaryColor : 'white' }}
-                      />
-                      <label htmlFor="consentToTerms" className="form-check-label text-dark fw-medium">
-                        I hereby confirm that all information provided is accurate and agree to the{' '}
-                        <a 
-                          href="/TermsConditions" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="text-decoration-none fw-bold" 
-                          style={{ color: primaryColor }}
-                        >
-                          Terms of Service
-                        </a>{' '}
-                        and{' '}
-                        <a 
-                          href="/PrivacyPolicy" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="text-decoration-none fw-bold" 
-                          style={{ color: primaryColor }}
-                        >
-                          Privacy Policy
-                        </a>
-                        .
-                        <span className="text-danger ms-1">*</span>
-                      </label>
-                      {errors.consentToTerms && <div className="invalid-feedback d-block">{errors.consentToTerms}</div>}
-                    </div>
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="mt-5">
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="btn btn-lg w-100 py-3 fw-bold rounded-pill"
-                      style={{ backgroundColor: primaryColor, borderColor: primaryColor, color: 'white' }}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          {submissionMessage || 'Submitting Application...'}
-                        </>
-                      ) : (
-                        <>
-                          <Users className="w-6 h-6 me-2" />
-                          Submit Application
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Login Link */}
-                  <div className="text-center mt-4 pt-4 border-top">
-                    <p className="text-muted">
-                      Need to log in instead?{' '}
+                    {/* Submit Button */}
+                    <div className="mt-5">
                       <button
-                        type="button"
-                        onClick={() => navigate('/login')}
-                        className="btn btn-link fw-bold text-decoration-none p-0"
-                        style={{ color: primaryColor }}
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="btn btn-lg w-100 py-3 fw-bold rounded-pill"
+                        style={{ backgroundColor: primaryColor, borderColor: primaryColor, color: 'white' }}
                       >
-                        <LogIn className="w-4 h-4 me-1" />
-                        Sign In Here
+                        {isSubmitting ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            {submissionMessage || 'Submitting Application...'}
+                          </>
+                        ) : (
+                          <>
+                            <Users className="w-6 h-6 me-2" />
+                            Submit Application
+                          </>
+                        )}
                       </button>
-                    </p>
-                  </div>
-                </form>
+                    </div>
+
+                    {/* Login Link */}
+                    <div className="text-center mt-4 pt-4 border-top">
+                      <p className="text-muted">
+                        Need to log in instead?{' '}
+                        <button
+                          type="button"
+                          onClick={() => navigate('/login')}
+                          className="btn btn-link fw-bold text-decoration-none p-0"
+                          style={{ color: primaryColor }}
+                        >
+                          <LogIn className="w-4 h-4 me-1" />
+                          Sign In Here
+                        </button>
+                      </p>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     </>
   );
 };

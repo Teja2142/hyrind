@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base_url } from "./commonAPI's.json";
 
@@ -280,10 +280,7 @@ body {
 }
 .payment-card {
   border: none;
-  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
   max-height: 90vh; /* Prevent overflow on small screens */
@@ -499,7 +496,7 @@ const TextInput = ({
             <Icon className="h-5 w-5" style={{ color: primaryColor }} />
           </span>
         )}
-        
+
         {options ? (
           <select
             id={name}
@@ -537,9 +534,8 @@ const TextInput = ({
             onChange={onChange}
             maxLength={maxLength}
             placeholder={placeholder}
-            className={`form-control form-control-lg ${
-              error ? 'is-invalid border-danger' : 'border-start-0'
-            }`}
+            className={`form-control form-control-lg ${error ? 'is-invalid border-danger' : 'border-start-0'
+              }`}
             required={required}
             readOnly={readOnly}
           />
@@ -587,7 +583,7 @@ const SidebarButton = ({ Icon, label, onClick, variant = 'normal', isEditing }) 
       ? 'sidebar-button sidebar-button-active'
       : 'sidebar-button sidebar-button-inactive';
 
-  
+
   return (
     <button type="button" onClick={onClick} className={className}>
       <Icon className="sidebar-button-icon" />
@@ -599,7 +595,7 @@ const SidebarButton = ({ Icon, label, onClick, variant = 'normal', isEditing }) 
 };
 
 // AdminSidebar with full name + actions
-const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEditing, onDeleteProfile, onUpgradeProfile, isSubscribed, hasAddonPlans }) => {
+const AdminSidebar = ({ fullName, onLogout, onclientIntakeSheet, onToggleEdit, isEditing, onDeleteProfile, onUpgradeProfile, isSubscribed, hasAddonPlans }) => {
   const displayName = fullName && fullName.trim().length > 0 ? fullName : 'Candidate Profile';
 
   return (
@@ -623,11 +619,11 @@ const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEdit
           variant="primary"
           isEditing={isEditing}
         />
-        {/* Interest Form */}
+        {/* client intake sheet*/}
         <SidebarButton
           Icon={Target}
-          label="Interest Form"
-          onClick={onInterestForm}
+          label="client intake sheet"
+          onClick={onclientIntakeSheet}
           variant="normal"
         />
         {/* Upgrade Profile - Show for non-subscribers OR Add Services for subscribers with addon plans */}
@@ -668,63 +664,63 @@ const AdminSidebar = ({ fullName, onLogout, onInterestForm, onToggleEdit, isEdit
 // Subscription Status Banner with Timer, Details and Cancel Button
 const SubscriptionStatusBanner = ({ isSubscribed, subscriptionData, onCancelSubscription, isCancelling }) => {
   const [timeRemaining, setTimeRemaining] = React.useState('');
-  
+
   React.useEffect(() => {
     // Only show if user has active subscription
     if (!isSubscribed) {
       return;
     }
-    
+
     const calculateTimeRemaining = () => {
       if (!subscriptionData.next_billing_date) return '';
-      
+
       const now = new Date();
       const billingDate = new Date(subscriptionData.next_billing_date);
       const diff = billingDate - now;
-      
+
       if (diff <= 0) return 'Billing due';
-      
+
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      
+
       if (days > 0) return `${days}d ${hours}h remaining`;
       if (hours > 0) return `${hours}h ${minutes}m remaining`;
       return `${minutes}m remaining`;
     };
-    
+
     // Update timer every minute
     const timer = setInterval(() => {
       setTimeRemaining(calculateTimeRemaining());
     }, 60000);
-    
+
     // Initial calculation
     setTimeRemaining(calculateTimeRemaining());
-    
+
     return () => clearInterval(timer);
   }, [subscriptionData.next_billing_date, isSubscribed]);
-  
+
   // Don't show banner if no subscription
   if (!isSubscribed) {
     return null;
   }
-  
+
   const statusColors = {
     active: { bg: '#10B981', border: '#059669', text: 'Active Subscription' },
     past_due: { bg: '#EF4444', border: '#DC2626', text: 'Payment Overdue' },
     paused: { bg: '#F59E0B', border: '#D97706', text: 'Subscription Paused' },
     cancelled: { bg: '#6B7280', border: '#4B5563', text: 'Subscription Cancelled' }
   };
-  
+
   const status = statusColors[subscriptionData.status] || statusColors.active;
   const basePlanName = subscriptionData.base_subscription?.plan_details?.name || 'Base Plan';
   const addons = subscriptionData.addons || [];
   const monthlyCost = parseFloat(subscriptionData.monthly_cost) || 0;
-  
+
   return (
-    <div 
-      className="mb-4 p-3 rounded-3 border-2" 
-      style={{ 
+    <div
+      className="mb-4 p-3 rounded-3 border-2"
+      style={{
         backgroundColor: status.bg + '10',
         borderLeft: `4px solid ${status.bg}`,
         borderColor: status.border + '40'
@@ -733,11 +729,11 @@ const SubscriptionStatusBanner = ({ isSubscribed, subscriptionData, onCancelSubs
       {/* Header Row */}
       <div className="d-flex justify-content-between align-items-start flex-wrap gap-2">
         <div className="d-flex align-items-center gap-3">
-          <div 
-            className="d-flex align-items-center justify-content-center rounded-circle" 
-            style={{ 
-              width: '40px', 
-              height: '40px', 
+          <div
+            className="d-flex align-items-center justify-content-center rounded-circle"
+            style={{
+              width: '40px',
+              height: '40px',
               backgroundColor: status.bg,
               color: 'white'
             }}
@@ -753,7 +749,7 @@ const SubscriptionStatusBanner = ({ isSubscribed, subscriptionData, onCancelSubs
             </p>
           </div>
         </div>
-        
+
         <div className="d-flex align-items-center gap-3">
           {subscriptionData.next_billing_date && (
             <div className="text-end">
@@ -763,14 +759,14 @@ const SubscriptionStatusBanner = ({ isSubscribed, subscriptionData, onCancelSubs
               </div>
             </div>
           )}
-          
+
           {/* Cancel Subscription Button - Only show for active subscriptions */}
           {subscriptionData.status === 'active' && onCancelSubscription && (
             <button
               onClick={onCancelSubscription}
               disabled={isCancelling}
               className="btn btn-sm btn-outline-danger"
-              style={{ 
+              style={{
                 borderRadius: '8px',
                 fontSize: '0.8rem',
                 padding: '0.4rem 0.8rem'
@@ -781,15 +777,15 @@ const SubscriptionStatusBanner = ({ isSubscribed, subscriptionData, onCancelSubs
           )}
         </div>
       </div>
-      
+
       {/* Subscription Details */}
       <div className="mt-3 pt-2 border-top">
         {/* Base Plan */}
         <div className="d-flex align-items-center gap-2 mb-2">
-          <span 
-            className="badge" 
-            style={{ 
-              backgroundColor: '#4F46E5', 
+          <span
+            className="badge"
+            style={{
+              backgroundColor: '#4F46E5',
               color: 'white',
               fontSize: '0.65rem',
               padding: '0.25rem 0.5rem'
@@ -802,22 +798,22 @@ const SubscriptionStatusBanner = ({ isSubscribed, subscriptionData, onCancelSubs
             (${parseFloat(subscriptionData.base_subscription?.price || 0).toFixed(2)}/month)
           </span>
         </div>
-        
+
         {/* Add-ons */}
         {addons.length > 0 && (
           <div className="mt-2">
             <div className="small text-muted mb-1">Active Add-ons:</div>
             <div className="d-flex flex-wrap gap-2">
               {addons.map((addon, index) => (
-                <div 
+                <div
                   key={addon.id || index}
                   className="d-flex align-items-center gap-1 px-2 py-1 rounded"
                   style={{ backgroundColor: '#10B98120', border: '1px solid #10B98140' }}
                 >
-                  <span 
-                    className="badge" 
-                    style={{ 
-                      backgroundColor: '#10B981', 
+                  <span
+                    className="badge"
+                    style={{
+                      backgroundColor: '#10B981',
                       color: 'white',
                       fontSize: '0.6rem',
                       padding: '0.15rem 0.35rem'
@@ -837,7 +833,7 @@ const SubscriptionStatusBanner = ({ isSubscribed, subscriptionData, onCancelSubs
           </div>
         )}
       </div>
-      
+
       {subscriptionData.marketing_start_date && (
         <div className="mt-2 pt-2 border-top small text-muted">
           Marketing started: {new Date(subscriptionData.marketing_start_date).toLocaleDateString()}
@@ -852,7 +848,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const primaryColor = '#4F46E5';
   const paleBackground = '#F0F8FF';
-const BASE_API_URL = `${base_url}`;
+  const BASE_API_URL = `${base_url}`;
 
   // Dynamic plans from API (replaces hardcoded AVAILABLE_SERVICES)
   const [availablePlans, setAvailablePlans] = useState([]);
@@ -874,7 +870,7 @@ const BASE_API_URL = `${base_url}`;
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedServices, setSelectedServices] = useState([]); // Will be set when plans load
   const [cartTotal, setCartTotal] = useState(0);
-  
+
   // Subscription state
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isCancellingSubscription, setIsCancellingSubscription] = useState(false);
@@ -906,15 +902,15 @@ const BASE_API_URL = `${base_url}`;
   // validation
   const validate = (data) => {
     let newErrors = {};
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; 
-    const nameRegex = /^[a-zA-Z\s'-]+$/; 
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const nameRegex = /^[a-zA-Z\s'-]+$/;
     const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
 
     if (!data.email || data.email.trim() === '') newErrors.email = 'Email is required.';
     if (!data.phone || data.phone.trim() === '') newErrors.phone = 'Phone is required.';
 
     if (data.email && !emailRegex.test(data.email)) newErrors.email = 'Invalid email format.';
-    
+
     const phoneDigits = (data.phone || '').replace(/[^\d]/g, '');
     if (data.phone && phoneDigits.length !== 10) newErrors.phone = 'Phone must be 10 digits.';
 
@@ -925,7 +921,7 @@ const BASE_API_URL = `${base_url}`;
 
     if (data.linkedinUrl && !urlRegex.test(data.linkedinUrl)) newErrors.linkedinUrl = 'Invalid URL format.';
     if (data.githubUrl && !urlRegex.test(data.githubUrl)) newErrors.githubUrl = 'Invalid URL format.';
-    
+
     if (data.visaStatus === 'F1-OPT' && (!data.optEndDate || data.optEndDate.trim() === '')) {
       newErrors.optEndDate = 'OPT End Date is required for F1-OPT status.';
     }
@@ -942,7 +938,7 @@ const BASE_API_URL = `${base_url}`;
       // Check ref first to prevent double calls in StrictMode
       if (hasFetchedRef.current) return;
       hasFetchedRef.current = true;
-      
+
       const token = localStorage.getItem('accessToken');
       if (!token) {
         setError("You are not logged in. Redirecting to login...");
@@ -1006,7 +1002,7 @@ const BASE_API_URL = `${base_url}`;
           githubUrl: profile.github_url,
           additionalNotes: profile.additional_notes,
         });
-        
+
 
       } catch (err) {
         setError("Failed to fetch profile.");
@@ -1039,7 +1035,7 @@ const BASE_API_URL = `${base_url}`;
       if (baseResp.ok) {
         const baseData = await baseResp.json();
         setBasePlan(baseData);
-        
+
         // Set base plan as default selected
         setSelectedServices([baseData.id]);
       }
@@ -1129,7 +1125,7 @@ const BASE_API_URL = `${base_url}`;
         const activeSubIds = [];
         // Store subscribed plan IDs to disable them in the modal
         const subscribedPlanIds = [];
-        
+
         if (data.base_subscription?.id) {
           activeSubIds.push(data.base_subscription.id);
           if (data.base_subscription.plan) {
@@ -1159,22 +1155,22 @@ const BASE_API_URL = `${base_url}`;
   }, [profileData]);
 
   // Auto-dismiss toast message
-    useEffect(() => {
-      if (submissionMessage) {
-        const timer = setTimeout(() => {
-          setSubmissionMessage('');
-        }, 3000); // Disappear after 3 seconds
-        return () => clearTimeout(timer);
-      }
-    }, [submissionMessage]);
+  useEffect(() => {
+    if (submissionMessage) {
+      const timer = setTimeout(() => {
+        setSubmissionMessage('');
+      }, 3000); // Disappear after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [submissionMessage]);
   // actions
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     navigate('/login');
   };
 
-  const handleInterestForm = () => {
-    navigate('/interest');
+  const handleclientIntakeSheet = () => {
+    // navigate('/interest');
   };
 
   const handleEditChange = (e) => {
@@ -1187,7 +1183,7 @@ const BASE_API_URL = `${base_url}`;
       newValue = checked;
     } else if (name === 'phone') {
       const digitsOnly = value.replace(/[^\d]/g, '');
-      newValue = digitsOnly.substring(0, 10); 
+      newValue = digitsOnly.substring(0, 10);
     }
 
     setFormData(prev => ({ ...prev, [name]: newValue }));
@@ -1196,6 +1192,7 @@ const BASE_API_URL = `${base_url}`;
   };
 
   const handleToggleEdit = () => {
+    setShowPaymentModal(false);
     if (!isEditing && profileData) {
       setFormData({
         firstName: profileData.first_name,
@@ -1247,16 +1244,16 @@ const BASE_API_URL = `${base_url}`;
       optEndDate: 'opt_end_date',
       consentToTerms: 'consent_to_terms',
       referralSource: 'referral_source',
-      linkedinUrl: 'linkedin_url', 
-      githubUrl: 'github_url', 
+      linkedinUrl: 'linkedin_url',
+      githubUrl: 'github_url',
       additionalNotes: 'additional_notes',
     };
 
     for (const [stateKey, apiKey] of Object.entries(fieldMap)) {
       let value = formData[stateKey];
-      
+
       if (stateKey === 'phone') {
-        value = (value || '').replace(/[^\d]/g, ''); 
+        value = (value || '').replace(/[^\d]/g, '');
       } else if (stateKey === 'graduationDate' || stateKey === 'optEndDate') {
         value = formatDateToApi(value);
       }
@@ -1266,7 +1263,7 @@ const BASE_API_URL = `${base_url}`;
       if (typeof value === 'boolean') {
         value = value ? 'true' : 'false';
       }
-      
+
       const originalKey = profileData[apiKey];
       if (value !== null && value !== undefined && value !== '' && value !== originalKey) {
         data.append(apiKey, value);
@@ -1276,7 +1273,7 @@ const BASE_API_URL = `${base_url}`;
     if (formData.resumeFile) {
       data.append('resume_file', formData.resumeFile, formData.resumeFile.name);
     }
-    
+
     let isDataEmpty = true;
     for (const pair of data.entries()) {
       if (pair[0] !== 'resume_file') {
@@ -1284,7 +1281,7 @@ const BASE_API_URL = `${base_url}`;
         break;
       }
     }
-    
+
     if (isDataEmpty && !formData.resumeFile) {
       setIsSubmitting(false);
       setSubmissionMessage('No changes detected to update.');
@@ -1296,7 +1293,7 @@ const BASE_API_URL = `${base_url}`;
       const response = await fetch(updateUrl, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${token}`, 
+          'Authorization': `Bearer ${token}`,
         },
         body: data,
       });
@@ -1312,7 +1309,7 @@ const BASE_API_URL = `${base_url}`;
         const errorData = await response.json();
         setIsSubmitting(false);
         let errorMessage = errorData.detail || 'Update failed due to server error.';
-        
+
         if (errorData) {
           const backendErrors = {};
           for (const key in errorData) {
@@ -1344,15 +1341,15 @@ const BASE_API_URL = `${base_url}`;
     setShowDeleteModal(false);
     setIsSubmitting(true);
     setSubmissionMessage('Deleting profile...');
-    
+
     const token = localStorage.getItem('accessToken');
     const deleteUrl = `${BASE_API_URL}/api/users/profiles/${profileId}/`;
-    
+
     try {
       const response = await fetch(deleteUrl, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`, 
+          'Authorization': `Bearer ${token}`,
         },
       });
 
@@ -1362,13 +1359,13 @@ const BASE_API_URL = `${base_url}`;
         if (response.status === 204) {
           setSubmissionMessage('Profile deleted successfully! Redirecting...');
           setIsSubmitting(false);
-          
+
           // Clear user data and redirect to login
           localStorage.removeItem('accessToken');
           setTimeout(() => {
             navigate('/login');
           }, 2000);
-        } 
+        }
         // 200 OK - successful deletion with response body
         else if (response.status === 200) {
           try {
@@ -1378,7 +1375,7 @@ const BASE_API_URL = `${base_url}`;
             setSubmissionMessage('Profile deleted successfully! Redirecting...');
           }
           setIsSubmitting(false);
-          
+
           // Clear user data and redirect to login
           localStorage.removeItem('accessToken');
           setTimeout(() => {
@@ -1403,7 +1400,7 @@ const BASE_API_URL = `${base_url}`;
       console.error("Network Fetch Error:", err);
     }
   };
-const handleUpgradeProfile = () => {
+  const handleUpgradeProfile = () => {
     // If not subscribed, show base plan; if subscribed, show add-ons
     if (!isSubscribed && basePlan) {
       setSelectedServices([basePlan.id]);
@@ -1519,7 +1516,7 @@ const handleUpgradeProfile = () => {
   // Confirm cancel subscription - Actually call the API
   const confirmCancelSubscription = async () => {
     setShowCancelModal(false);
-    
+
     if (!activeSubscriptions || activeSubscriptions.length === 0) {
       setSubmissionMessage('No active subscription to cancel.');
       return;
@@ -1530,7 +1527,7 @@ const handleUpgradeProfile = () => {
 
     try {
       let cancelledCount = 0;
-      
+
       // Cancel all active subscriptions
       for (const subId of activeSubscriptions) {
         const response = await fetch(`${BASE_API_URL}/api/subscriptions/my-subscriptions/${subId}/cancel/`, {
@@ -1588,7 +1585,7 @@ const handleUpgradeProfile = () => {
       } else {
         newSelection.push(serviceId);
       }
-      
+
       return newSelection;
     });
   };
@@ -1611,7 +1608,7 @@ const handleUpgradeProfile = () => {
       formattedValue = value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
       formattedValue = formattedValue.substring(0, 19); // 16 digits + 3 spaces
     }
-    
+
     // Format expiry date (MM/YY)
     if (name === 'expiryDate') {
       formattedValue = value.replace(/\D/g, '');
@@ -1620,7 +1617,7 @@ const handleUpgradeProfile = () => {
       }
       formattedValue = formattedValue.substring(0, 5);
     }
-    
+
     // Format CVV (only digits, max 4)
     if (name === 'cvv') {
       formattedValue = value.replace(/\D/g, '').substring(0, 4);
@@ -1631,19 +1628,19 @@ const handleUpgradeProfile = () => {
 
   const handlePaymentSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (selectedServices.length === 0) {
       setSubmissionMessage('Please select at least one plan.');
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
-      
+
       // Step 1: Create subscription records for all selected plans
       setSubmissionMessage('Creating subscription records...');
       const createdSubscriptions = [];
-      
+
       for (const planId of selectedServices) {
         const plan = availablePlans.find(p => p.id === planId);
         if (plan) {
@@ -1663,48 +1660,48 @@ const handleUpgradeProfile = () => {
           }
         }
       }
-      
+
       if (createdSubscriptions.length === 0) {
         setSubmissionMessage('No subscriptions were created. Please try again.');
         setIsSubmitting(false);
         return;
       }
-      
+
       // Step 2: Create Razorpay payment order
       setSubmissionMessage('Creating payment order...');
       const token = localStorage.getItem('accessToken');
       const amount = cartTotal;
-      
+
       const payload = { amount: amount };
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = 'Bearer ' + token;
-      
+
       const resp = await fetch(`${BASE_API_URL}/api/payments/razorpay/create-order/`, {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(payload)
       });
-      
+
       const json = await resp.json();
       if (!resp.ok) {
         setSubmissionMessage('Failed to create payment order: ' + (json.error || 'Unknown error'));
         setIsSubmitting(false);
         return;
       }
-      
+
       const order = json.order;
       const payment_uuid = json.payment_uuid;
       const key_id = json.key_id;
-      
+
       setSubmissionMessage('Opening payment gateway...');
       setIsSubmitting(false);
-      
+
       // Check if Razorpay is loaded
       if (typeof window.Razorpay === 'undefined') {
         setSubmissionMessage('Payment gateway not loaded. Please refresh and try again.');
         return;
       }
-      
+
       // Step 3: Open Razorpay Checkout
       const options = {
         key: key_id,
@@ -1713,11 +1710,11 @@ const handleUpgradeProfile = () => {
         name: 'Hyrind',
         description: `Subscription - ${createdSubscriptions.length} plan(s)`,
         order_id: order.id,
-        handler: async function(response) {
+        handler: async function (response) {
           try {
             setIsSubmitting(true);
             setSubmissionMessage('Verifying payment...');
-            
+
             // Send verification request to backend
             const verifyPayload = {
               payment_id: response.razorpay_payment_id,
@@ -1725,24 +1722,24 @@ const handleUpgradeProfile = () => {
               signature: response.razorpay_signature,
               payment_uuid: payment_uuid
             };
-            
+
             const verifyResp = await fetch(`${BASE_API_URL}/api/payments/razorpay/verify/`, {
               method: 'POST',
               headers: headers,
               body: JSON.stringify(verifyPayload)
             });
-            
+
             const verifyJson = await verifyResp.json();
             if (!verifyResp.ok) {
               setSubmissionMessage('Payment verification failed: ' + (verifyJson.error || 'Unknown error'));
               setIsSubmitting(false);
               return;
             }
-            
+
             // Step 4: Activate all created subscriptions with payment IDs
             setSubmissionMessage('Activating subscriptions...');
             let activatedCount = 0;
-            
+
             for (const sub of createdSubscriptions) {
               try {
                 await activateSubscription(
@@ -1756,10 +1753,10 @@ const handleUpgradeProfile = () => {
                 console.error(`Error activating subscription ${sub.id}:`, error);
               }
             }
-            
+
             setShowPaymentModal(false);
             setPaymentData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '' });
-            
+
             if (activatedCount > 0) {
               setSubmissionMessage(`Payment successful! ${activatedCount} subscription(s) activated.`);
               // Refresh subscription summary to get updated data
@@ -1767,7 +1764,7 @@ const handleUpgradeProfile = () => {
             } else {
               setSubmissionMessage('Payment completed but subscription activation failed. Please contact support.');
             }
-            
+
             setIsSubmitting(false);
           } catch (error) {
             setSubmissionMessage('Payment verification error: ' + error.message);
@@ -1782,16 +1779,16 @@ const handleUpgradeProfile = () => {
           color: primaryColor
         },
         modal: {
-          ondismiss: function() {
+          ondismiss: function () {
             setSubmissionMessage('Payment cancelled');
             setIsSubmitting(false);
           }
         }
       };
-      
+
       const rzp = new window.Razorpay(options);
       rzp.open();
-      
+
     } catch (error) {
       setSubmissionMessage('Payment error: ' + error.message);
       setIsSubmitting(false);
@@ -1816,8 +1813,8 @@ const handleUpgradeProfile = () => {
         <div className="alert alert-danger p-4 shadow-lg rounded-3">
           <h4 className="alert-heading">Access Issue</h4>
           <p>{error || "Could not load profile data."}</p>
-          <button 
-            onClick={handleLogout} 
+          <button
+            onClick={handleLogout}
             className="btn btn-sm btn-outline-danger mt-2"
           >
             <LogOut className="w-4 h-4 me-1" /> Go to Login
@@ -1880,8 +1877,8 @@ const handleUpgradeProfile = () => {
             <div className="position-absolute top-50 start-50 translate-middle bg-white rounded-3 shadow-lg p-4" style={{ maxWidth: '500px', width: '90%' }}>
               <div className="text-center">
                 <div className="mb-3">
-                  <div 
-                    className="mx-auto rounded-circle d-flex align-items-center justify-content-center" 
+                  <div
+                    className="mx-auto rounded-circle d-flex align-items-center justify-content-center"
                     style={{ width: '64px', height: '64px', backgroundColor: '#FEF3C7' }}
                   >
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1896,7 +1893,7 @@ const handleUpgradeProfile = () => {
                   Are you sure you want to cancel your subscription?
                 </p>
                 <p className="small mb-4" style={{ color: '#6B7280' }}>
-                  Your subscription will remain active until the end of your current billing period. 
+                  Your subscription will remain active until the end of your current billing period.
                   You will lose access to premium features after that date.
                 </p>
                 <div className="d-flex gap-3 justify-content-center">
@@ -1911,8 +1908,8 @@ const handleUpgradeProfile = () => {
                     onClick={confirmCancelSubscription}
                     disabled={isCancellingSubscription}
                     className="btn px-4 py-2 fw-semibold"
-                    style={{ 
-                      minWidth: '120px', 
+                    style={{
+                      minWidth: '120px',
                       borderRadius: '8px',
                       backgroundColor: '#EF4444',
                       border: 'none',
@@ -1927,190 +1924,13 @@ const handleUpgradeProfile = () => {
           </div>
         )}
 
-        {/* Payment Modal */}
-        {showPaymentModal && (
-          <div className="payment-modal-overlay position-fixed top-0 start-0 w-100 h-100" style={{ zIndex: 1050 }}>
-            <div className="payment-card position-absolute top-50 start-50 translate-middle bg-white w-100" style={{ maxWidth: '480px' }}>
-              
-              {/* Header */}
-              <div className="payment-header">
-                <button 
-                  onClick={() => {
-                    setShowPaymentModal(false);
-                    setPaymentData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '' });
-                    // setPaymentStep(1); // Removed
-                  }}
-                  className="position-absolute top-0 end-0 m-3 btn btn-sm"
-                  style={{ 
-                    color: '#6b7280', 
-                    background: '#f3f4f6', 
-                    border: 'none', 
-                    borderRadius: '50%', 
-                    width: '36px', 
-                    height: '36px', 
-                    padding: '0', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    zIndex: 10
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-                <div className="payment-title">{isSubscribed ? 'Add Services' : 'Upgrade Profile'}</div>
-                <div className="payment-amount-large">${cartTotal}</div>
-                <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
-                  {isSubscribed ? 'Select add-on services' : 'Total amount for subscription'}
-                </div>
-              </div>
 
-              {/* Body */}
-              <div className="payment-body">
-                
-                {/* SERVICE SELECTION - Dynamic from API */}
-                  <div className="service-list-container custom-scrollbar d-flex flex-column gap-2 mb-4">
-                     {loadingPlans ? (
-                       <div className="text-center py-4">
-                         <div className="spinner-border text-primary spinner-border-sm" role="status">
-                           <span className="visually-hidden">Loading plans...</span>
-                         </div>
-                         <p className="mt-2 mb-0 small text-muted">Loading available plans...</p>
-                       </div>
-                     ) : (!isSubscribed && !basePlan) || (isSubscribed && (!addonPlans || addonPlans.length === 0)) ? (
-                       <div className="text-center py-4">
-                         <p className="mb-0 text-muted">
-                           {isSubscribed ? 'No add-on services available at the moment.' : 'No plans available. Please try again later.'}
-                         </p>
-                       </div>
-                     ) : (
-                       // Show base plan for non-subscribers, add-ons for subscribers
-                       (isSubscribed ? availablePlans.filter(p => p.plan_type === 'addon') : availablePlans.filter(p => p.plan_type === 'base')).map((service) => {
-                        const isAlreadySubscribed = subscribedPlanIds.includes(service.id);
-                        const isDisabled = service.isMandatory || isAlreadySubscribed;
-                        
-                        return (
-                        <div 
-                          key={service.id} 
-                          className={`service-item ${selectedServices.includes(service.id) ? 'selected' : ''} ${isAlreadySubscribed ? 'already-subscribed' : ''}`}
-                          style={{ 
-                            cursor: isDisabled ? 'not-allowed' : 'pointer', 
-                            opacity: isAlreadySubscribed ? 0.6 : 1,
-                            backgroundColor: isAlreadySubscribed ? '#f0f0f0' : undefined
-                          }}
-                          onClick={() => !isDisabled && toggleService(service.id)}
-                        >
-                          <div className="d-flex align-items-center gap-3 flex-grow-1">
-                            <div className="ms-2">
-                              {isAlreadySubscribed ? (
-                                <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: '28px', height: '28px', backgroundColor: '#6B7280' }}>
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                </div>
-                              ) : selectedServices.includes(service.id) ? (
-                                <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: '28px', height: '28px', backgroundColor: primaryColor }}>
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                </div>
-                              ) : (
-                                <div className="rounded-circle border border-2" style={{ width: '28px', height: '28px', borderColor: '#cbd5e1' }}></div>
-                              )}
-                            </div>
-                            <div className="service-info text-start flex-grow-1">
-                              <div className="d-flex align-items-center gap-2 flex-wrap">
-                                <h5 className="mb-0 fw-semibold" style={{ fontSize: '1rem', color: isAlreadySubscribed ? '#6B7280' : '#1e293b' }}>
-                                  {service.title}
-                                </h5>
-                                {isAlreadySubscribed && (
-                                  <span 
-                                    className="badge" 
-                                    style={{ 
-                                      backgroundColor: '#6B7280', 
-                                      color: 'white', 
-                                      fontSize: '0.65rem', 
-                                      padding: '0.25rem 0.5rem',
-                                      borderRadius: '4px',
-                                      fontWeight: '600'
-                                    }}
-                                  >
-                                    SUBSCRIBED
-                                  </span>
-                                )}
-                                {service.isMandatory && !isAlreadySubscribed && (
-                                  <span 
-                                    className="badge" 
-                                    style={{ 
-                                      backgroundColor: '#DC2626', 
-                                      color: 'white', 
-                                      fontSize: '0.65rem', 
-                                      padding: '0.25rem 0.5rem',
-                                      borderRadius: '4px',
-                                      fontWeight: '600',
-                                      letterSpacing: '0.5px'
-                                    }}
-                                  >
-                                    REQUIRED
-                                  </span>
-                                )}
-                                {service.plan_type === 'addon' && !isAlreadySubscribed && (
-                                  <span 
-                                    className="badge" 
-                                    style={{ 
-                                      backgroundColor: '#10B981', 
-                                      color: 'white', 
-                                      fontSize: '0.65rem', 
-                                      padding: '0.25rem 0.5rem',
-                                      borderRadius: '4px',
-                                      fontWeight: '600'
-                                    }}
-                                  >
-                                    ADD-ON
-                                  </span>
-                                )}
-                              </div>
-                              <p className="mb-0 mt-1" style={{ fontSize: '0.85rem', color: '#64748b' }}>{service.description}</p>
-                            </div>
-                          </div>
-                          <div className="service-price text-end" style={{ minWidth: '80px' }}>
-                            <span className="fw-bold" style={{ fontSize: '1.25rem', color: isAlreadySubscribed ? '#6B7280' : primaryColor }}>${service.price}</span>
-                            <small className="text-muted d-block" style={{ fontSize: '0.75rem' }}>/{service.period}</small>
-                          </div>
-                        </div>
-                      )})
-                      )}
-                  </div>
-
-                  {/* <div className="cart-summary mb-4">
-                    <span>Total Amount</span>
-                    <span>${cartTotal}</span>
-                  </div> */}
-
-                <button
-                  onClick={handlePaymentSubmit}
-                  className="btn w-100 py-3 fw-bold shadow-sm"
-                  style={{ 
-                    background: primaryColor,
-                    border: 'none', 
-                    color: 'white',
-                    fontSize: '1.1rem',
-                    borderRadius: '12px',
-                    transition: 'all 0.2s ease',
-                    marginTop: '1.5rem'
-                  }}
-                  onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
-                  onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
-                  onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                >
-                  Proceed to Pay
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
         {/* Sidebar with full name + actions */}
         <div>
           <AdminSidebar
             fullName={fullName}
             onLogout={handleLogout}
-            onInterestForm={handleInterestForm}
+            onclientIntakeSheet={handleclientIntakeSheet}
             onToggleEdit={handleToggleEdit}
             isEditing={isEditing}
             onDeleteProfile={handleDeleteProfile}
@@ -2123,10 +1943,203 @@ const handleUpgradeProfile = () => {
         {/* Main content */}
         <main className="admin-main-content">
           <div className="admin-content-wrapper">
-            <div className="p-4">
+            {/* Payment Modal */}
+            {showPaymentModal && (
+              <div className="d-flex justify-content-center align-items-center" >
+                <div className="payment-card  bg-white w-100" style={{ maxWidth: '480px' }}>
+
+                  {/* Header */}
+                  <div className="payment-header">
+                    {/* <button
+                      onClick={() => {
+                        setShowPaymentModal(false);
+                        setPaymentData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '' });
+                        // setPaymentStep(1); // Removed
+                      }}
+                      className="position-absolute top-0 end-0 m-3 btn btn-sm"
+                      style={{
+                        color: '#6b7280',
+                        background: '#f3f4f6',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '36px',
+                        height: '36px',
+                        padding: '0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        zIndex: 10
+                      }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button> */}
+                    <div className="payment-title">{isSubscribed ? 'Add Services' : 'Upgrade Profile'}</div>
+                    <div className="payment-amount-large">${cartTotal}</div>
+                    <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
+                      {isSubscribed ? 'Select add-on services' : 'Total amount for subscription'}
+                    </div>
+                  </div>
+
+                  {/* Body */}
+                  <div className="payment-body">
+
+                    {/* SERVICE SELECTION - Dynamic from API */}
+                    <div className="service-list-container custom-scrollbar d-flex flex-column gap-2 mb-4">
+                      {loadingPlans ? (
+                        <div className="text-center py-4">
+                          <div className="spinner-border text-primary spinner-border-sm" role="status">
+                            <span className="visually-hidden">Loading plans...</span>
+                          </div>
+                          <p className="mt-2 mb-0 small text-muted">Loading available plans...</p>
+                        </div>
+                      ) : (!isSubscribed && !basePlan) || (isSubscribed && (!addonPlans || addonPlans.length === 0)) ? (
+                        <div className="text-center py-4">
+                          <p className="mb-0 text-muted">
+                            {isSubscribed ? 'No add-on services available at the moment.' : 'No plans available. Please try again later.'}
+                          </p>
+                        </div>
+                      ) : (
+                        // Show base plan for non-subscribers, add-ons for subscribers
+                        (isSubscribed ? availablePlans.filter(p => p.plan_type === 'addon') : availablePlans.filter(p => p.plan_type === 'base')).map((service) => {
+                          const isAlreadySubscribed = subscribedPlanIds.includes(service.id);
+                          const isDisabled = service.isMandatory || isAlreadySubscribed;
+
+                          return (
+                            <div
+                              key={service.id}
+                              className={`service-item ${selectedServices.includes(service.id) ? 'selected' : ''} ${isAlreadySubscribed ? 'already-subscribed' : ''}`}
+                              style={{
+                                cursor: isDisabled ? 'not-allowed' : 'pointer',
+                                opacity: isAlreadySubscribed ? 0.6 : 1,
+                                backgroundColor: isAlreadySubscribed ? '#f0f0f0' : undefined
+                              }}
+                              onClick={() => !isDisabled && toggleService(service.id)}
+                            >
+                              <div className="d-flex align-items-center gap-3 flex-grow-1">
+                                <div className="ms-2">
+                                  {isAlreadySubscribed ? (
+                                    <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: '28px', height: '28px', backgroundColor: '#6B7280' }}>
+                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </div>
+                                  ) : selectedServices.includes(service.id) ? (
+                                    <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: '28px', height: '28px', backgroundColor: primaryColor }}>
+                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </div>
+                                  ) : (
+                                    <div className="rounded-circle border border-2" style={{ width: '28px', height: '28px', borderColor: '#cbd5e1' }}></div>
+                                  )}
+                                </div>
+                                <div className="service-info text-start flex-grow-1">
+                                  <div className="d-flex align-items-center gap-2 flex-wrap">
+                                    <h5 className="mb-0 fw-semibold" style={{ fontSize: '1rem', color: isAlreadySubscribed ? '#6B7280' : '#1e293b' }}>
+                                      {service.title}
+                                    </h5>
+                                    {isAlreadySubscribed && (
+                                      <span
+                                        className="badge"
+                                        style={{
+                                          backgroundColor: '#6B7280',
+                                          color: 'white',
+                                          fontSize: '0.65rem',
+                                          padding: '0.25rem 0.5rem',
+                                          borderRadius: '4px',
+                                          fontWeight: '600'
+                                        }}
+                                      >
+                                        SUBSCRIBED
+                                      </span>
+                                    )}
+                                    {service.isMandatory && !isAlreadySubscribed && (
+                                      <span
+                                        className="badge"
+                                        style={{
+                                          backgroundColor: '#DC2626',
+                                          color: 'white',
+                                          fontSize: '0.65rem',
+                                          padding: '0.25rem 0.5rem',
+                                          borderRadius: '4px',
+                                          fontWeight: '600',
+                                          letterSpacing: '0.5px'
+                                        }}
+                                      >
+                                        REQUIRED
+                                      </span>
+                                    )}
+                                    {service.plan_type === 'addon' && !isAlreadySubscribed && (
+                                      <span
+                                        className="badge"
+                                        style={{
+                                          backgroundColor: '#10B981',
+                                          color: 'white',
+                                          fontSize: '0.65rem',
+                                          padding: '0.25rem 0.5rem',
+                                          borderRadius: '4px',
+                                          fontWeight: '600'
+                                        }}
+                                      >
+                                        ADD-ON
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="mb-0 mt-1" style={{ fontSize: '0.85rem', color: '#64748b' }}>{service.description}</p>
+                                </div>
+                              </div>
+                              <div className="service-price text-end" style={{ minWidth: '80px' }}>
+                                <span className="fw-bold" style={{ fontSize: '1.25rem', color: isAlreadySubscribed ? '#6B7280' : primaryColor }}>${service.price}</span>
+                                <small className="text-muted d-block" style={{ fontSize: '0.75rem' }}>/{service.period}</small>
+                              </div>
+                            </div>
+                          )
+                        })
+                      )}
+                    </div>
+
+                    {/* <div className="cart-summary mb-4">
+                    <span>Total Amount</span>
+                    <span>${cartTotal}</span>
+                  </div> */}
+
+                    {/* Refund Policy Link */}
+                    <div className="text-center mt-3 mb-2" style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                      By proceeding, you agree to our{' '}
+                      <a
+                        href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/refund"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: primaryColor, textDecoration: 'underline', fontWeight: '600' }}
+                      >
+                        Refund Policy
+                      </a>
+                    </div>
+
+                    <button
+                      onClick={handlePaymentSubmit}
+                      className="btn w-100 py-3 fw-bold shadow-sm"
+                      style={{
+                        background: primaryColor,
+                        border: 'none',
+                        color: 'white',
+                        fontSize: '1.1rem',
+                        borderRadius: '12px',
+                        transition: 'all 0.2s ease',
+                        marginTop: '1.5rem'
+                      }}
+                      onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
+                      onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
+                      onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                    >
+                      Proceed to Pay
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div hidden={showPaymentModal} className="p-4">
+
               {/* Profile summary */}
               <div className="text-center mb-4">
-                <div 
+                <div
                   className="mx-auto rounded-circle d-flex align-items-center justify-content-center shadow-sm"
                   style={{ width: '100px', height: '100px', backgroundColor: primaryColor + '33' }}
                 >
@@ -2142,310 +2155,310 @@ const handleUpgradeProfile = () => {
               </div>
 
               {/* Subscription Status Banner */}
-              <SubscriptionStatusBanner 
-                isSubscribed={isSubscribed} 
-                subscriptionData={subscriptionData} 
+              <SubscriptionStatusBanner
+                isSubscribed={isSubscribed}
+                subscriptionData={subscriptionData}
                 onCancelSubscription={handleCancelSubscription}
                 isCancelling={isCancellingSubscription}
               />
 
               {/* Form / View */}
               <form onSubmit={handleUpdateProfile} noValidate>
-                    <div className="row g-4">
-                      {isEditing ? (
-                        <>
-                          <div className="col-md-6">
-                            <TextInput
-                              label="First Name"
-                              name="firstName"
-                              value={formData.firstName}
-                              onChange={handleEditChange}
-                              error={errors.firstName}
-                              icon={User}
-                              required
-                              maxLength={50}
-                              placeholder="First Name"
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <TextInput
-                              label="Last Name"
-                              name="lastName"
-                              value={formData.lastName}
-                              onChange={handleEditChange}
-                              error={errors.lastName}
-                              icon={User}
-                              required
-                              maxLength={50}
-                              placeholder="Last Name"
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <TextInput
-                              label="Email Address"
-                              name="email"
-                              type="email"
-                              value={formData.email}
-                              onChange={handleEditChange}
-                              error={errors.email}
-                              icon={Mail}
-                              required
-                              placeholder="you@example.com"
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <TextInput
-                              label="Phone (10 Digits)"
-                              name="phone"
-                              type="tel"
-                              value={formData.phone}
-                              onChange={handleEditChange}
-                              error={errors.phone}
-                              icon={Phone}
-                              required
-                              maxLength={10}
-                              placeholder="0000000000"
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <TextInput
-                              label="University"
-                              name="university"
-                              value={formData.university}
-                              onChange={handleEditChange}
-                              error={errors.university}
-                              icon={GraduationCap}
-                              maxLength={100}
-                              placeholder="University Name"
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <TextInput
-                              label="Major"
-                              name="major"
-                              value={formData.major}
-                              onChange={handleEditChange}
-                              error={errors.major}
-                              icon={GraduationCap}
-                              maxLength={100}
-                              placeholder="Major"
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <TextInput
-                              label="Degree"
-                              name="degree"
-                              value={formData.degree}
-                              onChange={handleEditChange}
-                              error={errors.degree}
-                              icon={GraduationCap}
-                              options={degreeOptions}
-                              placeholder="Select Degree"
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <TextInput
-                              label="Graduation (MM/YYYY)"
-                              name="graduationDate"
-                              type="date"
-                              value={formData.graduationDate}
-                              onChange={handleEditChange}
-                              error={errors.graduationDate}
-                              icon={Calendar}
-                              placeholder="MM/YYYY"
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <TextInput
-                              label="Visa Status"
-                              name="visaStatus"
-                              value={formData.visaStatus}
-                              onChange={handleEditChange}
-                              error={errors.visaStatus}
-                              icon={GraduationCap}
-                              options={visaOptions}
-                              placeholder="Select Status"
-                            />
-                          </div>
-                          {formData.visaStatus === 'F1-OPT' && (
-                            <div className="col-md-6">
-                              <TextInput
-                                label="OPT End Date (MM/YYYY)"
-                                name="optEndDate"
-                                type="date"
-                                value={formData.optEndDate}
-                                onChange={handleEditChange}
-                                error={errors.optEndDate}
-                                icon={Calendar}
-                                required
-                                placeholder="MM/YYYY"
-                              />
-                            </div>
-                          )}
-                          <div className="col-12">
-                            <TextInput
-                              label="Additional Notes"
-                              name="additionalNotes"
-                              value={formData.additionalNotes}
-                              onChange={handleEditChange}
-                              error={errors.additionalNotes}
-                              isTextArea
-                              maxLength={500}
-                              placeholder="Enter any additional notes..."
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <TextInput
-                              label="LinkedIn URL"
-                              name="linkedinUrl"
-                              type="url"
-                              value={formData.linkedinUrl}
-                              onChange={handleEditChange}
-                              error={errors.linkedinUrl}
-                              icon={LinkIcon}
-                              maxLength={255}
-                              placeholder="https://linkedin.com/..."
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <TextInput
-                              label="GitHub URL"
-                              name="githubUrl"
-                              type="url"
-                              value={formData.githubUrl}
-                              onChange={handleEditChange}
-                              error={errors.githubUrl}
-                              icon={GitBranch}
-                              maxLength={255}
-                              placeholder="https://github.com/..."
-                            />
-                          </div>
-
-                          {/* Resume upload */}
-                          <div className="col-12">
-                            <div className="mb-3">
-                              <label className="form-label fw-semibold text-dark" htmlFor="resumeFile">
-                                Update Resume (PDF/DOCX, Max 5MB)
-                              </label>
-                              <div className={`border rounded-3 p-3 ${errors.resumeFile ? 'border-danger bg-danger bg-opacity-10' : 'border-secondary border-opacity-25'}`}>
-                                <div className="d-flex align-items-center">
-                                  <div className="p-2 rounded-2 me-3" style={{ backgroundColor: primaryColor + '1A' }}>
-                                    <Upload className="h-5 w-5" style={{ color: primaryColor }} />
-                                  </div>
-                                  <div className="flex-grow-1">
-                                    <input
-                                      type="file"
-                                      id="resumeFile"
-                                      name="resumeFile"
-                                      onChange={handleEditChange}
-                                      className="form-control form-control-lg"
-                                      accept=".pdf,.docx,.doc"
-                                    />
-                                  </div>
-                                </div>
-                                {(formData.resumeFile && formData.resumeFile.name) ? (
-                                  <p className="text-success mt-2 mb-0 fw-semibold">
-                                    Selected: {formData.resumeFile.name}
-                                  </p>
-                                ) : profile.resume_file && (
-                                  <p className="text-muted mt-2 mb-0 fw-semibold">
-                                    Current: <a href={profile.resume_file} target="_blank" rel="noopener noreferrer" style={{ color: primaryColor }}>View File</a>
-                                  </p>
-                                )}
-                              </div>
-                              {errors.resumeFile && <div className="invalid-feedback d-block">{errors.resumeFile}</div>}
-                            </div>
-                          </div>
-
-                          <div className="col-12 mt-3">
-                            <button
-                              type="submit"
-                              disabled={isSubmitting}
-                              className="btn btn-lg w-100 py-3 fw-bold rounded-pill"
-                              style={{ backgroundColor: '#10B981', borderColor: '#10B981', color: 'white' }}
-                            >
-                              {isSubmitting ? (
-                                <>
-                                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                  {submissionMessage || 'Updating...'}
-                                </>
-                              ) : (
-                                <>
-                                  <Save className="w-6 h-6 me-2" />
-                                  Save Changes
-                                </>
-                              )}
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="col-md-6">
-                            <ProfileField icon={User} label="Full Name" value={fullName} />
-                          </div>
-                          <div className="col-md-6">
-                            <ProfileField icon={Mail} label="Email" value={profile.email} />
-                          </div>
-                          <div className="col-md-6">
-                            <ProfileField icon={Phone} label="Phone" value={profile.phone} />
-                          </div>
-                          <div className="col-md-6">
-                            <ProfileField icon={GraduationCap} label="University" value={profile.university} />
-                          </div>
-                          <div className="col-md-6">
-                            <ProfileField icon={GraduationCap} label="Degree / Major" value={`${profile.degree} in ${profile.major}`} />
-                          </div>
-                          <div className="col-md-6">
-                            <ProfileField icon={Calendar} label="Graduation Date" value={profile.graduation_date} />
-                          </div>
-                          <div className="col-md-6">
-                            <ProfileField icon={GraduationCap} label="Visa Status" value={profile.visa_status} />
-                          </div>
-                          {profile.visa_status === 'F1-OPT' && (
-                            <div className="col-md-6">
-                              <ProfileField icon={Calendar} label="OPT End Date" value={profile.opt_end_date} />
-                            </div>
-                          )}
-                          <div className="col-md-6">
-                            <ProfileField icon={LinkIcon} label="LinkedIn" value={profile.linkedin_url} isLink />
-                          </div>
-                          <div className="col-md-6">
-                            <ProfileField icon={GitBranch} label="GitHub" value={profile.github_url} isLink />
-                          </div>
-
-                          <div className="col-12 mt-4 pt-3 border-top">
-                            <h4 className="fw-semibold text-dark">Additional Information</h4>
-                            <div className="row mt-3">
-                              <div className="col-md-6 mb-3 mb-md-0">
-                                <p className="text-muted mb-1 small fw-semibold">Resume File</p>
-                                {profile.resume_file ? (
-                                  <a
-                                    href={profile.resume_file}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="btn btn-sm"
-                                    style={{backgroundColor: primaryColor + '1A', color: primaryColor}}
-                                  >
-                                    View Uploaded Resume
-                                  </a>
-                                ) : (
-                                  <span className="text-danger">No File Uploaded</span>
-                                )}
-                              </div>
-                              <div className="col-md-6">
-                                <p className="text-muted mb-1 small fw-semibold">Notes</p>
-                                <p className="text-dark small border p-2 rounded-3" style={{ whiteSpace: 'pre-wrap', minHeight: '50px' }}>
-                                  {profile.additional_notes || 'No additional notes provided.'}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </>
+                <div className="row g-4">
+                  {isEditing ? (
+                    <>
+                      <div className="col-md-6">
+                        <TextInput
+                          label="First Name"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleEditChange}
+                          error={errors.firstName}
+                          icon={User}
+                          required
+                          maxLength={50}
+                          placeholder="First Name"
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Last Name"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleEditChange}
+                          error={errors.lastName}
+                          icon={User}
+                          required
+                          maxLength={50}
+                          placeholder="Last Name"
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Email Address"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleEditChange}
+                          error={errors.email}
+                          icon={Mail}
+                          required
+                          placeholder="you@example.com"
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Phone (10 Digits)"
+                          name="phone"
+                          type="tel"
+                          value={formData.phone}
+                          onChange={handleEditChange}
+                          error={errors.phone}
+                          icon={Phone}
+                          required
+                          maxLength={10}
+                          placeholder="0000000000"
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <TextInput
+                          label="University"
+                          name="university"
+                          value={formData.university}
+                          onChange={handleEditChange}
+                          error={errors.university}
+                          icon={GraduationCap}
+                          maxLength={100}
+                          placeholder="University Name"
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Major"
+                          name="major"
+                          value={formData.major}
+                          onChange={handleEditChange}
+                          error={errors.major}
+                          icon={GraduationCap}
+                          maxLength={100}
+                          placeholder="Major"
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Degree"
+                          name="degree"
+                          value={formData.degree}
+                          onChange={handleEditChange}
+                          error={errors.degree}
+                          icon={GraduationCap}
+                          options={degreeOptions}
+                          placeholder="Select Degree"
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Graduation (MM/YYYY)"
+                          name="graduationDate"
+                          type="date"
+                          value={formData.graduationDate}
+                          onChange={handleEditChange}
+                          error={errors.graduationDate}
+                          icon={Calendar}
+                          placeholder="MM/YYYY"
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <TextInput
+                          label="Visa Status"
+                          name="visaStatus"
+                          value={formData.visaStatus}
+                          onChange={handleEditChange}
+                          error={errors.visaStatus}
+                          icon={GraduationCap}
+                          options={visaOptions}
+                          placeholder="Select Status"
+                        />
+                      </div>
+                      {formData.visaStatus === 'F1-OPT' && (
+                        <div className="col-md-6">
+                          <TextInput
+                            label="OPT End Date (MM/YYYY)"
+                            name="optEndDate"
+                            type="date"
+                            value={formData.optEndDate}
+                            onChange={handleEditChange}
+                            error={errors.optEndDate}
+                            icon={Calendar}
+                            required
+                            placeholder="MM/YYYY"
+                          />
+                        </div>
                       )}
-                    </div>
-                  </form>
+                      <div className="col-12">
+                        <TextInput
+                          label="Additional Notes"
+                          name="additionalNotes"
+                          value={formData.additionalNotes}
+                          onChange={handleEditChange}
+                          error={errors.additionalNotes}
+                          isTextArea
+                          maxLength={500}
+                          placeholder="Enter any additional notes..."
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <TextInput
+                          label="LinkedIn URL"
+                          name="linkedinUrl"
+                          type="url"
+                          value={formData.linkedinUrl}
+                          onChange={handleEditChange}
+                          error={errors.linkedinUrl}
+                          icon={LinkIcon}
+                          maxLength={255}
+                          placeholder="https://linkedin.com/..."
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <TextInput
+                          label="GitHub URL"
+                          name="githubUrl"
+                          type="url"
+                          value={formData.githubUrl}
+                          onChange={handleEditChange}
+                          error={errors.githubUrl}
+                          icon={GitBranch}
+                          maxLength={255}
+                          placeholder="https://github.com/..."
+                        />
+                      </div>
+
+                      {/* Resume upload */}
+                      <div className="col-12">
+                        <div className="mb-3">
+                          <label className="form-label fw-semibold text-dark" htmlFor="resumeFile">
+                            Update Resume (PDF/DOCX, Max 5MB)
+                          </label>
+                          <div className={`border rounded-3 p-3 ${errors.resumeFile ? 'border-danger bg-danger bg-opacity-10' : 'border-secondary border-opacity-25'}`}>
+                            <div className="d-flex align-items-center">
+                              <div className="p-2 rounded-2 me-3" style={{ backgroundColor: primaryColor + '1A' }}>
+                                <Upload className="h-5 w-5" style={{ color: primaryColor }} />
+                              </div>
+                              <div className="flex-grow-1">
+                                <input
+                                  type="file"
+                                  id="resumeFile"
+                                  name="resumeFile"
+                                  onChange={handleEditChange}
+                                  className="form-control form-control-lg"
+                                  accept=".pdf,.docx,.doc"
+                                />
+                              </div>
+                            </div>
+                            {(formData.resumeFile && formData.resumeFile.name) ? (
+                              <p className="text-success mt-2 mb-0 fw-semibold">
+                                Selected: {formData.resumeFile.name}
+                              </p>
+                            ) : profile.resume_file && (
+                              <p className="text-muted mt-2 mb-0 fw-semibold">
+                                Current: <a href={profile.resume_file} target="_blank" rel="noopener noreferrer" style={{ color: primaryColor }}>View File</a>
+                              </p>
+                            )}
+                          </div>
+                          {errors.resumeFile && <div className="invalid-feedback d-block">{errors.resumeFile}</div>}
+                        </div>
+                      </div>
+
+                      <div className="col-12 mt-3">
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="btn btn-lg w-100 py-3 fw-bold rounded-pill"
+                          style={{ backgroundColor: '#10B981', borderColor: '#10B981', color: 'white' }}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                              {submissionMessage || 'Updating...'}
+                            </>
+                          ) : (
+                            <>
+                              <Save className="w-6 h-6 me-2" />
+                              Save Changes
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="col-md-6">
+                        <ProfileField icon={User} label="Full Name" value={fullName} />
+                      </div>
+                      <div className="col-md-6">
+                        <ProfileField icon={Mail} label="Email" value={profile.email} />
+                      </div>
+                      <div className="col-md-6">
+                        <ProfileField icon={Phone} label="Phone" value={profile.phone} />
+                      </div>
+                      <div className="col-md-6">
+                        <ProfileField icon={GraduationCap} label="University" value={profile.university} />
+                      </div>
+                      <div className="col-md-6">
+                        <ProfileField icon={GraduationCap} label="Degree / Major" value={`${profile.degree} in ${profile.major}`} />
+                      </div>
+                      <div className="col-md-6">
+                        <ProfileField icon={Calendar} label="Graduation Date" value={profile.graduation_date} />
+                      </div>
+                      <div className="col-md-6">
+                        <ProfileField icon={GraduationCap} label="Visa Status" value={profile.visa_status} />
+                      </div>
+                      {profile.visa_status === 'F1-OPT' && (
+                        <div className="col-md-6">
+                          <ProfileField icon={Calendar} label="OPT End Date" value={profile.opt_end_date} />
+                        </div>
+                      )}
+                      <div className="col-md-6">
+                        <ProfileField icon={LinkIcon} label="LinkedIn" value={profile.linkedin_url} isLink />
+                      </div>
+                      <div className="col-md-6">
+                        <ProfileField icon={GitBranch} label="GitHub" value={profile.github_url} isLink />
+                      </div>
+
+                      <div className="col-12 mt-4 pt-3 border-top">
+                        <h4 className="fw-semibold text-dark">Additional Information</h4>
+                        <div className="row mt-3">
+                          <div className="col-md-6 mb-3 mb-md-0">
+                            <p className="text-muted mb-1 small fw-semibold">Resume File</p>
+                            {profile.resume_file ? (
+                              <a
+                                href={profile.resume_file}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-sm"
+                                style={{ backgroundColor: primaryColor + '1A', color: primaryColor }}
+                              >
+                                View Uploaded Resume
+                              </a>
+                            ) : (
+                              <span className="text-danger">No File Uploaded</span>
+                            )}
+                          </div>
+                          <div className="col-md-6">
+                            <p className="text-muted mb-1 small fw-semibold">Notes</p>
+                            <p className="text-dark small border p-2 rounded-3" style={{ whiteSpace: 'pre-wrap', minHeight: '50px' }}>
+                              {profile.additional_notes || 'No additional notes provided.'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
-              </div>
+              </form>
+            </div>
+          </div>
         </main>
       </div>
     </>

@@ -484,9 +484,9 @@ export default function Navbar() {
               <Link to="/reviews" className={`nav-link ${isActive("/reviews") ? "active" : ""}`}>
                 Reviews
               </Link>
-              <Link to="/contact" className={`nav-link ${isActive("/contact") ? "active" : ""}`}>
+              <a href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/contact_us" target="_blank" className={`nav-link ${isActive("/contact") ? "active" : ""}`}>
                 Contact
-              </Link>
+              </a>
 
               {/* More Dropdown */}
               <div className="more-container">

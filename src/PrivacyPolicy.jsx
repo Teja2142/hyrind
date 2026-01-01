@@ -176,13 +176,23 @@ export default function PrivacyPolicy({ lastUpdated = "Dec 3 2025" }) {
 
             <h3>Contact Us</h3>
             <div className="contact">
-              <div>HNO. 3-43B VIDYANAGAR, BEHIND DR. KHADARHOSPITAL Cherukupalle Guntur</div>
-              <div>Cherukupalle Andhra Pradesh 522309 Vinayasramam ANDHRA PRADESH 522309</div>
-              <div>Phone: 7075405791</div>
-              <div>Email: <a href="mailto:support@hyrind.com">support@hyrind.com</a></div>
+              <p style={{ marginBottom: '15px' }}>For all inquiries and support, please visit:</p>
+              <a
+                href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/contact_us"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn"
+                style={{
+                  display: 'inline-block',
+                  textDecoration: 'none',
+                  marginTop: '10px'
+                }}
+              >
+                Contact Page
+              </a>
             </div>
 
-           
+
           </aside>
         </div>
       </article>

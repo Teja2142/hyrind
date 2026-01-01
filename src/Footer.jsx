@@ -111,7 +111,15 @@ const Footer = () => {
             <p className="footer-link"><Link to="/services">Services</Link></p>
             <p className="footer-link"><Link to="/howitworks">How it works</Link></p>
             <p className="footer-link"><Link to="/reviews">Reviews</Link></p>
-            <p className="footer-link"><Link to="/contactus">Contact us</Link></p>
+            <p className="footer-link">
+              <a
+                href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/contact_us"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Contact us
+              </a>
+            </p>
           </div>
 
           {/* Solutions */}
@@ -127,8 +135,8 @@ const Footer = () => {
           {/* QR Code */}
           <div className="footer-column">
             <h3 className="footer-title">Scan & Connect</h3>
-            <img 
-              src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://hyrind.com" 
+            <img
+              src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://hyrind.com"
               alt="QR Code"
               className="qr-box"
             />
@@ -159,10 +167,10 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="footer-bottom">
+        {/* <div className="footer-bottom">
           © {new Date().getFullYear()} Hyrind. All Rights Reserved |
           Sitemap | Privacy Policy | Terms of Use
-        </div>
+        </div> */}
       </footer>
     </>
   );
