@@ -169,8 +169,8 @@ const Footer = () => {
 
         <div className="footer-bottom">
           © {new Date().getFullYear()} Hyrind. All Rights Reserved |
-          <a href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/privacy_policy" target="_blank" rel="noopener noreferrer" style={{ color: "#dce6ff", textDecoration: "none" }}> Privacy Policy </a> |
-          <a href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/terms_of_use" target="_blank" rel="noopener noreferrer" style={{ color: "#dce6ff", textDecoration: "none" }}> Terms and Conditions </a>
+          <a href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/privacy" target="_blank" rel="noopener noreferrer" style={{ color: "#dce6ff", textDecoration: "none" }}> Privacy Policy </a> |
+          <a href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/terms" target="_blank" rel="noopener noreferrer" style={{ color: "#dce6ff", textDecoration: "none" }}> Terms and Conditions </a>
         </div>
       </footer>
     </>
