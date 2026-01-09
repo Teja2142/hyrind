@@ -102,12 +102,23 @@ export default function Navbar() {
   return (
     <>
       <style>{`
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          padding-top: 80px;
+        }
+
         .navbar-overlay {
           position: fixed;
           inset: 0;
-          background-color: rgba(0, 0, 0, 0.5);
+          background-color: rgba(0, 0, 0, 0.6);
           z-index: 40;
           transition: opacity 0.3s;
+          backdrop-filter: blur(4px);
         }
         
         .navbar-overlay.visible {
@@ -121,49 +132,43 @@ export default function Navbar() {
         }
 
         .navbar {
-          background-color: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(10px);
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-          position: sticky;
+          width: 100%;
+          background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+          color: white;
+          position: fixed;
           top: 0;
-          z-index: 50;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+          left: 0;
+          z-index: 1000;
+          box-shadow: 0 4px 20px rgba(13, 71, 161, 0.25);
+          backdrop-filter: blur(10px);
         }
 
         .navbar-container {
           max-width: 1400px;
           margin: 0 auto;
-          padding: 0 2rem;
+          padding: 0 5%;
         }
 
         .navbar-content {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          height: 60px;
+          height: 80px;
           transition: all 0.3s ease;
         }
 
-        @media (min-width: 768px) {
-          .navbar-content {
-            height: 70px;
-          }
-        }
-
         .navbar-logo img {
-          height: 46px;
-          width: auto;
-          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @media (min-width: 768px) {
-          .navbar-logo img {
-            height: 56px;
-          }
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          object-fit: fill;
+          border: 3px solid rgba(255, 255, 255, 0.3);
+          transition: transform 0.3s ease, border-color 0.3s ease;
         }
 
         .navbar-logo img:hover {
-          transform: scale(1.08);
+          transform: scale(1.1) rotate(5deg);
+          border-color: rgba(255, 255, 255, 0.8);
         }
 
         .navbar-desktop {
@@ -179,56 +184,64 @@ export default function Navbar() {
         }
 
         .nav-link {
-          padding: 0.6rem 0.8rem;
-          border-radius: 0.5rem;
-          font-size: 0.95rem;
-          font-weight: 600;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          color: white;
           text-decoration: none;
-          color: #4b5563;
+          font-size: 15px;
+          font-weight: 500;
+          padding: 10px 18px;
+          border-radius: 8px;
+          transition: all 0.3s ease;
           position: relative;
+          white-space: nowrap;
+          cursor: pointer;
+        }
+
+        .nav-link::before {
+          content: '';
+          position: absolute;
+          bottom: 0px;
+          left: 50%;
+          width: 0;
+          height: 2px;
+          background: white;
+          transform: translateX(-50%);
+          transition: width 0.3s ease;
         }
 
         .nav-link:hover {
-          color: #2563eb;
-          background-color: #f3f4f6;
-          transform: translateY(-1px);
+          background: rgba(255, 255, 255, 0.15);
+          transform: translateY(-2px);
+          color: white;
+        }
+
+        .nav-link:hover::before {
+          width: 70%;
         }
 
         .nav-link.active {
-          color: #2563eb;
-          background-color: #eff6ff;
-        }
-
-        .nav-link.active::after {
-          content: '';
-          position: absolute;
-          bottom: -5px;
-          left: 1rem;
-          right: 1rem;
-          height: 3px;
-          background-color: #2563eb;
-          border-radius: 3px;
+          background: rgba(255, 255, 255, 0.25);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          color: white;
         }
 
         .register-btn {
-          background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-          color: white;
-          padding: 0.5rem 1.25rem;
-          border-radius: 0.4rem;
-          font-size: 0.875rem;
-          font-weight: 600;
+          background: white;
+          color: #0d47a1;
           border: none;
+          padding: 10px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 15px;
           cursor: pointer;
           transition: all 0.3s ease;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
           white-space: nowrap;
-          box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
         }
 
         .register-btn:hover {
-          background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
           transform: translateY(-2px);
-          box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+          background: #f0f7ff;
         }
 
         .profile-container, .more-container {
@@ -238,26 +251,35 @@ export default function Navbar() {
         .profile-button, .more-button {
           display: flex;
           align-items: center;
-          gap: 0.3rem;
-          padding: 0.4rem 0.6rem;
-          border-radius: 0.4rem;
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: #4b5563;
+          gap: 8px;
+          padding: 10px 18px;
+          border-radius: 8px;
+          font-size: 15px;
+          font-weight: 500;
+          color: white;
           background: none;
-          border: 1px solid transparent;
+          border: none;
           cursor: pointer;
           transition: all 0.3s ease;
           white-space: nowrap;
         }
 
         .profile-button:hover, .more-button:hover {
-          background-color: #f3f4f6;
-          border-color: #e5e7eb;
+          background: rgba(255, 255, 255, 0.15);
+          transform: translateY(-2px);
         }
 
         .profile-icon {
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          background: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #0d47a1;
           font-size: 1.25rem;
+          border: 2px solid rgba(255, 255, 255, 0.5);
         }
 
         .user-name {
@@ -279,24 +301,22 @@ export default function Navbar() {
 
         .profile-dropdown, .more-dropdown {
           position: absolute;
+          top: calc(100% + 15px);
           right: 0;
-          margin-top: 1.5rem;
-          width: 17rem;
-          background-color: white;
-          border-radius: 1rem;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-          padding: 0.5rem;
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          max-height: 500px;
-          overflow-y: auto;
-          z-index: 60;
-          animation: dropdownSlideIn 0.2s ease-out;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+          min-width: 240px;
+          overflow: hidden;
+          z-index: 1001;
+          border: 1px solid rgba(0, 71, 161, 0.1);
+          animation: dropdownSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @keyframes dropdownSlideIn {
           from {
             opacity: 0;
-            transform: translateY(-10px);
+            transform: translateY(-12px);
           }
           to {
             opacity: 1;
@@ -305,54 +325,79 @@ export default function Navbar() {
         }
 
         .dropdown-header {
-          padding: 0.75rem 1rem;
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: #9ca3af;
+          padding: 12px 20px;
+          background: #f8fafc;
+          color: #64748b;
+          font-size: 11px;
+          font-weight: 800;
           text-transform: uppercase;
-          letter-spacing: 0.05em;
-          border-bottom: 1px solid #f3f4f6;
+          letter-spacing: 1px;
+          border-bottom: 1px solid #f1f5f9;
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
 
         .dropdown-item {
-          width: 100%;
+          width: calc(100% - 16px);
+          margin: 4px 8px;
           text-align: left;
-          padding: 0.75rem 1rem;
-          font-size: 0.9rem;
-          font-weight: 500;
-          color: #4b5563;
-          background: none;
+          padding: 10px 12px;
+          font-size: 14px;
+          font-weight: 600;
+          color: #334155;
+          background: transparent;
           border: none;
+          border-radius: 8px;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           text-decoration: none;
-          display: block;
-          border-radius: 0.5rem;
-          margin-bottom: 2px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
         }
 
         .dropdown-item:hover {
-          background-color: #eff6ff;
-          color: #2563eb;
+          background-color: #f1f5f9;
+          color: #0d47a1;
+          transform: translateX(4px);
+        }
+
+        .dropdown-item svg {
+          color: #94a3b8;
+          transition: color 0.2s ease;
+        }
+
+        .dropdown-item:hover svg {
+          color: #0d47a1;
         }
 
         .dropdown-item.logout {
           color: #dc2626;
+          border-top: 1px solid #f1f5f9;
+          margin-top: 8px;
+          padding-top: 12px;
         }
 
         .dropdown-item.logout:hover {
           background-color: #fef2f2;
+          color: #dc2626;
+        }
+
+        .dropdown-item.logout svg {
+          color: #ef4444;
         }
 
         .mobile-menu-button {
           display: block;
           font-size: 1.5rem;
-          padding: 0.5rem;
-          color: #374151;
-          background: none;
+          padding: 8px;
+          color: white;
+          background: rgba(255, 255, 255, 0.1);
           border: none;
+          border-radius: 8px;
           cursor: pointer;
-          transition: color 0.2s;
+          transition: all 0.2s ease;
         }
 
         @media (min-width: 768px) {
@@ -362,21 +407,36 @@ export default function Navbar() {
         }
 
         .mobile-menu-button:hover {
-          color: #2563eb;
+          background: rgba(255, 255, 255, 0.2);
+          transform: scale(1.1);
+        }
+
+        .mobile-controls {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        @media (min-width: 768px) {
+          .mobile-controls {
+            display: none;
+          }
         }
 
         .mobile-sidebar {
           position: fixed;
           top: 0;
           right: 0;
-          height: 100%;
-          width: 16rem;
+          height: 100vh;
+          width: 300px;
+          max-width: 85vw;
           background-color: white;
-          box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+          box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
           z-index: 50;
           transform: translateX(100%);
-          transition: transform 0.3s ease-in-out;
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           overflow-y: auto;
+          border-left: 4px solid #0d47a1;
         }
 
         .mobile-sidebar.open {
@@ -387,125 +447,143 @@ export default function Navbar() {
           display: flex;
           flex-direction: column;
           height: 100%;
-          padding-bottom: 2rem;
+          padding: 80px 24px 24px;
         }
 
         .mobile-close-button {
-          display: flex;
-          justify-content: flex-end;
-          padding: 1rem;
+          position: absolute;
+          top: 20px;
+          right: 20px;
         }
 
         .close-btn {
           font-size: 1.5rem;
-          color: #374151;
-          background: none;
+          color: #0d47a1;
+          background: rgba(13, 71, 161, 0.1);
           border: none;
+          border-radius: 8px;
+          padding: 8px;
           cursor: pointer;
-          transition: color 0.2s;
+          transition: all 0.2s;
         }
 
         .close-btn:hover {
-          color: #dc2626;
+          background: rgba(13, 71, 161, 0.2);
+          color: #d32f2f;
         }
 
         .mobile-nav-links {
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
-          padding: 0 1rem;
+          gap: 6px;
         }
 
         .mobile-nav-link {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          padding: 0.75rem 1rem;
-          border-radius: 0.375rem;
-          transition: all 0.2s;
+          gap: 12px;
+          padding: 14px 18px;
+          border-radius: 10px;
+          transition: all 0.3s ease;
           text-decoration: none;
-          color: #374151;
+          color: #0d47a1;
+          font-weight: 500;
+          font-size: 16px;
         }
 
         .mobile-nav-link:hover {
-          background-color: #f9fafb;
+          background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+          transform: translateX(5px);
         }
 
         .mobile-nav-link.active {
-          background-color: #eff6ff;
-          color: #2563eb;
+          background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+          color: white;
+          box-shadow: 0 4px 12px rgba(13, 71, 161, 0.3);
         }
 
         .mobile-section-header {
-          padding: 0.75rem 1rem;
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: #6b7280;
+          padding: 12px 18px;
+          font-size: 12px;
+          font-weight: 700;
+          color: #1565c0;
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          margin-top: 1rem;
+          margin-top: 10px;
+          opacity: 0.8;
         }
 
         .mobile-profile-section {
-          margin-top: 1.5rem;
-          padding-top: 1.5rem;
-          border-top: 1px solid #e5e7eb;
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 2px solid #e0e0e0;
         }
 
         .mobile-profile-card {
-          background-color: #f9fafb;
-          border-radius: 0.375rem;
-          padding: 1rem;
-          margin-bottom: 0.5rem;
+          background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+          border-radius: 10px;
+          padding: 16px;
+          margin-bottom: 8px;
         }
 
         .mobile-profile-header {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          margin-bottom: 0.5rem;
+          gap: 12px;
         }
 
         .mobile-profile-title {
-          font-weight: 500;
-          color: #111827;
+          font-weight: 600;
+          color: #0d47a1;
+          font-size: 16px;
         }
 
         .mobile-profile-subtitle {
-          font-size: 0.75rem;
-          color: #6b7280;
+          font-size: 13px;
+          color: #1565c0;
+          margin-top: 4px;
         }
 
         .mobile-profile-button {
           width: 100%;
           text-align: left;
-          padding: 0.75rem 1rem;
-          border-radius: 0.375rem;
-          color: #374151;
+          padding: 12px 18px;
+          border-radius: 8px;
+          color: #0d47a1;
           background: none;
           border: none;
           cursor: pointer;
-          transition: background-color 0.2s;
+          transition: all 0.2s;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          gap: 12px;
         }
 
         .mobile-profile-button:hover {
-          background-color: #f3f4f6;
+          background: rgba(13, 71, 161, 0.05);
         }
 
         .mobile-logout-button {
           width: 100%;
           text-align: left;
-          padding: 0.75rem 1rem;
-          border-radius: 0.375rem;
-          color: #dc2626;
+          padding: 12px 18px;
+          border-radius: 8px;
+          color: #d32f2f;
           background: none;
           border: none;
           cursor: pointer;
-          transition: background-color 0.2s;
+          transition: all 0.2s;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          border-top: 1px solid #e0e0e0;
+          margin-top: 4px;
         }
 
         .mobile-logout-button:hover {
-          background-color: #fef2f2;
+          background: #ffebee;
         }
       `}</style>
 
@@ -566,19 +644,34 @@ export default function Navbar() {
 
                 {moreDropdownOpen && (
                   <div className="more-dropdown">
-                    <div className="dropdown-header">Additional</div>
+                    <div className="dropdown-header">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      Additional
+                    </div>
                     <Link to="/interest" onClick={closeMoreDropdown} className="dropdown-item">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                       Interest
                     </Link>
-                    <div className="dropdown-header" style={{ marginTop: '0.5rem' }}>For Recruiters</div>
+
+                    <div className="dropdown-header" style={{ borderTop: '1px solid #f1f5f9' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                      Recruiters
+                    </div>
                     <Link to="/recruiter-register" onClick={closeMoreDropdown} className="dropdown-item">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="16" y1="11" x2="22" y2="11"></line></svg>
                       Recruiter Register
                     </Link>
                     <Link to="/recruiter-login" onClick={closeMoreDropdown} className="dropdown-item">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
                       Recruiter Login
                     </Link>
-                    <div className="dropdown-header" style={{ marginTop: '0.5rem' }}>Admin</div>
+
+                    <div className="dropdown-header" style={{ borderTop: '1px solid #f1f5f9' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                      Internal
+                    </div>
                     <Link to="/admin-login" onClick={closeMoreDropdown} className="dropdown-item">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                       Admin Login
                     </Link>
                   </div>
@@ -632,12 +725,14 @@ export default function Navbar() {
                         }}
                         className="dropdown-item"
                       >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         Profile
                       </button>
                       <button
                         onClick={handleLogout}
                         className="dropdown-item logout"
                       >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                         Logout
                       </button>
                     </div>
@@ -646,10 +741,50 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Mobile menu button */}
-            <button onClick={toggleMenu} className="mobile-menu-button">
-              {open ? "✖" : "☰"}
-            </button>
+            {/* Mobile controls */}
+            <div className="mobile-controls">
+              {localStorage.getItem("accessToken") && (
+                <div className="profile-container">
+                  <div onClick={toggleProfileDropdown} className="profile-icon" style={{ cursor: 'pointer' }}>
+                    👤
+                  </div>
+                  {profileDropdownOpen && (
+                    <div className="profile-dropdown">
+                      <div className="dropdown-header">
+                        {userName || "User"}
+                      </div>
+                      <button
+                        onClick={() => {
+                          closeProfileDropdown();
+                          const profileType = localStorage.getItem('profileType');
+                          if (profileType === 'Candidate') {
+                            navigate('/profile');
+                          } else if (profileType === 'Recruiter') {
+                            navigate('/recruiter-dashboard');
+                          } else if (profileType === 'Admin') {
+                            navigate('/admin');
+                          }
+                        }}
+                        className="dropdown-item"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        Profile
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="dropdown-item logout"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+              <button onClick={toggleMenu} className="mobile-menu-button">
+                {open ? "✖" : "☰"}
+              </button>
+            </div>
           </div>
         </div>
       </nav>
