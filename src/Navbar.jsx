@@ -121,35 +121,55 @@ export default function Navbar() {
         }
 
         .navbar {
-          background-color: white;
-          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+          background-color: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
           position: sticky;
           top: 0;
           z-index: 50;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .navbar-container {
-          max-width: 1280px;
+          max-width: 1400px;
           margin: 0 auto;
-          padding: 0 1rem;
+          padding: 0 2rem;
         }
 
         .navbar-content {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          height: 4rem;
+          height: 60px;
+          transition: all 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+          .navbar-content {
+            height: 70px;
+          }
         }
 
         .navbar-logo img {
-          height: 2.5rem;
+          height: 46px;
           width: auto;
+          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @media (min-width: 768px) {
+          .navbar-logo img {
+            height: 56px;
+          }
+        }
+
+        .navbar-logo img:hover {
+          transform: scale(1.08);
         }
 
         .navbar-desktop {
           display: none;
           align-items: center;
-          gap: 1.5rem;
+          gap: 1.75rem;
         }
 
         @media (min-width: 768px) {
@@ -159,18 +179,20 @@ export default function Navbar() {
         }
 
         .nav-link {
-          padding: 0.5rem 0.75rem;
-          border-radius: 0.375rem;
-          font-size: 0.875rem;
-          font-weight: 500;
-          transition: all 0.2s;
+          padding: 0.6rem 0.8rem;
+          border-radius: 0.5rem;
+          font-size: 0.95rem;
+          font-weight: 600;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           text-decoration: none;
-          color: #374151;
+          color: #4b5563;
+          position: relative;
         }
 
         .nav-link:hover {
           color: #2563eb;
-          background-color: #f9fafb;
+          background-color: #f3f4f6;
+          transform: translateY(-1px);
         }
 
         .nav-link.active {
@@ -178,21 +200,35 @@ export default function Navbar() {
           background-color: #eff6ff;
         }
 
-        .register-btn {
+        .nav-link.active::after {
+          content: '';
+          position: absolute;
+          bottom: -5px;
+          left: 1rem;
+          right: 1rem;
+          height: 3px;
           background-color: #2563eb;
+          border-radius: 3px;
+        }
+
+        .register-btn {
+          background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
           color: white;
-          padding: 0.5rem 1rem;
-          border-radius: 0.375rem;
+          padding: 0.5rem 1.25rem;
+          border-radius: 0.4rem;
           font-size: 0.875rem;
-          font-weight: 500;
+          font-weight: 600;
           border: none;
           cursor: pointer;
-          transition: background-color 0.2s;
+          transition: all 0.3s ease;
           white-space: nowrap;
+          box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
         }
 
         .register-btn:hover {
-          background-color: #1d4ed8;
+          background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
         }
 
         .profile-container, .more-container {
@@ -202,21 +238,22 @@ export default function Navbar() {
         .profile-button, .more-button {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          padding: 0.5rem 0.75rem;
-          border-radius: 0.375rem;
+          gap: 0.3rem;
+          padding: 0.4rem 0.6rem;
+          border-radius: 0.4rem;
           font-size: 0.875rem;
-          font-weight: 500;
-          color: #374151;
+          font-weight: 600;
+          color: #4b5563;
           background: none;
-          border: none;
+          border: 1px solid transparent;
           cursor: pointer;
-          transition: background-color 0.2s;
+          transition: all 0.3s ease;
           white-space: nowrap;
         }
 
         .profile-button:hover, .more-button:hover {
-          background-color: #f9fafb;
+          background-color: #f3f4f6;
+          border-color: #e5e7eb;
         }
 
         .profile-icon {
@@ -243,40 +280,60 @@ export default function Navbar() {
         .profile-dropdown, .more-dropdown {
           position: absolute;
           right: 0;
-          margin-top: 0.5rem;
-          width: 14rem;
+          margin-top: 1.5rem;
+          width: 17rem;
           background-color: white;
-          border-radius: 0.375rem;
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-          padding: 0.25rem 0;
-          border: 1px solid rgba(0, 0, 0, 0.05);
-          max-height: 400px;
+          border-radius: 1rem;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+          padding: 0.5rem;
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          max-height: 500px;
           overflow-y: auto;
+          z-index: 60;
+          animation: dropdownSlideIn 0.2s ease-out;
+        }
+
+        @keyframes dropdownSlideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         .dropdown-header {
-          padding: 0.5rem 1rem;
+          padding: 0.75rem 1rem;
           font-size: 0.75rem;
-          color: #6b7280;
-          border-bottom: 1px solid #e5e7eb;
+          font-weight: 700;
+          color: #9ca3af;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          border-bottom: 1px solid #f3f4f6;
         }
 
         .dropdown-item {
           width: 100%;
           text-align: left;
-          padding: 0.5rem 1rem;
-          font-size: 0.875rem;
-          color: #374151;
+          padding: 0.75rem 1rem;
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: #4b5563;
           background: none;
           border: none;
           cursor: pointer;
-          transition: background-color 0.2s;
+          transition: all 0.2s;
           text-decoration: none;
           display: block;
+          border-radius: 0.5rem;
+          margin-bottom: 2px;
         }
 
         .dropdown-item:hover {
-          background-color: #f3f4f6;
+          background-color: #eff6ff;
+          color: #2563eb;
         }
 
         .dropdown-item.logout {

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Briefcase, CheckCircle, XCircle, UserPlus, Zap, Loader, AlertTriangle, RefreshCw, LogOut, CreditCard, Layers, DollarSign, List, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, Briefcase, CheckCircle, XCircle, UserPlus, Zap, Loader, AlertTriangle, RefreshCw, LogOut, CreditCard, Layers, DollarSign, List, Download, ChevronLeft, ChevronRight, FileText, Clock, UserCheck, CheckCircle2, Ban } from 'lucide-react';
 import { base_url } from "./commonAPI's.json";
 
 
@@ -80,8 +80,16 @@ body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -m
   .admin-main-content { padding: 2rem; }
   .admin-content-wrapper { min-height: calc(100vh - 4rem); }
   .admin-sidebar { width: 256px; }
-  .metrics-grid { grid-template-columns: repeat(3, 1fr); }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
   .recruiters-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .metrics-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1280px) {
+  .metrics-grid { grid-template-columns: repeat(4, 1fr); }
 }
 `;
 
@@ -367,15 +375,32 @@ const SidebarButton = ({ Icon, label, isActive, onClick }) => (
   </button>
 );
 
-const MetricCard = ({ title, value, color, Icon }) => (
-  <div className={`card border-0 shadow-sm h-100 ${color}`}>
-    <div className="card-body p-4 d-flex align-items-center">
-      <div className="p-3 rounded-3 bg-white bg-opacity-25 me-3">
-        {Icon && <Icon className="w-6 h-6" style={{ width: '24px', height: '24px' }} />}
+const MetricCard = ({ title, value, bg, text, Icon, onClick, isActive }) => (
+  <div onClick={onClick} className="card border-0 h-100" style={{
+    minHeight: '100px',
+    backgroundColor: bg,
+    color: text,
+    borderRadius: '12px',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    cursor: 'pointer',
+    transform: isActive ? 'translateY(-4px) scale(1.02)' : 'none',
+    boxShadow: isActive
+      ? `0 20px 25px -5px ${text}40, 0 10px 10px -5px ${text}20`
+      : '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+    border: isActive ? `2px solid ${text}` : '2px solid transparent',
+    zIndex: isActive ? 10 : 1
+  }}>
+    <div className="card-body p-3 d-flex align-items-center">
+      <div className="p-3 rounded-3 me-3 d-flex align-items-center justify-content-center" style={{
+        backgroundColor: isActive ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.3)',
+        backdropFilter: 'blur(4px)',
+        transition: 'background-color 0.3s ease'
+      }}>
+        {Icon && <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />}
       </div>
       <div className="flex-grow-1">
-        <p className="text-sm fw-semibold mb-1 opacity-75">{title}</p>
-        <h3 className="fs-3 fw-bold mb-0">{value}</h3>
+        <p className="text-xs fw-bold mb-0 opacity-80 text-uppercase" style={{ letterSpacing: '0.5px', fontSize: '0.7rem' }}>{title}</p>
+        <h3 className="fw-bold mb-0" style={{ fontSize: '1.5rem', transform: isActive ? 'scale(1.05)' : 'none', transition: 'transform 0.3s ease' }}>{value}</h3>
       </div>
     </div>
   </div>
@@ -385,15 +410,31 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const submittedCount = candidates.length;
-  const approvedCount = candidates.filter(c => c.active === true).length;
-  const readyToAssignCount = candidates.filter(c => c.active === true && !c.recruiter_info).length;
+  const submittedList = candidates
+  const submittedCount = submittedList.length;
+  const approvedList = candidates.filter(c => c.active === true)
+  const approvedCount = approvedList.length;
+  const readyToAssignList = candidates.filter(c => c.active === true && !c.recruiter_info)
+  const readyToAssignCount = readyToAssignList.length;
+  const assignedList = candidates.filter(c => c.active === true && c.recruiter_info)
+  const assignedCount = assignedList.length;
+  const openedList = candidates.filter(c => c.active === true && c.recruiter_info)
+  const openedCount = openedList.length;
+  const waitingForPaymentList = candidates.filter(c => c.active === true && c.subscribed === false)
+  const waitingForPaymentCount = waitingForPaymentList.length;
+  const closedList = candidates.filter(c => c.closed === true)
+  const closedCount = closedList.length;
+  const rejectedList = candidates.filter(c => c.active === false)
+  const rejectedCount = rejectedList.length;
+  const [selectedCurrentCandidateList, setSelectedCurrentCandidateList] = useState(candidates);
+  const [activeTab, setActiveTab] = useState("All Records");
 
   // Calculate pagination
-  const totalPages = Math.ceil(candidates.length / itemsPerPage);
+  const totalPages = Math.ceil(selectedCurrentCandidateList.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentCandidates = candidates.slice(indexOfFirstItem, indexOfLastItem);
+  const currentCandidates = selectedCurrentCandidateList.slice(indexOfFirstItem, indexOfLastItem);
+
 
   // Reset to page 1 when candidates list changes
   useEffect(() => {
@@ -406,6 +447,96 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
     setCurrentPage(pageNumber);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+  const MetricCardList = [
+    {
+      title: "All Records",
+      value: submittedCount,
+      bg: '#EEF2FF',
+      text: '#4338CA',
+      Icon: FileText,
+      onClick: () => {
+        setSelectedCurrentCandidateList(candidates);
+        setActiveTab("All Records");
+      }
+    },
+    {
+      title: "Open",
+      value: openedCount,
+      bg: '#EFF6FF',
+      text: '#1D4ED8',
+      Icon: Clock,
+      onClick: () => {
+        setSelectedCurrentCandidateList(openedList);
+        setActiveTab("Open");
+      }
+    },
+    {
+      title: "Approved",
+      value: approvedCount,
+      bg: '#F0FDF4',
+      text: '#15803D',
+      Icon: CheckCircle2,
+      onClick: () => {
+        setSelectedCurrentCandidateList(approvedList);
+        setActiveTab("Approved");
+      }
+    },
+    {
+      title: "Ready to Assign",
+      value: readyToAssignCount,
+      bg: '#F5F3FF',
+      text: '#7C3AED',
+      Icon: UserPlus,
+      onClick: () => {
+        setSelectedCurrentCandidateList(readyToAssignList);
+        setActiveTab("Ready to Assign");
+      }
+    },
+    {
+      title: "Assigned",
+      value: assignedCount,
+      bg: '#F0FDFA',
+      text: '#0F766E',
+      Icon: UserCheck,
+      onClick: () => {
+        setSelectedCurrentCandidateList(assignedList);
+        setActiveTab("Assigned");
+      }
+    },
+    {
+      title: "Waiting for Payment",
+      value: waitingForPaymentCount,
+      bg: '#FFFBEB',
+      text: '#B45309',
+      Icon: DollarSign,
+      onClick: () => {
+        setSelectedCurrentCandidateList(waitingForPaymentList);
+        setActiveTab("Waiting for Payment");
+      }
+    },
+    {
+      title: "Closed",
+      value: closedCount,
+      bg: '#F9FAFB',
+      text: '#374151',
+      Icon: CheckCircle,
+      onClick: () => {
+        setSelectedCurrentCandidateList(closedList);
+        setActiveTab("Closed");
+      }
+    },
+    {
+      title: "Rejected",
+      value: rejectedCount,
+      bg: '#FEF2F2',
+      text: '#B91C1C',
+      Icon: Ban,
+      onClick: () => {
+        setSelectedCurrentCandidateList(rejectedList);
+        setActiveTab("Rejected");
+      }
+    }
+  ]
 
   return (
     <div className="candidates-view">
@@ -455,9 +586,18 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
       </div>
 
       <div className="metrics-grid">
-        <MetricCard title="Submitted (New)" value={submittedCount} color="bg-yellow-100 text-yellow-800" Icon={Zap} />
-        <MetricCard title="Approved" value={approvedCount} color="bg-green-100 text-green-800" Icon={CheckCircle} />
-        <MetricCard title="Ready to Assign" value={readyToAssignCount} color="bg-blue-100 text-blue-800" Icon={UserPlus} />
+        {MetricCardList.map((metric, index) => (
+          <MetricCard
+            key={index}
+            title={metric.title}
+            value={metric.value}
+            bg={metric.bg}
+            text={metric.text}
+            Icon={metric.Icon}
+            onClick={metric.onClick}
+            isActive={activeTab === metric.title}
+          />
+        ))}
       </div>
 
       {isLoading && <div className="text-center p-4 text-indigo-600"><Loader className="w-6 h-6 inline-block animate-spin mr-2" /> Loading candidates...</div>}
