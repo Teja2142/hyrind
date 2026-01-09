@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base_url } from "./commonAPI's.json";
+import CredentialForm from './CredentialForm';
+import ClientIntakeForm from './ClientIntakeForm';
+
+
 
 // --- START: Inline SVG Icon Definitions ---
 
@@ -107,6 +111,15 @@ const Upgrade = (props) => (
     <path d="M12 2L2 7l10 5 10-5-10-5z" />
     <path d="M2 17l10 5 10-5" />
     <path d="M2 12l10 5 10-5" />
+  </svg>
+);
+const FileText = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+    <polyline points="10 9 9 9 8 9" />
   </svg>
 );
 // --- END: Inline SVG Icon Definitions ---
@@ -642,7 +655,8 @@ const SidebarButton = ({ Icon, label, onClick, variant = 'normal', isEditing }) 
 };
 
 // AdminSidebar with full name + actions
-const AdminSidebar = ({ fullName, onLogout, onclientIntakeSheet, onToggleEdit, isEditing, onDeleteProfile, onUpgradeProfile, isSubscribed, hasAddonPlans }) => {
+const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onToggleEdit, isEditing, onDeleteProfile, onUpgradeProfile, isSubscribed, hasAddonPlans }) => {
+
   const displayName = fullName && fullName.trim().length > 0 ? fullName : 'Candidate Profile';
 
   return (
@@ -666,13 +680,15 @@ const AdminSidebar = ({ fullName, onLogout, onclientIntakeSheet, onToggleEdit, i
           variant="primary"
           isEditing={isEditing}
         />
-        {/* client intake sheet*/}
-        {!isSubscribed && <SidebarButton
-          Icon={Target}
+
+        {/* client intake sheet */}
+        <SidebarButton
+          Icon={FileText}
           label="Client Intake Sheet"
-          onClick={onclientIntakeSheet}
+          onClick={onIntake}
           variant="normal"
-        />}
+        />
+
         {/* Upgrade Profile - Show for non-subscribers OR Add Services for subscribers with addon plans */}
         {!isSubscribed ? (
           <SidebarButton
@@ -689,6 +705,16 @@ const AdminSidebar = ({ fullName, onLogout, onclientIntakeSheet, onToggleEdit, i
             variant="normal"
           />
         ) : null}
+
+        {/* Credential sheet*/}
+        {!isSubscribed && <SidebarButton
+          Icon={Target}
+          label="Credential Sheet"
+          onClick={onCredential}
+          variant="normal"
+        />}
+
+
         {/* Delete Profile */}
         <SidebarButton
           Icon={Delete}
@@ -947,6 +973,10 @@ const Profile = () => {
   const [acceptedRefundPolicy, setAcceptedRefundPolicy] = useState(false);
   const [acceptedTermsConditions, setAcceptedTermsConditions] = useState(false);
   const [acceptedPrivacyPolicy, setAcceptedPrivacyPolicy] = useState(false);
+  const [showCredentialForm, setShowCredentialForm] = useState(false);
+  const [showIntakeForm, setShowIntakeForm] = useState(false);
+
+
 
   const degreeOptions = ["Bachelor's", "Master's", 'PhD'];
   const visaOptions = ['F1-OPT', 'F1-CPT', 'H1B', 'Green Card', 'Citizen', 'Other'];
@@ -1221,12 +1251,21 @@ const Profile = () => {
     navigate('/login');
   };
 
-  const handleclientIntakeSheet = () => {
-    const a = document.createElement('a');
-    a.href = 'https://docs.google.com/forms/d/e/1FAIpQLSfOj-0T7lssR4jSsV4wQ2QjctpSvnsMQ_G7TJrUKNCKPMWI-A/viewform';
-    a.target = '_blank';
-    a.click();
+  const handleCredential = () => {
+    setShowCredentialForm(!showCredentialForm);
+    setShowIntakeForm(false);
+    setShowPaymentModal(false);
+    setIsEditing(false);
   };
+
+  const handleIntake = () => {
+    setShowIntakeForm(!showIntakeForm);
+    setShowCredentialForm(false);
+    setShowPaymentModal(false);
+    setIsEditing(false);
+  };
+
+
 
   const handleEditChange = (e) => {
     const { name, value, type, checked, files } = e.target;
@@ -1248,6 +1287,8 @@ const Profile = () => {
 
   const handleToggleEdit = () => {
     setShowPaymentModal(false);
+    setShowCredentialForm(false);
+
     if (!isEditing && profileData) {
       setFormData({
         firstName: profileData.first_name,
@@ -1468,7 +1509,9 @@ const Profile = () => {
     setAcceptedTermsConditions(false);
     setAcceptedPrivacyPolicy(false);
     setShowPaymentModal(true);
+    setShowCredentialForm(false);
   };
+
 
   // Create subscription record (called before payment)
   const createSubscription = async (planId, planData) => {
@@ -1897,7 +1940,11 @@ const Profile = () => {
           </div>
         )}
 
+        {/* Client Intake Form Modal - Removed (now inline) */}
+
+
         {/* Delete Confirmation Modal */}
+
         {showDeleteModal && (
           <div className="position-fixed top-0 start-0 w-100 h-100" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1050 }}>
             <div className="position-absolute top-50 start-50 translate-middle bg-white rounded-3 shadow-lg p-4" style={{ maxWidth: '500px', width: '90%' }}>
@@ -1989,7 +2036,9 @@ const Profile = () => {
           <AdminSidebar
             fullName={fullName}
             onLogout={handleLogout}
-            onclientIntakeSheet={handleclientIntakeSheet}
+            onCredential={handleCredential}
+            onIntake={handleIntake}
+
             onToggleEdit={handleToggleEdit}
             isEditing={isEditing}
             onDeleteProfile={handleDeleteProfile}
@@ -2002,14 +2051,38 @@ const Profile = () => {
         {/* Main content */}
         <main className="admin-main-content">
           <div className="admin-content-wrapper">
+            {/* Credential Form */}
+            {showCredentialForm && (
+              <div className="p-4 bg-white rounded-3 shadow-sm mb-4">
+                <CredentialForm
+                  isOpen={true}
+                  onClose={() => setShowCredentialForm(false)}
+                  inline={true}
+                />
+              </div>
+            )}
+
+            {/* Intake Form */}
+            {showIntakeForm && (
+              <div className="p-4 bg-white rounded-3 shadow-sm mb-4">
+                <ClientIntakeForm
+                  isOpen={true}
+                  onClose={() => setShowIntakeForm(false)}
+                  inline={true}
+                />
+              </div>
+            )}
+
             {/* Payment Modal */}
+
             {showPaymentModal && (
               <div className="d-flex justify-content-center align-items-center" >
                 <div className="payment-card  bg-white w-100" style={{ maxWidth: '80%' }}>
                   {/* client intake sheet message */}
-                  <div hidden={isSubscribed} className="client-intake-sheet-message">
-                    <p> Please fill the Client Intake Sheet before proceeding to payment.</p>
+                  <div hidden={isSubscribed || showCredentialForm} className="client-intake-sheet-message">
+                    <p> Please fill the Credential Form before proceeding to payment.</p>
                   </div>
+
                   {/* Header */}
                   <div className="payment-header">
                     {/* <button
