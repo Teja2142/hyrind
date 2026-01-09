@@ -410,38 +410,49 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const submittedList = candidates
-  const submittedCount = submittedList.length;
-  const approvedList = candidates.filter(c => c.active === true)
-  const approvedCount = approvedList.length;
-  const readyToAssignList = candidates.filter(c => c.active === true && !c.recruiter_info)
-  const readyToAssignCount = readyToAssignList.length;
-  const assignedList = candidates.filter(c => c.active === true && c.recruiter_info)
-  const assignedCount = assignedList.length;
-  const openedList = candidates.filter(c => c.active === true && c.recruiter_info)
-  const openedCount = openedList.length;
-  const waitingForPaymentList = candidates.filter(c => c.active === true && c.subscribed === false)
-  const waitingForPaymentCount = waitingForPaymentList.length;
-  const closedList = candidates.filter(c => c.closed === true)
-  const closedCount = closedList.length;
-  const rejectedList = candidates.filter(c => c.active === false)
-  const rejectedCount = rejectedList.length;
-  const [selectedCurrentCandidateList, setSelectedCurrentCandidateList] = useState(candidates);
   const [activeTab, setActiveTab] = useState("All Records");
 
+  // Derive counts for metrics
+  const submittedCount = candidates.length;
+  const approvedCount = candidates.filter(c => c.active === true).length;
+  const readyToAssignCount = candidates.filter(c => c.active === true && !c.recruiter_info).length;
+  const assignedCount = candidates.filter(c => c.active === true && c.recruiter_info).length;
+  const openedCount = candidates.filter(c => c.active === true && c.recruiter_info).length;
+  const waitingForPaymentCount = candidates.filter(c => c.active === true && c.subscribed === false).length;
+  const closedCount = candidates.filter(c => c.closed === true).length;
+  const rejectedCount = candidates.filter(c => c.active === false).length;
+
+  // Derive the active list based on selected tab
+  const filteredCandidates = useMemo(() => {
+    switch (activeTab) {
+      case "Open": return candidates.filter(c => c.active === true && c.recruiter_info);
+      case "Approved": return candidates.filter(c => c.active === true);
+      case "Ready to Assign": return candidates.filter(c => c.active === true && !c.recruiter_info);
+      case "Assigned": return candidates.filter(c => c.active === true && c.recruiter_info);
+      case "Waiting for Payment": return candidates.filter(c => c.active === true && c.subscribed === false);
+      case "Closed": return candidates.filter(c => c.closed === true);
+      case "Rejected": return candidates.filter(c => c.active === false);
+      case "All Records":
+      default: return candidates;
+    }
+  }, [candidates, activeTab]);
+
   // Calculate pagination
-  const totalPages = Math.ceil(selectedCurrentCandidateList.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredCandidates.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentCandidates = selectedCurrentCandidateList.slice(indexOfFirstItem, indexOfLastItem);
+  const currentCandidates = filteredCandidates.slice(indexOfFirstItem, indexOfLastItem);
 
+  // Reset to page 1 when criteria change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, itemsPerPage]);
 
-  // Reset to page 1 when candidates list changes
   useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(1);
     }
-  }, [candidates.length, currentPage, totalPages]);
+  }, [filteredCandidates.length, currentPage, totalPages]);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -454,10 +465,7 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
       bg: '#EEF2FF',
       text: '#4338CA',
       Icon: FileText,
-      onClick: () => {
-        setSelectedCurrentCandidateList(candidates);
-        setActiveTab("All Records");
-      }
+      onClick: () => setActiveTab("All Records")
     },
     {
       title: "Open",
@@ -465,10 +473,7 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
       bg: '#EFF6FF',
       text: '#1D4ED8',
       Icon: Clock,
-      onClick: () => {
-        setSelectedCurrentCandidateList(openedList);
-        setActiveTab("Open");
-      }
+      onClick: () => setActiveTab("Open")
     },
     {
       title: "Approved",
@@ -476,10 +481,7 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
       bg: '#F0FDF4',
       text: '#15803D',
       Icon: CheckCircle2,
-      onClick: () => {
-        setSelectedCurrentCandidateList(approvedList);
-        setActiveTab("Approved");
-      }
+      onClick: () => setActiveTab("Approved")
     },
     {
       title: "Ready to Assign",
@@ -487,10 +489,7 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
       bg: '#F5F3FF',
       text: '#7C3AED',
       Icon: UserPlus,
-      onClick: () => {
-        setSelectedCurrentCandidateList(readyToAssignList);
-        setActiveTab("Ready to Assign");
-      }
+      onClick: () => setActiveTab("Ready to Assign")
     },
     {
       title: "Assigned",
@@ -498,10 +497,7 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
       bg: '#F0FDFA',
       text: '#0F766E',
       Icon: UserCheck,
-      onClick: () => {
-        setSelectedCurrentCandidateList(assignedList);
-        setActiveTab("Assigned");
-      }
+      onClick: () => setActiveTab("Assigned")
     },
     {
       title: "Waiting for Payment",
@@ -509,10 +505,7 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
       bg: '#FFFBEB',
       text: '#B45309',
       Icon: DollarSign,
-      onClick: () => {
-        setSelectedCurrentCandidateList(waitingForPaymentList);
-        setActiveTab("Waiting for Payment");
-      }
+      onClick: () => setActiveTab("Waiting for Payment")
     },
     {
       title: "Closed",
@@ -520,10 +513,7 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
       bg: '#F9FAFB',
       text: '#374151',
       Icon: CheckCircle,
-      onClick: () => {
-        setSelectedCurrentCandidateList(closedList);
-        setActiveTab("Closed");
-      }
+      onClick: () => setActiveTab("Closed")
     },
     {
       title: "Rejected",
@@ -531,10 +521,7 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
       bg: '#FEF2F2',
       text: '#B91C1C',
       Icon: Ban,
-      onClick: () => {
-        setSelectedCurrentCandidateList(rejectedList);
-        setActiveTab("Rejected");
-      }
+      onClick: () => setActiveTab("Rejected")
     }
   ]
 
@@ -623,13 +610,13 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
             isDeactivating={isDeactivating}
           />
         ))}
-        {candidates.length > 0 && totalPages > 1 && (
+        {filteredCandidates.length > 0 && totalPages > 1 && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
             itemsPerPage={itemsPerPage}
-            totalItems={candidates.length}
+            totalItems={filteredCandidates.length}
           />
         )}
       </div>
