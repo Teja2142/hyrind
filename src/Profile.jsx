@@ -372,7 +372,7 @@ body {
 .payment-body {
   padding: 1.5rem;
   background-color: #ffffff;
-  /* overflow-y: auto; removed global scroll */
+  overflow-y: auto; /* removed global scroll */
   flex-grow: 1;
 }
 .service-item {
@@ -655,7 +655,7 @@ const SidebarButton = ({ Icon, label, onClick, variant = 'normal', isEditing }) 
 };
 
 // AdminSidebar with full name + actions
-const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onToggleEdit, isEditing, onDeleteProfile, onUpgradeProfile, isSubscribed, hasAddonPlans }) => {
+const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onToggleEdit, isEditing, onDeleteProfile, onUpgradeProfile, isSubscribed, hasAddonPlans, showCredentialForm, showIntakeForm, showPaymentModal }) => {
 
   const displayName = fullName && fullName.trim().length > 0 ? fullName : 'Candidate Profile';
 
@@ -677,8 +677,15 @@ const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onToggleEdit
           Icon={Edit}
           label="Update Profile"
           onClick={onToggleEdit}
-          variant="primary"
+          variant={isEditing ? 'primary' : 'normal'}
           isEditing={isEditing}
+        />
+        {/* onCredential sheet */}
+        <SidebarButton
+          Icon={Target}
+          label="Credential Sheet"
+          onClick={onCredential}
+          variant={showCredentialForm ? 'primary' : 'normal'}
         />
 
         {/* client intake sheet */}
@@ -686,7 +693,7 @@ const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onToggleEdit
           Icon={FileText}
           label="Client Intake Sheet"
           onClick={onIntake}
-          variant="normal"
+          variant={showIntakeForm ? 'primary' : 'normal'}
         />
 
         {/* Upgrade Profile - Show for non-subscribers OR Add Services for subscribers with addon plans */}
@@ -695,14 +702,14 @@ const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onToggleEdit
             Icon={Upgrade}
             label="Upgrade Profile"
             onClick={onUpgradeProfile}
-            variant="normal"
+            variant={showPaymentModal ? 'primary' : 'normal'}
           />
         ) : hasAddonPlans ? (
           <SidebarButton
             Icon={Upgrade}
             label="Add Services"
             onClick={onUpgradeProfile}
-            variant="normal"
+            variant={showPaymentModal ? 'primary' : 'normal'}
           />
         ) : null}
 
@@ -1288,6 +1295,7 @@ const Profile = () => {
   const handleToggleEdit = () => {
     setShowPaymentModal(false);
     setShowCredentialForm(false);
+    setShowIntakeForm(false);
 
     if (!isEditing && profileData) {
       setFormData({
@@ -1510,6 +1518,8 @@ const Profile = () => {
     setAcceptedPrivacyPolicy(false);
     setShowPaymentModal(true);
     setShowCredentialForm(false);
+    setShowIntakeForm(false);
+    setIsEditing(false);
   };
 
 
@@ -2038,13 +2048,15 @@ const Profile = () => {
             onLogout={handleLogout}
             onCredential={handleCredential}
             onIntake={handleIntake}
-
             onToggleEdit={handleToggleEdit}
             isEditing={isEditing}
             onDeleteProfile={handleDeleteProfile}
             onUpgradeProfile={handleUpgradeProfile}
             isSubscribed={isSubscribed}
             hasAddonPlans={addonPlans && addonPlans.length > 0}
+            showCredentialForm={showCredentialForm}
+            showIntakeForm={showIntakeForm}
+            showPaymentModal={showPaymentModal}
           />
         </div>
 
@@ -2365,7 +2377,7 @@ const Profile = () => {
                 </div>
               </div>
             )}
-            <div hidden={showPaymentModal} className="p-4">
+            <div hidden={showPaymentModal || showCredentialForm || showIntakeForm} className="p-4">
 
               {/* Profile summary */}
               <div className="text-center mb-4">

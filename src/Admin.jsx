@@ -406,32 +406,45 @@ const MetricCard = ({ title, value, bg, text, Icon, onClick, isActive }) => (
   </div>
 );
 
-const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, recruiters, isLoading, error, refetchData, isActivating, isDeactivating }) => {
+const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, recruiters, isLoading, error, refetchData, activatingCandidateId, deactivatingCandidateId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [activeTab, setActiveTab] = useState("All Records");
 
   // Derive counts for metrics
-  const submittedCount = candidates.length;
-  const approvedCount = candidates.filter(c => c.active === true).length;
-  const readyToAssignCount = candidates.filter(c => c.active === true && !c.recruiter_info).length;
-  const assignedCount = candidates.filter(c => c.active === true && c.recruiter_info).length;
-  const openedCount = candidates.filter(c => c.active === true && c.recruiter_info).length;
-  const waitingForPaymentCount = candidates.filter(c => c.active === true && c.subscribed === false).length;
-  const closedCount = candidates.filter(c => c.closed === true).length;
-  const rejectedCount = candidates.filter(c => c.active === false).length;
+  // const submittedCount = candidates.length;
+  // const approvedCount = candidates.filter(c => c.status === "approved").length;
+  // const readyToAssignCount = candidates.filter(c => c.status === "ready_to_assign").length;
+  // const assignedCount = candidates.filter(c => c.status === "assigned").length;
+  // const openedCount = candidates.filter(c => c.status === "open").length;
+  // const waitingForPaymentCount = candidates.filter(c => c.status === "waiting_payment").length;
+  // const closedCount = candidates.filter(c => c.status === "closed").length;
+  // const rejectedCount = candidates.filter(c => c.status === "rejected").length;
+
+  const [submittedCount, approvedCount, readyToAssignCount, assignedCount, openedCount, waitingForPaymentCount, closedCount, rejectedCount] = useMemo(() => {
+    return [
+      candidates.length,
+      candidates.filter(c => c.status === "approved").length,
+      candidates.filter(c => c.status === "ready_to_assign").length,
+      candidates.filter(c => c.status === "assigned").length,
+      candidates.filter(c => c.status === "open").length,
+      candidates.filter(c => c.status === "waiting_payment").length,
+      candidates.filter(c => c.status === "closed").length,
+      candidates.filter(c => c.status === "rejected").length
+    ]
+  }, [candidates])
 
   // Derive the active list based on selected tab
   const filteredCandidates = useMemo(() => {
     switch (activeTab) {
-      case "Open": return candidates.filter(c => c.active === true && c.recruiter_info);
-      case "Approved": return candidates.filter(c => c.active === true);
-      case "Ready to Assign": return candidates.filter(c => c.active === true && !c.recruiter_info);
-      case "Assigned": return candidates.filter(c => c.active === true && c.recruiter_info);
-      case "Waiting for Payment": return candidates.filter(c => c.active === true && c.subscribed === false);
-      case "Closed": return candidates.filter(c => c.closed === true);
-      case "Rejected": return candidates.filter(c => c.active === false);
+      case "Open": return candidates.filter(c => c.status === "open");
+      case "Approved": return candidates.filter(c => c.status === "approved");
+      case "Ready to Assign": return candidates.filter(c => c.status === "ready_to_assign");
+      case "Assigned": return candidates.filter(c => c.status === "assigned");
+      case "Waiting for Payment": return candidates.filter(c => c.status === "waiting_payment");
+      case "Closed": return candidates.filter(c => c.status === "closed");
+      case "Rejected": return candidates.filter(c => c.status === "rejected");
       case "All Records":
       default: return candidates;
     }
@@ -606,8 +619,8 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
             updateStatus={updateCandidateStatus}
             openAssignModal={openAssignModal}
             recruiters={recruiters}
-            isActivating={isActivating}
-            isDeactivating={isDeactivating}
+            isActivating={activatingCandidateId === candidate.id}
+            isDeactivating={deactivatingCandidateId === candidate.id}
           />
         ))}
         {filteredCandidates.length > 0 && totalPages > 1 && (
@@ -635,9 +648,15 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
 };
 
 const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters, isActivating, isDeactivating }) => {
-  const isSubmitted = candidate.active == false;
-  const isApproved = candidate.active !== false;
   const isActive = candidate.active !== false; // Default to true if not specified
+  const isApproved = candidate.status === "approved";
+  const isReadyToAssign = candidate.status === "ready_to_assign";
+  const isAssigned = candidate.status === "assigned";
+  const isOpen = candidate.status === "open";
+  const isWaitingForPayment = candidate.status === "waiting_payment";
+  const isClosed = candidate.status === "closed";
+  const isRejected = candidate.status === "rejected";
+
 
   // Get recruiter info from the new API structure
   const recruiterInfo = candidate.recruiter_info;
@@ -769,7 +788,7 @@ const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters, i
           </div>
 
           <div className="col-md-4 d-flex flex-wrap gap-2 justify-content-md-end align-items-start">
-            {isSubmitted && (
+            {isOpen && (
               <>
                 <ActionButton
                   Icon={CheckCircle}
@@ -791,7 +810,7 @@ const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters, i
             />
 
 
-            {isApproved && !recruiterInfo && (
+            {isReadyToAssign && (
               <ActionButton
                 Icon={UserPlus}
                 label="Assign Recruiter"
@@ -1776,8 +1795,8 @@ export default function Admin() {
   const [errors, setErrors] = useState({});
   const [submissionMessage, setSubmissionMessage] = useState('');
   const hasFetchedRef = useRef(false);
-  const [isActivating, setIsActivating] = useState(false);
-  const [isDeactivating, setIsDeactivating] = useState(false);
+  const [activatingCandidateId, setActivatingCandidateId] = useState(null);
+  const [deactivatingCandidateId, setDeactivatingCandidateId] = useState(null);
 
   useEffect(() => {
     // Prevent double fetch in React Strict Mode
@@ -1945,13 +1964,11 @@ export default function Admin() {
       condidatesData.forEach(user => {
         // Assume users with a profile_id are potential candidates
         if (user.profile_id) {
-          // Use functional update to access current candidates state
-          // This will be handled below using setCandidates with a callback
           fetchedCandidates.push({
             ...user,
-            // Assign default status and recruiterId, will merge with existing state below
-            status: 'submitted',
-            recruiterId: null,
+            // Assign default status and recruiterId
+            status: user.status || (user.active ? 'approved' : 'open'),
+            recruiterId: user.recruiter_info?.id || null,
           });
         }
       });
@@ -2017,9 +2034,9 @@ export default function Admin() {
     // 'approved' -> 'activate', 'rejected' -> 'deactivate'
     const action = newStatus === "approved" ? "activate" : "deactivate";
     if (action === "activate") {
-      setIsActivating(true);
+      setActivatingCandidateId(candidate.id);
     } else if (action === "deactivate") {
-      setIsDeactivating(true);
+      setDeactivatingCandidateId(candidate.id);
     }
     const url = `${ADMIN_BASE_URL}/candidates/${profileId}/${action}/`;
 
@@ -2049,27 +2066,30 @@ export default function Admin() {
       }
 
       // Update local state on success
-      setCandidates(prev =>
-        prev.map(c => (c.id === candidate.id ? { ...c, status: newStatus, active: newStatus === "approved" } : c))
-      );
+      // setCandidates(prev =>
+      //   prev.map(c => (c.id === candidate.id ? { ...c, status: newStatus, active: newStatus === "approved" } : c))
+      // );
       if (action === "activate") {
-        setIsActivating(false);
+        setActivatingCandidateId(null);
       } else if (action === "deactivate") {
-        setIsDeactivating(false);
+        setDeactivatingCandidateId(null);
       }
+
+      // Refresh data to reflect status changes
+      fetchUsers();
 
       console.log(`Successfully updated candidate ${profileId} to ${newStatus}`);
     } catch (err) {
       console.error(`Failed to update status for ${profileId}:`, err);
       // Revert status or show error message
-      setCandidates(prev =>
-        prev.map(c => (c.id === candidate.id ? { ...c, status: candidate.status } : c)) // Revert
-      );
+      // setCandidates(prev =>
+      //   prev.map(c => (c.id === candidate.id ? { ...c, status: candidate.status } : c)) // Revert
+      // );
       setError(`Failed to update candidate status: ${err.message}`);
       if (action === "activate") {
-        setIsActivating(false);
+        setActivatingCandidateId(null);
       } else if (action === "deactivate") {
-        setIsDeactivating(false);
+        setDeactivatingCandidateId(null);
       }
     }
   }, [ADMIN_BASE_URL]);
@@ -2141,9 +2161,9 @@ export default function Admin() {
       }
 
       // Show loading state
-      setCandidates(prev =>
-        prev.map(c => (c.id === candidate.id ? { ...c, active: 'updating...' } : c))
-      );
+      // setCandidates(prev =>
+      //   prev.map(c => (c.id === candidate.id ? { ...c, active: 'updating...' } : c))
+      // );
 
       const response = await fetch(url, {
         method: 'PATCH',
@@ -2159,17 +2179,17 @@ export default function Admin() {
       }
 
       // Update local state on success
-      setCandidates(prev =>
-        prev.map(c => (c.id === candidate.id ? { ...c, active: activate } : c))
-      );
+      // setCandidates(prev =>
+      //   prev.map(c => (c.id === candidate.id ? { ...c, active: activate } : c))
+      // );
 
       console.log(`Successfully ${activate ? 'activated' : 'deactivated'} candidate ${profileId}`);
     } catch (err) {
       console.error(`Failed to ${action} candidate:`, err);
       // Revert to previous state
-      setCandidates(prev =>
-        prev.map(c => (c.id === candidate.id ? { ...c, active: candidate.active } : c))
-      );
+      // setCandidates(prev =>
+      //   prev.map(c => (c.id === candidate.id ? { ...c, active: candidate.active } : c))
+      // );
       alert(`Failed to ${action} candidate: ${err.message}`);
     }
   }, [ADMIN_BASE_URL, navigate]);
@@ -2348,8 +2368,8 @@ export default function Admin() {
                 isLoading={isLoading}
                 error={activeView === 'candidates' ? error : null}
                 refetchData={fetchUsers}
-                isActivating={isActivating}
-                isDeactivating={isDeactivating}
+                activatingCandidateId={activatingCandidateId}
+                deactivatingCandidateId={deactivatingCandidateId}
               />
             )}
             {activeView === 'recruiters' && (
