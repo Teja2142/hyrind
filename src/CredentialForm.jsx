@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { base_url } from "./commonAPI's.json";
 const ChevronLeft = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="15 18 9 12 15 6"></polyline>
@@ -19,6 +19,7 @@ const Check = () => (
 );
 
 const CredentialForm = ({ isOpen, onClose, inline = false }) => {
+    const BASE_URL = `${base_url}/api`;
 
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
@@ -53,6 +54,17 @@ const CredentialForm = ({ isOpen, onClose, inline = false }) => {
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [submissionMessage, setSubmissionMessage] = useState('');
+
+    // Auto-dismiss toast message
+    React.useEffect(() => {
+        if (submissionMessage) {
+            const timer = setTimeout(() => {
+                setSubmissionMessage('');
+            }, 3000); // Disappear after 3 seconds
+            return () => clearTimeout(timer);
+        }
+    }, [submissionMessage]);
 
     if (!isOpen) return null;
 
@@ -127,31 +139,77 @@ const CredentialForm = ({ isOpen, onClose, inline = false }) => {
         setIsSubmitting(true);
 
         try {
+            const storedToken = localStorage.getItem('accessToken');
             const data = new FormData();
+
+            const keyMapping = {
+                fullName: 'full_name',
+                email: 'email',
+                personalEmail: 'personal_email',
+                phoneNumber: 'phone_number',
+                location: 'location',
+                bachelorsGradDate: 'bachelor_graduation_date',
+                mastersGradDate: 'master_graduation_date',
+                firstEntryUS: 'first_entry_us',
+                optStartDate: 'opt_start_date',
+                optOfferLetterSubmitted: 'opt_offer_letter_submitted',
+                offerLetter: 'offer_letter',
+                preferredRoles: 'preferred_job_roles',
+                preferredLocations: 'preferred_locations',
+                linkedinId: 'linkedin_id',
+                linkedinPassword: 'linkedin_password',
+                indeedId: 'indeed_id',
+                indeedPassword: 'indeed_password',
+                diceId: 'dice_id',
+                dicePassword: 'dice_password',
+                monsterId: 'monster_id',
+                monsterPassword: 'monster_password',
+                ziprecruiterId: 'ziprecruiter_id',
+                ziprecruiterPassword: 'ziprecruiter_password',
+                otherPlatforms: 'other_platforms',
+                showInConfirmation: 'show_in_confirmation'
+            };
+
             Object.keys(formData).forEach(key => {
-                if (key === 'offerLetter' && formData[key]) {
-                    data.append(key, formData[key]);
-                } else if (typeof formData[key] === 'boolean') {
-                    data.append(key, formData[key] ? 'true' : 'false');
-                } else {
-                    data.append(key, formData[key]);
+                const apiKey = keyMapping[key] || key;
+                const value = formData[key];
+
+                if (key === 'offerLetter' && value) {
+                    data.append(apiKey, value);
+                } else if (typeof value === 'boolean') {
+                    data.append(apiKey, value ? 'true' : 'false');
+                } else if (value !== null && value !== undefined) {
+                    data.append(apiKey, value);
                 }
             });
 
-            const response = await fetch('https://api.hyrind.com/client/sheet/', {
+            const url = `${BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL}/users/credential-sheet/`;
+            const response = await fetch(url, {
                 method: 'POST',
                 body: data,
+                headers: {
+                    accept: "application/json",
+                    Authorization: `Bearer ${storedToken}`,
+                },
             });
 
             if (response.ok) {
                 setIsSubmitted(true);
+                setSubmissionMessage('Form Submitted Successfully!');
             } else {
                 const errData = await response.json();
-                alert('Submission failed: ' + (errData.detail || 'Unknown error'));
+                console.error('Submission failed errors:', errData);
+                let errorMsg = errData.detail || 'Unknown error';
+                if (!errData.detail && typeof errData === 'object') {
+                    const firstKey = Object.keys(errData)[0];
+                    const firstErr = errData[firstKey];
+                    errorMsg = `${firstKey}: ${Array.isArray(firstErr) ? firstErr[0] : firstErr}`;
+                }
+                setSubmissionMessage('Submission failed: ' + errorMsg);
             }
         } catch (error) {
             console.error('Submission error:', error);
-            alert('An error occurred during submission.');
+            setSubmissionMessage('An error occurred during submission.');
         } finally {
             setIsSubmitting(false);
         }
@@ -397,6 +455,20 @@ const CredentialForm = ({ isOpen, onClose, inline = false }) => {
                 </div>
 
                 <div className="modal-body-custom">
+                    {submissionMessage && (
+                        <div
+                            className={`alert ${isSubmitting
+                                ? "alert-info"
+                                : Object.keys(errors).length > 0 && !isSubmitted
+                                    ? "alert-danger"
+                                    : "alert-success"
+                                } toast-alert shadow-sm position-fixed`}
+                            role="alert"
+                            style={{ zIndex: 10000 }}
+                        >
+                            {submissionMessage}
+                        </div>
+                    )}
                     {isSubmitted ? (
                         <div className="text-center py-5">
                             <div className="mb-4">
@@ -492,6 +564,41 @@ const CredentialForm = ({ isOpen, onClose, inline = false }) => {
                 @keyframes slideUp {
                     from { transform: translateY(20px); opacity: 0; }
                     to { transform: translateY(0); opacity: 1; }
+                }
+                /* Base toast style */
+                .toast-alert {
+                    top: 20px;                 /* below top */
+                    right: 20px;               /* right side on larger screens */
+                    z-index: 10000;
+                    min-width: 280px;
+                    max-width: 440px;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    animation: fadeSlideIn 0.35s ease-out forwards;
+                    text-align: center;
+                }
+
+                /* Small screens: prevent overflow & improve readability */
+                @media (max-width: 576px) {
+                    .toast-alert {
+                        top: 10px;
+                        right: 10px;
+                        left: 10px;                 /* stretch between left & right */
+                        min-width: auto;
+                        max-width: 100%;
+                        font-size: 0.85rem;          /* slightly smaller text */
+                    }
+                }
+
+                /* Animation for toast */
+                @keyframes fadeSlideIn {
+                    from {
+                        opacity: 0;
+                        transform: translateX(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
                 }
                 .animate-in {
                     animation: fadeIn 0.4s ease-out;

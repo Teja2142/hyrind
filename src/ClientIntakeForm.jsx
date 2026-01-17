@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { base_url } from "./commonAPI's.json";
 
 const ChevronLeft = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -33,6 +34,7 @@ const Trash = () => (
 );
 
 const ClientIntakeForm = ({ isOpen, onClose, inline = false }) => {
+    const BASE_URL = `${base_url.endsWith('/') ? base_url.slice(0, -1) : base_url}/api/`;
     const [step, setStep] = useState(() => {
         const saved = localStorage.getItem('intake_form_step');
         return saved ? parseInt(saved) : 1;
@@ -118,6 +120,17 @@ const ClientIntakeForm = ({ isOpen, onClose, inline = false }) => {
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [submissionMessage, setSubmissionMessage] = useState('');
+
+    // Auto-dismiss toast message
+    React.useEffect(() => {
+        if (submissionMessage) {
+            const timer = setTimeout(() => {
+                setSubmissionMessage('');
+            }, 3000); // Disappear after 3 seconds
+            return () => clearTimeout(timer);
+        }
+    }, [submissionMessage]);
 
     if (!isOpen) return null;
 
@@ -214,6 +227,14 @@ const ClientIntakeForm = ({ isOpen, onClose, inline = false }) => {
             if (!formData.desiredYOE) newErrors.desiredYOE = 'Desired Years of Experience is mandatory';
         }
 
+        if (currentStep === 'all') {
+            let allValid = true;
+            for (let i = 1; i <= 6; i++) {
+                if (!validateStep(i)) allValid = false;
+            }
+            return allValid;
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -230,37 +251,124 @@ const ClientIntakeForm = ({ isOpen, onClose, inline = false }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!validateStep(6)) return;
+        // Validate all steps before submission
+        const isStep1Valid = validateStep(1);
+        const isStep2Valid = validateStep(2);
+        const isStep3Valid = validateStep(3);
+        const isStep4Valid = validateStep(4);
+        const isStep5Valid = validateStep(5);
+        const isStep6Valid = validateStep(6);
+
+        if (!isStep1Valid || !isStep2Valid || !isStep3Valid || !isStep4Valid || !isStep5Valid || !isStep6Valid) {
+            // Find the first step with errors and go to it
+            if (!isStep1Valid) setStep(1);
+            else if (!isStep2Valid) setStep(2);
+            else if (!isStep3Valid) setStep(3);
+            else if (!isStep4Valid) setStep(4);
+            else if (!isStep5Valid) setStep(5);
+            else if (!isStep6Valid) setStep(6);
+            return;
+        }
 
         setIsSubmitting(true);
 
         try {
+            const accessToken = localStorage.getItem('accessToken');
             const data = new FormData();
+
+            const keyMapping = {
+                firstName: 'first_name',
+                lastName: 'last_name',
+                dob: 'date_of_birth',
+                phone: 'phone_number',
+                marketingEmail: 'marketing_email',
+                marketingPhone: 'marketing_phone',
+                currentAddress: 'current_address',
+                mailingAddress: 'mailing_address',
+                visaStatus: 'visa_status',
+                firstEntryUS: 'first_entry_us',
+                totalYearsUS: 'total_years_in_us',
+                skilledIn: 'skilled_in',
+                currentlyLearning: 'currently_learning',
+                experiencedTools: 'experienced_with',
+                selfTaughtTools: 'self_taught_tools',
+                nonTechnicalSkills: 'non_technical_skills',
+                hasWorkExperience: 'has_work_experience',
+                workExperiences: 'work_experiences',
+                highestDegree: 'highest_degree',
+                fieldOfStudy: 'field_of_study',
+                universityName: 'university_name',
+                country: 'country',
+                gradMonthYear: 'grad_month_year',
+                bachelorsField: 'bachelors_field',
+                bachelorsUniversity: 'bachelors_university',
+                bachelorsCountry: 'bachelors_country',
+                bachelorsGradDate: 'bachelors_grad_date',
+                hasCertifications: 'has_certifications',
+                certifications: 'certifications',
+                passportFile: 'passport_file',
+                govIdFile: 'gov_id_file',
+                visaFile: 'visa_file',
+                workAuthFile: 'work_auth_file',
+                resumeFile: 'resume_file',
+                desiredJobRoles: 'desired_job_roles',
+                desiredYOE: 'desired_yoe',
+                linkedinProfile: 'linkedin_profile'
+            };
+
             Object.keys(formData).forEach(key => {
-                if (key.includes('File') && formData[key]) {
-                    data.append(key, formData[key]);
-                } else if (key === 'workExperiences' || key === 'certifications') {
-                    data.append(key, JSON.stringify(formData[key]));
-                } else {
-                    data.append(key, formData[key]);
+                const apiKey = keyMapping[key] || key;
+                const value = formData[key];
+
+                if (key.includes('File') && value) {
+                    data.append(apiKey, value);
+                } else if (key === 'workExperiences' && value) {
+                    const mappedExperiences = value.map(exp => ({
+                        job_title: exp.jobTitle,
+                        company_name: exp.companyName,
+                        company_address: exp.companyAddress,
+                        start_date: exp.startDate,
+                        end_date: exp.endDate,
+                        job_type: exp.jobType,
+                        responsibilities: exp.responsibilities
+                    }));
+                    data.append(apiKey, JSON.stringify(mappedExperiences));
+                } else if (key === 'certifications' && value) {
+                    data.append(apiKey, JSON.stringify(value));
+                } else if (value !== null && value !== undefined) {
+                    data.append(apiKey, value);
                 }
             });
 
-            const response = await fetch('https://api.hyrind.com/client/sheet/', {
+            const response = await fetch(BASE_URL + 'users/client-intake/', {
                 method: 'POST',
                 body: data,
+                headers: {
+                    accept: "application/json",
+                    Authorization: `Bearer ${accessToken}`,
+                },
             });
 
             if (response.ok) {
                 setIsSubmitted(true);
+                setSubmissionMessage('Intake Form Submitted Successfully!');
                 localStorage.removeItem('intake_form_data');
                 localStorage.removeItem('intake_form_step');
             } else {
                 const errData = await response.json();
-                alert('Submission failed: ' + (errData.detail || 'Unknown error'));
+                console.error('Submission failed errors:', errData);
+                // Extract a human-readable error message
+                let errorMsg = errData.detail || 'Unknown error';
+                if (!errData.detail && typeof errData === 'object') {
+                    const firstKey = Object.keys(errData)[0];
+                    const firstErr = errData[firstKey];
+                    errorMsg = `${firstKey}: ${Array.isArray(firstErr) ? firstErr[0] : firstErr}`;
+                }
+                setSubmissionMessage('Submission failed: ' + errorMsg);
             }
         } catch (error) {
             console.error('Submission error:', error);
+            setSubmissionMessage('An error occurred during submission. Please check your connection.');
         } finally {
             setIsSubmitting(false);
         }
@@ -617,6 +725,20 @@ const ClientIntakeForm = ({ isOpen, onClose, inline = false }) => {
                 </div>
 
                 <div className="modal-body-custom">
+                    {submissionMessage && (
+                        <div
+                            className={`alert ${isSubmitting
+                                ? "alert-info"
+                                : Object.keys(errors).length > 0 && !isSubmitted
+                                    ? "alert-danger"
+                                    : "alert-success"
+                                } toast-alert shadow-sm position-fixed`}
+                            role="alert"
+                            style={{ zIndex: 10000 }}
+                        >
+                            {submissionMessage}
+                        </div>
+                    )}
                     {isSubmitted ? (
                         <div className="text-center py-5">
                             <div className="mb-4">
@@ -719,6 +841,41 @@ const ClientIntakeForm = ({ isOpen, onClose, inline = false }) => {
                 @keyframes slideUp {
                     from { transform: translateY(20px); opacity: 0; }
                     to { transform: translateY(0); opacity: 1; }
+                }
+                /* Base toast style */
+                .toast-alert {
+                    top: 20px;                 /* below top */
+                    right: 20px;               /* right side on larger screens */
+                    z-index: 10000;
+                    min-width: 280px;
+                    max-width: 460px;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    animation: fadeSlideIn 0.35s ease-out forwards;
+                    text-align: center;
+                }
+
+                /* Small screens: prevent overflow & improve readability */
+                @media (max-width: 576px) {
+                    .toast-alert {
+                        top: 10px;
+                        right: 10px;
+                        left: 10px;                 /* stretch between left & right */
+                        min-width: auto;
+                        max-width: 100%;
+                        font-size: 0.85rem;          /* slightly smaller text */
+                    }
+                }
+
+                /* Animation for toast */
+                @keyframes fadeSlideIn {
+                    from {
+                        opacity: 0;
+                        transform: translateX(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
                 }
                 .animate-in {
                     animation: fadeIn 0.4s ease-out;
