@@ -152,17 +152,17 @@ const Footer = () => {
             </div>
 
             <div className="contact-item">
-              <FaPhone /> +1-XXX-XXX-XXXX
+              <FaPhone /> 314-354-0634
             </div>
 
             <h3 className="footer-title" style={{ marginTop: "15px" }}>Social Media</h3>
 
             <div className="social-icons">
-              <FaInstagram />
-              <FaFacebook />
-              <FaTwitter />
-              <FaLinkedin />
-              <FaYoutube />
+              <FaInstagram onClick={() => window.open('https://www.instagram.com/hyrind_usa/', '_blank')} />
+              {/* <FaFacebook /> */}
+              {/* <FaTwitter /> */}
+              <FaLinkedin onClick={() => window.open('https://www.linkedin.com/company/hyrind/', '_blank')} />
+              {/* <FaYoutube /> */}
             </div>
           </div>
         </div>
