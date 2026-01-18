@@ -572,7 +572,14 @@ const ClientIntakeForm = ({ isOpen, onClose, inline = false }) => {
                                 <div className="row g-3">
                                     <div className="col-md-6">
                                         <label className="form-label">Highest Degree <span className="text-danger">*</span></label>
-                                        <input type="text" className="form-control" name="highestDegree" value={formData.highestDegree} onChange={handleChange} placeholder="e.g. Master's in CS" />
+                                        <select className="form-select" name="highestDegree" value={formData.highestDegree} onChange={handleChange}>
+                                            <option value="">Select Degree</option>
+                                            <option value="Bachelor's">Bachelor's</option>
+                                            <option value="Master's">Master's</option>
+                                            <option value="PhD">PhD</option>
+                                            <option value="Diploma">Diploma</option>
+                                            <option value="Other">Other</option>
+                                        </select>
                                         {errors.highestDegree && <div className="text-danger extra-small">{errors.highestDegree}</div>}
                                     </div>
                                     <div className="col-md-6">
