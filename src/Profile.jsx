@@ -115,11 +115,17 @@ const Upgrade = (props) => (
 );
 const FileText = (props) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
     <polyline points="14 2 14 8 20 8" />
     <line x1="16" y1="13" x2="8" y2="13" />
     <line x1="16" y1="17" x2="8" y2="17" />
-    <polyline points="10 9 9 9 8 9" />
+    <line x1="10" y1="9" x2="8" y2="9" />
+  </svg>
+);
+
+const Key = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3L15.5 7.5z" />
   </svg>
 );
 // --- END: Inline SVG Icon Definitions ---
@@ -655,7 +661,7 @@ const SidebarButton = ({ Icon, label, onClick, variant = 'normal', isEditing }) 
 };
 
 // AdminSidebar with full name + actions
-const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onToggleEdit, isEditing, onDeleteProfile, onUpgradeProfile, isSubscribed, hasAddonPlans, showCredentialForm, showIntakeForm, showPaymentModal }) => {
+const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onChangePassword, onToggleEdit, isEditing, onDeleteProfile, onUpgradeProfile, isSubscribed, hasAddonPlans, showCredentialForm, showIntakeForm, showChangePasswordForm, showPaymentModal }) => {
 
   const displayName = fullName && fullName.trim().length > 0 ? fullName : 'Candidate Profile';
 
@@ -696,6 +702,14 @@ const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onToggleEdit
           variant={showIntakeForm ? 'primary' : 'normal'}
         />
 
+        {/* Change Password */}
+        <SidebarButton
+          Icon={Key}
+          label="Change Password"
+          onClick={onChangePassword}
+          variant={showChangePasswordForm ? 'primary' : 'normal'}
+        />
+
         {/* Upgrade Profile - Show for non-subscribers OR Add Services for subscribers with addon plans */}
         {!isSubscribed ? (
           <SidebarButton
@@ -713,15 +727,6 @@ const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onToggleEdit
           />
         ) : null}
 
-        {/* Credential sheet*/}
-        {!isSubscribed && <SidebarButton
-          Icon={Target}
-          label="Credential Sheet"
-          onClick={onCredential}
-          variant="normal"
-        />}
-
-
         {/* Delete Profile */}
         <SidebarButton
           Icon={Delete}
@@ -737,6 +742,111 @@ const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onToggleEdit
           variant="normal"
         />
       </nav>
+    </div>
+  );
+};
+
+// Change Password Form Component
+const ChangePasswordForm = ({ onClose }) => {
+  const [formData, setFormData] = useState({
+    current_password: '',
+    new_password: '',
+    confirm_password: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+  const primaryColor = '#4F46E5';
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (formData.new_password !== formData.confirm_password) {
+      setMessage({ type: 'error', text: 'New passwords do not match!' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setMessage({ type: 'info', text: 'Updating password...' });
+
+    const token = localStorage.getItem('accessToken');
+    try {
+      const response = await fetch(`${base_url}/api/users/password-change/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Password changed successfully!' });
+        setFormData({ current_password: '', new_password: '', confirm_password: '' });
+        setTimeout(() => onClose(), 2000);
+      } else {
+        setMessage({ type: 'error', text: data.detail || 'Failed to change password.' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Network error. Please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="p-4 bg-white rounded-4 shadow-sm">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h3 className="fw-bold mb-0" style={{ color: primaryColor }}>Change Password</h3>
+        <button className="btn-close" onClick={onClose}></button>
+      </div>
+
+      {message.text && (
+        <div className={`alert ${message.type === 'error' ? 'alert-danger' : message.type === 'success' ? 'alert-success' : 'alert-info'} mb-4`}>
+          {message.text}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit}>
+        <TextInput
+          label="Current Password"
+          name="current_password"
+          type="password"
+          value={formData.current_password}
+          onChange={handleChange}
+          required
+        />
+        <TextInput
+          label="New Password"
+          name="new_password"
+          type="password"
+          value={formData.new_password}
+          onChange={handleChange}
+          required
+        />
+        <TextInput
+          label="Confirm New Password"
+          name="confirm_password"
+          type="password"
+          value={formData.confirm_password}
+          onChange={handleChange}
+          required
+        />
+
+        <div className="d-grid mt-4">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="btn btn-lg py-3 fw-bold rounded-pill text-white"
+            style={{ backgroundColor: primaryColor, border: 'none' }}
+          >
+            {isSubmitting ? 'Updating...' : 'Change Password'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
@@ -982,6 +1092,7 @@ const Profile = () => {
   const [acceptedPrivacyPolicy, setAcceptedPrivacyPolicy] = useState(false);
   const [showCredentialForm, setShowCredentialForm] = useState(false);
   const [showIntakeForm, setShowIntakeForm] = useState(false);
+  const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
 
 
 
@@ -2048,6 +2159,13 @@ const Profile = () => {
             onLogout={handleLogout}
             onCredential={handleCredential}
             onIntake={handleIntake}
+            onChangePassword={() => {
+              setShowChangePasswordForm(true);
+              setShowCredentialForm(false);
+              setShowIntakeForm(false);
+              setIsEditing(false);
+              setShowPaymentModal(false);
+            }}
             onToggleEdit={handleToggleEdit}
             isEditing={isEditing}
             onDeleteProfile={handleDeleteProfile}
@@ -2056,6 +2174,7 @@ const Profile = () => {
             hasAddonPlans={addonPlans && addonPlans.length > 0}
             showCredentialForm={showCredentialForm}
             showIntakeForm={showIntakeForm}
+            showChangePasswordForm={showChangePasswordForm}
             showPaymentModal={showPaymentModal}
           />
         </div>
@@ -2063,6 +2182,13 @@ const Profile = () => {
         {/* Main content */}
         <main className="admin-main-content">
           <div className="admin-content-wrapper">
+            {/* Change Password Form */}
+            {showChangePasswordForm && (
+              <div className="mb-4">
+                <ChangePasswordForm onClose={() => setShowChangePasswordForm(false)} />
+              </div>
+            )}
+
             {/* Credential Form */}
             {showCredentialForm && (
               <div className="p-4 bg-white rounded-3 shadow-sm mb-4">
@@ -2377,7 +2503,7 @@ const Profile = () => {
                 </div>
               </div>
             )}
-            <div hidden={showPaymentModal || showCredentialForm || showIntakeForm} className="p-4">
+            <div hidden={showPaymentModal || showCredentialForm || showIntakeForm || showChangePasswordForm} className="p-4">
 
               {/* Profile summary */}
               <div className="text-center mb-4">

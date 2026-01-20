@@ -114,12 +114,15 @@ const Login = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
 
   const LOGIN_API_URL = `${base_url}/api/users/login/`;
+  const FORGOT_PASSWORD_API_URL = `${base_url}/api/users/password-reset/request/`;
 
+  const [view, setView] = useState('login'); // 'login' or 'forgot-password'
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false,
   });
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionMessage, setSubmissionMessage] = useState('');
@@ -223,6 +226,51 @@ const Login = ({ onLoginSuccess }) => {
     }
   };
 
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!forgotPasswordEmail) {
+      setErrors({ forgotEmail: 'Email is required.' });
+      return;
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(forgotPasswordEmail)) {
+      setErrors({ forgotEmail: 'Invalid email format.' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmissionMessage('Sending reset instructions...');
+
+    try {
+      const response = await fetch(FORGOT_PASSWORD_API_URL, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: forgotPasswordEmail }),
+      });
+
+      const result = await response.json();
+      setIsSubmitting(false);
+
+      if (response.ok) {
+        setSubmissionMessage(result.message || 'If an account exists with this email, you will receive password reset instructions.');
+        // Optionally switch back to login after a delay
+        setTimeout(() => setView('login'), 5000);
+      } else {
+        setSubmissionMessage(result.message || result.error || 'Something went wrong. Please try again.');
+        setErrors({ general: result.message || result.error || 'Something went wrong.' });
+      }
+    } catch (error) {
+      setIsSubmitting(false);
+      setSubmissionMessage('Network error. Please try again later.');
+      console.error("Forgot Password Error:", error);
+    }
+  };
+
   // Auto-dismiss toast message
   useEffect(() => {
     if (submissionMessage) {
@@ -281,10 +329,10 @@ const Login = ({ onLoginSuccess }) => {
       {submissionMessage && (
         <div
           className={`alert ${isSubmitting
-              ? "alert-info"
-              : errors && Object.keys(errors).length > 0
-                ? "alert-danger"
-                : "alert-success"
+            ? "alert-info"
+            : errors && Object.keys(errors).length > 0
+              ? "alert-danger"
+              : "alert-success"
             } toast-alert shadow-sm position-fixed`}
           role="alert"
         >
@@ -306,99 +354,102 @@ const Login = ({ onLoginSuccess }) => {
                       </div>
                     </div>
                     <h2 className="card-title fw-bold mb-3" style={{ color: primaryColor }}>
-                      Candidate Sign In
+                      {view === 'login' ? 'Candidate Sign In' : 'Forgot Password'}
                     </h2>
                     <p className="text-muted lead">
-                      Access your profile and track your application status.
+                      {view === 'login'
+                        ? 'Access your profile and track your application status.'
+                        : 'Enter your email to receive password reset instructions.'}
                     </p>
                   </div>
 
-                  <form onSubmit={handleSubmit}>
-                    {/* General Error Alert */}
-                    {errors.general && (
-                      <div className="alert alert-danger d-flex align-items-center" role="alert">
-                        <span className="me-2 fw-bold fs-5">!</span>
+                  {view === 'login' ? (
+                    <form onSubmit={handleSubmit}>
+                      {/* General Error Alert */}
+                      {errors.general && (
+                        <div className="alert alert-danger d-flex align-items-center" role="alert">
+                          <span className="me-2 fw-bold fs-5">!</span>
+                          <div>
+                            {errors.general}
+                          </div>
+                        </div>
+                      )}
+
+
+
+                      {/* Email Input */}
+                      <TextInput
+                        label="Email Address"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        error={errors.email}
+                        icon={Mail}
+                        required
+                      />
+
+                      {/* Password Input */}
+                      <PasswordInput
+                        label="Password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        error={errors.password}
+                      />
+
+                      {/* Remember Me & Forgot Password */}
+                      <div className="d-flex justify-content-between align-items-center mb-4">
+                        <div className="form-check">
+                          <input
+                            id="rememberMe"
+                            name="rememberMe"
+                            type="checkbox"
+                            checked={formData.rememberMe}
+                            onChange={handleChange}
+                            className="form-check-input"
+                            style={{ borderColor: primaryColor, color: primaryColor, backgroundColor: formData.rememberMe ? primaryColor : 'white' }}
+                          />
+                          <label htmlFor="rememberMe" className="form-check-label text-dark">
+                            Remember Me
+                          </label>
+                        </div>
+
                         <div>
-                          {errors.general}
+                          <button
+                            type="button"
+                            onClick={() => setView('forgot-password')}
+                            className="btn btn-link text-decoration-none fw-semibold p-0"
+                            style={{ color: primaryColor }}
+                          >
+                            Forgot Password?
+                          </button>
                         </div>
                       </div>
-                    )}
 
-
-
-                    {/* Email Input */}
-                    <TextInput
-                      label="Email Address"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      error={errors.email}
-                      icon={Mail}
-                      required
-                    />
-
-                    {/* Password Input */}
-                    <PasswordInput
-                      label="Password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      error={errors.password}
-                    />
-
-                    {/* Remember Me & Forgot Password */}
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                      <div className="form-check">
-                        <input
-                          id="rememberMe"
-                          name="rememberMe"
-                          type="checkbox"
-                          checked={formData.rememberMe}
-                          onChange={handleChange}
-                          className="form-check-input"
-                          style={{ borderColor: primaryColor, color: primaryColor, backgroundColor: formData.rememberMe ? primaryColor : 'white' }}
-                        />
-                        <label htmlFor="rememberMe" className="form-check-label text-dark">
-                          Remember Me
-                        </label>
-                      </div>
-
-                      <div>
+                      {/* Candidate Sign In Button */}
+                      <div className="d-grid mb-3">
                         <button
-                          type="button"
-                          onClick={() => console.log('Forgot Password functionality triggered.')}
-                          className="btn btn-link text-decoration-none fw-semibold p-0"
-                          style={{ color: primaryColor }}
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="btn btn-lg py-3 fw-bold rounded-pill"
+                          style={{ backgroundColor: primaryColor, borderColor: primaryColor, color: 'white' }}
                         >
-                          Forgot Password?
+                          {isSubmitting ? (
+                            <>
+                              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                              {submissionMessage}
+                            </>
+                          ) : (
+                            <>
+                              <LogIn className="w-5 h-5 me-2" />
+                              Sign In
+                            </>
+                          )}
                         </button>
                       </div>
-                    </div>
 
-                    {/* Candidate Sign In Button */}
-                    <div className="d-grid mb-3">
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="btn btn-lg py-3 fw-bold rounded-pill"
-                        style={{ backgroundColor: primaryColor, borderColor: primaryColor, color: 'white' }}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            {submissionMessage}
-                          </>
-                        ) : (
-                          <>
-                            <LogIn className="w-5 h-5 me-2" />
-                            Sign In
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Admin Login Link (replaces recruiter button) 
+                      {/* Admin Login Link (replaces recruiter button) 
                   <div className="text-center mb-4">
                     <button
                       type="button"
@@ -411,46 +462,100 @@ const Login = ({ onLoginSuccess }) => {
                   </div>
                   */}
 
-                    {/* Registration Link */}
-                    <div className="text-center pt-3 border-top">
-                      <p className="text-muted mb-0">
-                        Don't have an account?{' '}
+                      {/* Registration Link */}
+                      <div className="text-center pt-3 border-top">
+                        <p className="text-muted mb-0">
+                          Don't have an account?{' '}
+                          <button
+                            type="button"
+                            onClick={() => navigate('/register')}
+                            className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
+                            style={{ color: primaryColor }}
+                          >
+                            Register Here
+                          </button>
+                        </p>
+                      </div>
+                      {/* Login as Recruiter and Admin  */}
+                      <div className="text-center pt-3 border-top d-flex justify-content-around  align-items-center">
+                        <p className="text-muted mb-0">
+                          Are you a recruiter?{' '}
+                          <button
+                            type="button"
+                            onClick={() => navigate('/recruiter-login')}
+                            className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
+                            style={{ color: primaryColor }}
+                          >
+                            Login Here
+                          </button>
+                        </p>
+                        <p className="text-muted mb-0">
+                          Are you a Admin?{' '}
+                          <button
+                            type="button"
+                            onClick={() => navigate('/admin-login')}
+                            className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
+                            style={{ color: primaryColor }}
+                          >
+                            Login Here
+                          </button>
+                        </p>
+                      </div>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleForgotPasswordSubmit}>
+                      {/* General Error Alert */}
+                      {errors.general && (
+                        <div className="alert alert-danger d-flex align-items-center" role="alert">
+                          <span className="me-2 fw-bold fs-5">!</span>
+                          <div>{errors.general}</div>
+                        </div>
+                      )}
+
+                      <TextInput
+                        label="Email Address"
+                        name="forgotEmail"
+                        type="email"
+                        value={forgotPasswordEmail}
+                        onChange={(e) => {
+                          setForgotPasswordEmail(e.target.value);
+                          setErrors({});
+                        }}
+                        error={errors.forgotEmail}
+                        icon={Mail}
+                        required
+                      />
+
+                      <div className="d-grid mb-3">
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="btn btn-lg py-3 fw-bold rounded-pill"
+                          style={{ backgroundColor: primaryColor, borderColor: primaryColor, color: 'white' }}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                              Sending...
+                            </>
+                          ) : (
+                            'Send Reset Link'
+                          )}
+                        </button>
+                      </div>
+
+                      <div className="text-center">
                         <button
                           type="button"
-                          onClick={() => navigate('/register')}
-                          className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
+                          onClick={() => setView('login')}
+                          className="btn btn-link text-decoration-none fw-semibold p-0"
                           style={{ color: primaryColor }}
                         >
-                          Register Here
+                          Back to Sign In
                         </button>
-                      </p>
-                    </div>
-                    {/* Login as Recruiter and Admin  */}
-                    <div className="text-center pt-3 border-top d-flex justify-content-around  align-items-center">
-                      <p className="text-muted mb-0">
-                        Are you a recruiter?{' '}
-                        <button
-                          type="button"
-                          onClick={() => navigate('/recruiter-login')}
-                          className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
-                          style={{ color: primaryColor }}
-                        >
-                          Login Here
-                        </button>
-                      </p>
-                      <p className="text-muted mb-0">
-                        Are you a Admin?{' '}
-                        <button
-                          type="button"
-                          onClick={() => navigate('/admin-login')}
-                          className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
-                          style={{ color: primaryColor }}
-                        >
-                          Login Here
-                        </button>
-                      </p>
-                    </div>
-                  </form>
+                      </div>
+                    </form>
+                  )}
                 </div>
               </div>
             </div>
