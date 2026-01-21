@@ -2001,7 +2001,7 @@ export default function Admin() {
       setCandidates(prevCandidates => {
         return fetchedCandidates.map(fetched => {
           const existing = prevCandidates.find(c => c.id === fetched.id);
-          return existing ? { ...fetched, status: existing.status, recruiterId: existing.recruiterId } : fetched;
+          return existing ? { ...fetched, status: fetched.status, recruiterId: fetched.recruiterId } : fetched;
         });
       });
 
