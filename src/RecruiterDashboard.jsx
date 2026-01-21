@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base_url } from "./commonAPI's.json";
 // ============================================
@@ -356,7 +356,7 @@ body {
 // Text Input Component
 const TextInput = ({ label, name, type = 'text', value, onChange, error, icon: Icon, required = false, placeholder, maxLength, readOnly = false }) => {
   const primaryColor = '#4F46E5';
-  
+
   return (
     <div className="mb-3">
       <label htmlFor={name} className="form-label fw-semibold text-dark">
@@ -390,25 +390,25 @@ const TextInput = ({ label, name, type = 'text', value, onChange, error, icon: I
 };
 
 // Profile Field Component (View Mode)
-const ProfileField = ({ icon: Icon, label, value }) => {
+const ProfileField = ({ icon: Icon, label, value, valueColor = '#1F2937' }) => {
   const primaryColor = '#4F46E5';
-  
+
   return (
-    <div className="mb-3 p-3 border rounded-3" style={{ backgroundColor: '#F9FAFB' }}>
+    <div className="mb-3 p-3 border rounded-3 h-100" style={{ backgroundColor: '#F9FAFB' }}>
       <div className="d-flex align-items-center mb-2">
         {Icon && <Icon className="me-2" style={{ color: primaryColor }} width={20} height={20} />}
         <span className="text-muted small fw-semibold">{label}</span>
       </div>
-      <p className="mb-0 fw-semibold text-dark">{value || 'N/A'}</p>
+      <p className="mb-0 fw-semibold" style={{ color: valueColor }}>{value !== null && value !== undefined ? value : 'N/A'}</p>
     </div>
   );
 };
 
 // Sidebar Button Component
 const SidebarButton = ({ Icon, label, onClick, variant = 'normal', isEditing, isActive }) => {
-  const className = variant === 'primary' 
-    ? 'sidebar-button sidebar-button-active' 
-    : isActive 
+  const className = variant === 'primary'
+    ? 'sidebar-button sidebar-button-active'
+    : isActive
       ? 'sidebar-button sidebar-button-active'
       : 'sidebar-button sidebar-button-inactive';
 
@@ -435,17 +435,17 @@ const AdminSidebar = ({ fullName, onLogout, onToggleEdit, isEditing, onDeletePro
       </div>
 
       <nav className="sidebar-nav">
-        <SidebarButton 
-          Icon={User} 
-          label="My Profile" 
-          onClick={() => setActiveView('profile')} 
+        <SidebarButton
+          Icon={User}
+          label="My Profile"
+          onClick={() => setActiveView('profile')}
           variant={activeView === 'profile' ? 'primary' : 'normal'}
           isActive={activeView === 'profile'}
         />
-        <SidebarButton 
-          Icon={Users} 
-          label="Candidates" 
-          onClick={() => setActiveView('candidates')} 
+        <SidebarButton
+          Icon={Users}
+          label="Candidates"
+          onClick={() => setActiveView('candidates')}
           variant="normal"
           isActive={activeView === 'candidates'}
         />
@@ -550,7 +550,7 @@ const RecruiterDashboard = () => {
   const [submissionMessage, setSubmissionMessage] = useState('');
   const [errors, setErrors] = useState({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
+
   // Candidates state
   const [candidates, setCandidates] = useState([]);
   const [filteredCandidates, setFilteredCandidates] = useState([]);
@@ -585,7 +585,7 @@ const RecruiterDashboard = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem('accessToken');
-      
+
       if (!token) {
         setError("You are not logged in. Redirecting to login...");
         setLoading(false);
@@ -604,7 +604,7 @@ const RecruiterDashboard = () => {
         });
 
         if (!response.ok) throw new Error("Failed to load profiles");
-        const profile =  await response.json();
+        const profile = await response.json();
 
         if (!profile) {
           setError("Profile not found.");
@@ -644,7 +644,7 @@ const RecruiterDashboard = () => {
   useEffect(() => {
     const fetchCandidates = async () => {
       if (activeView !== 'candidates') return;
-      
+
       setCandidatesLoading(true);
       const token = localStorage.getItem('accessToken');
 
@@ -708,7 +708,7 @@ const RecruiterDashboard = () => {
   // ============================================
   // EVENT HANDLERS
   // ============================================
-  
+
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     navigate('/recruiter-login');
@@ -746,7 +746,7 @@ const RecruiterDashboard = () => {
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
-    
+
     if (!validate(formData)) {
       setSubmissionMessage('Please correct the highlighted errors.');
       return;
@@ -754,7 +754,7 @@ const RecruiterDashboard = () => {
 
     setIsSubmitting(true);
     setSubmissionMessage('Saving changes...');
-    
+
     const token = localStorage.getItem('accessToken');
     const updateUrl = `${BASE_API_URL}${profileId}`;
     const data = new FormData();
@@ -812,7 +812,7 @@ const RecruiterDashboard = () => {
       } else {
         const errorData = await response.json();
         setIsSubmitting(false);
-        
+
         const backendErrors = {};
         for (const key in errorData) {
           if (key !== 'detail') {
@@ -912,7 +912,7 @@ const RecruiterDashboard = () => {
     <>
       <style>{styles}</style>
       <div className="admin-container">
-        
+
         {/* Toast Notification */}
         {submissionMessage && (
           <div className={`alert ${isSubmitting ? 'alert-info' : errors && Object.keys(errors).length > 0 ? 'alert-danger' : 'alert-success'} text-center mb-4 toast-alert shadow-sm position-fixed`}>
@@ -962,7 +962,7 @@ const RecruiterDashboard = () => {
             <div className="container-fluid">
               <div className="row justify-content-center">
                 <div className="col-12 col-xl-10">
-                  
+
                   {activeView === 'profile' ? (
                     <>
                       {/* PROFILE VIEW */}
@@ -987,6 +987,9 @@ const RecruiterDashboard = () => {
                         <div className="row g-4">
                           {isEditing ? (
                             <>
+                              <div className="col-12 mt-3">
+                                <h5 className="fw-bold mb-3 pb-2 border-bottom" style={{ color: '#4B5563', fontSize: '1rem' }}>Personal Information</h5>
+                              </div>
                               <div className="col-md-12">
                                 <TextInput label="Name" name="name" value={formData.name} onChange={handleEditChange} error={errors.name} icon={User} required maxLength={100} placeholder="Full Name" />
                               </div>
@@ -996,18 +999,29 @@ const RecruiterDashboard = () => {
                               <div className="col-md-6">
                                 <TextInput label="Phone (10 Digits)" name="phone" type="tel" value={formData.phone} onChange={handleEditChange} error={errors.phone} icon={Phone} required maxLength={10} placeholder="0000000000" />
                               </div>
+
+                              <div className="col-12 mt-4">
+                                <h5 className="fw-bold mb-3 pb-2 border-bottom" style={{ color: '#4B5563', fontSize: '1rem' }}>Professional Details</h5>
+                              </div>
+                              <div className="col-md-6">
+                                <TextInput label="Company" value={profile.company_name} icon={Briefcase} readOnly />
+                              </div>
+                              <div className="col-md-6">
+                                <TextInput label="Employee ID" value={profile.employee_id} icon={Briefcase} readOnly />
+                              </div>
                               <div className="col-md-6">
                                 <div className="mb-3">
                                   <label className="form-label fw-semibold text-dark">Status</label>
-                                  <div className="form-check form-switch">
+                                  <div className="form-check form-switch pt-2">
                                     <input className="form-check-input" type="checkbox" id="active" name="active" checked={formData.active || false} onChange={handleEditChange} />
-                                    <label className="form-check-label" htmlFor="active">{formData.active ? 'Active' : 'Inactive'}</label>
+                                    <label className="form-check-label ms-2" htmlFor="active">{formData.active ? 'Active' : 'Inactive'}</label>
                                   </div>
                                 </div>
                               </div>
                               <div className="col-md-6">
                                 <TextInput label="Total Assignments" name="totalAssignments" type="number" value={formData.totalAssignments} onChange={handleEditChange} icon={Briefcase} readOnly placeholder="0" />
                               </div>
+
                               <div className="col-12 mt-3">
                                 <button type="submit" disabled={isSubmitting} className="btn btn-lg w-100 py-3 fw-bold rounded-pill" style={{ backgroundColor: '#10B981', borderColor: '#10B981', color: 'white' }}>
                                   {isSubmitting ? (
@@ -1026,6 +1040,9 @@ const RecruiterDashboard = () => {
                             </>
                           ) : (
                             <>
+                              <div className="col-12 mt-3">
+                                <h5 className="fw-bold mb-3 pb-2 border-bottom" style={{ color: '#4B5563', fontSize: '1rem' }}>Personal Information</h5>
+                              </div>
                               <div className="col-md-12">
                                 <ProfileField icon={User} label="Name" value={profile.name} />
                               </div>
@@ -1035,19 +1052,59 @@ const RecruiterDashboard = () => {
                               <div className="col-md-6">
                                 <ProfileField icon={Phone} label="Phone" value={profile.phone} />
                               </div>
-                              <div className="col-md-6">
-                                <div className="mb-3 p-3 border rounded-3" style={{ backgroundColor: '#F9FAFB' }}>
-                                  <div className="d-flex align-items-center mb-2">
-                                    <span className="me-2" style={{ fontSize: '20px' }}>●</span>
-                                    <span className="text-muted small fw-semibold">Status</span>
-                                  </div>
-                                  <p className="mb-0 fw-semibold" style={{ color: profile.active ? '#10B981' : '#DC2626' }}>
-                                    {profile.active ? '✓ Active' : '✗ Inactive'}
-                                  </p>
-                                </div>
+
+                              <div className="col-12 mt-4">
+                                <h5 className="fw-bold mb-3 pb-2 border-bottom" style={{ color: '#4B5563', fontSize: '1rem' }}>Professional Details</h5>
                               </div>
                               <div className="col-md-6">
-                                <ProfileField icon={Briefcase} label="Total Assignments" value={profile.total_assignments || 0} />
+                                <ProfileField icon={Briefcase} label="Company" value={profile.company_name} />
+                              </div>
+                              <div className="col-md-6">
+                                <ProfileField icon={Briefcase} label="Employee ID" value={profile.employee_id} />
+                              </div>
+                              <div className="col-md-6">
+                                <ProfileField icon={Briefcase} label="Department" value={profile.department_display} />
+                              </div>
+                              <div className="col-md-6">
+                                <ProfileField icon={Briefcase} label="Specialization" value={profile.specialization_display} />
+                              </div>
+                              <div className="col-md-6">
+                                <ProfileField icon={Briefcase} label="Date of Joining" value={profile.date_of_joining} />
+                              </div>
+                              <div className="col-md-3">
+                                <ProfileField
+                                  icon={Briefcase}
+                                  label="Status"
+                                  value={profile.active ? '✓ Active' : '✗ Inactive'}
+                                  valueColor={profile.active ? '#10B981' : '#DC2626'}
+                                />
+                              </div>
+                              <div className="col-md-3">
+                                <ProfileField
+                                  icon={Briefcase}
+                                  label="Verified"
+                                  value={profile.verified ? '✓ Verified' : '✗ Not Verified'}
+                                  valueColor={profile.verified ? '#10B981' : '#DC2626'}
+                                />
+                              </div>
+
+                              <div className="col-12 mt-4">
+                                <h5 className="fw-bold mb-3 pb-2 border-bottom" style={{ color: '#4B5563', fontSize: '1rem' }}>Capacity & Statistics</h5>
+                              </div>
+                              <div className="col-md-4">
+                                <ProfileField icon={Users} label="Max Clients" value={profile.max_clients} />
+                              </div>
+                              <div className="col-md-4">
+                                <ProfileField icon={Users} label="Current Clients" value={profile.current_clients_count} />
+                              </div>
+                              <div className="col-md-4">
+                                <ProfileField icon={Users} label="Available Slots" value={profile.available_slots} />
+                              </div>
+                              <div className="col-md-6">
+                                <ProfileField icon={Briefcase} label="Total Placements" value={profile.total_placements || 0} />
+                              </div>
+                              <div className="col-md-6">
+                                <ProfileField icon={Briefcase} label="Active Applications" value={profile.active_applications || 0} />
                               </div>
                             </>
                           )}
@@ -1086,9 +1143,9 @@ const RecruiterDashboard = () => {
                           <p className="mt-3 text-muted">Loading candidates...</p>
                         </div>
                       ) : (
-                        <CandidatesTable 
-                          candidates={filteredCandidates} 
-                          page={page} 
+                        <CandidatesTable
+                          candidates={filteredCandidates}
+                          page={page}
                           setPage={setPage}
                           pageSize={10}
                         />
