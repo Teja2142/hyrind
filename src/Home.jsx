@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
 // Mock Data based on Hyrind requirements
 const VALUE_PROPS = [
@@ -66,11 +67,11 @@ const Home = () => {
     }
 
     if (!document.getElementById('bootstrap-icons')) {
-        const linkIcons = document.createElement('link');
-        linkIcons.id = 'bootstrap-icons';
-        linkIcons.rel = 'stylesheet';
-        linkIcons.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css';
-        document.head.appendChild(linkIcons);
+      const linkIcons = document.createElement('link');
+      linkIcons.id = 'bootstrap-icons';
+      linkIcons.rel = 'stylesheet';
+      linkIcons.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css';
+      document.head.appendChild(linkIcons);
     }
   }, []);
 
@@ -566,10 +567,10 @@ const Home = () => {
               </p>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem' }}>
-                <a href="#interest-form" className="btn-custom btn-primary-custom">
+                <Link to="/interest" className="btn-custom btn-primary-custom">
                   Submit Interest Form
-                </a>
-                <a href="#contact" className="btn-custom btn-outline-custom">
+                </Link>
+                <a href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/contact_us" target="_blank" className="btn-custom btn-outline-custom">
                   Book a Free Consultation <i className="bi bi-arrow-right-short"></i>
                 </a>
               </div>
@@ -653,7 +654,7 @@ const Home = () => {
               ))}
             </div>
           </div>
-        </section>  
+        </section>
 
         <section className="cta-section">
           <div className="cta-content">

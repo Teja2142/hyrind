@@ -686,14 +686,6 @@ const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onChangePass
           variant={isEditing ? 'primary' : 'normal'}
           isEditing={isEditing}
         />
-        {/* onCredential sheet */}
-        <SidebarButton
-          Icon={Target}
-          label="Credential Sheet"
-          onClick={onCredential}
-          variant={showCredentialForm ? 'primary' : 'normal'}
-        />
-
         {/* client intake sheet */}
         <SidebarButton
           Icon={FileText}
@@ -701,15 +693,6 @@ const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onChangePass
           onClick={onIntake}
           variant={showIntakeForm ? 'primary' : 'normal'}
         />
-
-        {/* Change Password */}
-        <SidebarButton
-          Icon={Key}
-          label="Change Password"
-          onClick={onChangePassword}
-          variant={showChangePasswordForm ? 'primary' : 'normal'}
-        />
-
         {/* Upgrade Profile - Show for non-subscribers OR Add Services for subscribers with addon plans */}
         {!isSubscribed ? (
           <SidebarButton
@@ -727,13 +710,32 @@ const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onChangePass
           />
         ) : null}
 
-        {/* Delete Profile */}
+        {/* onCredential sheet */}
         <SidebarButton
+          Icon={Target}
+          label="Credential Sheet"
+          onClick={onCredential}
+          variant={showCredentialForm ? 'primary' : 'normal'}
+        />
+
+
+        {/* Change Password */}
+        <SidebarButton
+          Icon={Key}
+          label="Change Password"
+          onClick={onChangePassword}
+          variant={showChangePasswordForm ? 'primary' : 'normal'}
+        />
+
+
+
+        {/* Delete Profile */}
+        {/* <SidebarButton
           Icon={Delete}
           label="Delete Profile"
           onClick={onDeleteProfile}
           variant="normal"
-        />
+        /> */}
         {/* Logout */}
         <SidebarButton
           Icon={LogOut}
