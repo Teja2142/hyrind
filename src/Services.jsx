@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Services = () => {
   const [expandedService, setExpandedService] = useState(null);
+  const navigate = useNavigate();
 
   const services = [
     {
@@ -440,7 +442,7 @@ const Services = () => {
       <div style={styles.servicesContainer}>
         {services.map((service, index) => (
           <div key={service.id} className="service-section" style={styles.serviceSection}>
-            <div 
+            <div
               className="service-header"
               style={{
                 ...styles.serviceHeader,
@@ -462,8 +464,8 @@ const Services = () => {
                     <p style={styles.expandedText}>{service.expandedContent}</p>
                   </div>
                 )}
-                <button 
-                  className="btn-primary-custom" 
+                <button
+                  className="btn-primary-custom"
                   style={styles.learnMoreButton}
                   onClick={() => setExpandedService(expandedService === service.id ? null : service.id)}
                 >
@@ -471,8 +473,8 @@ const Services = () => {
                 </button>
               </div>
               <div className="service-header-img" style={styles.serviceHeaderImage}>
-                <img 
-                  src={service.image} 
+                <img
+                  src={service.image}
                   alt={service.title}
                   style={styles.headerImg}
                 />
@@ -483,8 +485,8 @@ const Services = () => {
               {service.features.map((feature, idx) => (
                 <div key={idx} className="feature-card" style={styles.featureCard}>
                   <div style={styles.featureImageWrapper}>
-                    <img 
-                      src={feature.image} 
+                    <img
+                      src={feature.image}
                       alt={feature.title}
                       style={styles.featureImage}
                     />
@@ -515,10 +517,10 @@ const Services = () => {
           Join hundreds of Master's students who have successfully transitioned to their dream careers through our services.
         </p>
         <div className="button-group" style={styles.buttonGroup}>
-          <button className="btn-primary-custom" style={styles.primaryButton}>
+          <button className="btn-primary-custom" onClick={() => navigate('/register')} style={styles.primaryButton}>
             Get Started Today
           </button>
-          <button className="btn-outline-custom" style={styles.outlineButton}>
+          <button className="btn-outline-custom" onClick={() => navigate('/how-it-works')} style={styles.outlineButton}>
             Learn More
           </button>
         </div>
