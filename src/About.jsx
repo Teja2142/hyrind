@@ -1,13 +1,13 @@
 import React from 'react';
-
+import { Link } from 'react-router-dom';
 const About = () => {
   return (
     <div className="about-page">
       {/* Hero Section - Who We Are */}
       <section className="hero-section">
-        <img 
-          src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&q=80" 
-          alt="Team collaboration" 
+        <img
+          src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&q=80"
+          alt="Team collaboration"
           className="hero-bg-image"
         />
         <div className="hero-overlay"></div>
@@ -15,7 +15,7 @@ const About = () => {
           <div className="hero-content">
             <h1 className="hero-title">Who We Are</h1>
             <p className="hero-description">
-              HYRIND is a talent marketing and job support platform created to help 
+              HYRIND is a talent marketing and job support platform created to help
               international students bridge the gap between education and employment.
             </p>
           </div>
@@ -29,9 +29,9 @@ const About = () => {
           <div className="serve-grid">
             <div className="serve-card">
               <div className="serve-image-wrapper">
-                <img 
-                  src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80" 
-                  alt="International students" 
+                <img
+                  src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80"
+                  alt="International students"
                   className="serve-image"
                 />
               </div>
@@ -39,9 +39,9 @@ const About = () => {
             </div>
             <div className="serve-card">
               <div className="serve-image-wrapper">
-                <img 
-                  src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80" 
-                  alt="Graduates celebrating" 
+                <img
+                  src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80"
+                  alt="Graduates celebrating"
                   className="serve-image"
                 />
               </div>
@@ -49,9 +49,9 @@ const About = () => {
             </div>
             <div className="serve-card">
               <div className="serve-image-wrapper">
-                <img 
-                  src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80" 
-                  alt="Young professionals" 
+                <img
+                  src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80"
+                  alt="Young professionals"
                   className="serve-image"
                 />
               </div>
@@ -63,16 +63,16 @@ const About = () => {
 
       {/* Our Mission */}
       <section className="mission-section">
-        <img 
-          src="https://images.unsplash.com/photo-1522071901873-411886a10004?w=1920&q=80" 
-          alt="Team working together" 
+        <img
+          src="https://images.unsplash.com/photo-1522071901873-411886a10004?w=1920&q=80"
+          alt="Team working together"
           className="mission-bg-image"
         />
         <div className="mission-overlay"></div>
         <div className="container">
           <h2 className="section-title">Our Mission</h2>
           <p className="mission-text">
-            To empower job seekers with the tools, support, and representation they 
+            To empower job seekers with the tools, support, and representation they
             need to get interview calls and secure opportunities.
           </p>
         </div>
@@ -133,9 +133,9 @@ const About = () => {
           <div className="why-grid">
             <div className="why-card">
               <div className="why-image-wrapper">
-                <img 
-                  src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80" 
-                  alt="Profile validation" 
+                <img
+                  src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80"
+                  alt="Profile validation"
                   className="why-image"
                 />
               </div>
@@ -146,9 +146,9 @@ const About = () => {
 
             <div className="why-card">
               <div className="why-image-wrapper">
-                <img 
-                  src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80" 
-                  alt="Resume building" 
+                <img
+                  src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80"
+                  alt="Resume building"
                   className="why-image"
                 />
               </div>
@@ -159,9 +159,9 @@ const About = () => {
 
             <div className="why-card">
               <div className="why-image-wrapper">
-                <img 
-                  src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80" 
-                  alt="Marketing campaigns" 
+                <img
+                  src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80"
+                  alt="Marketing campaigns"
                   className="why-image"
                 />
               </div>
@@ -172,9 +172,9 @@ const About = () => {
 
             <div className="why-card">
               <div className="why-image-wrapper">
-                <img 
-                  src="https://images.unsplash.com/photo-1553028826-f4804a6dba3b?w=800&q=80" 
-                  alt="Dedicated career mentoring" 
+                <img
+                  src="https://images.unsplash.com/photo-1553028826-f4804a6dba3b?w=800&q=80"
+                  alt="Dedicated career mentoring"
                   className="why-image"
                 />
               </div>
@@ -185,9 +185,9 @@ const About = () => {
 
             <div className="why-card">
               <div className="why-image-wrapper">
-                <img 
-                  src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80" 
-                  alt="Industry connections" 
+                <img
+                  src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80"
+                  alt="Industry connections"
                   className="why-image"
                 />
               </div>
@@ -198,9 +198,9 @@ const About = () => {
 
             <div className="why-card">
               <div className="why-image-wrapper">
-                <img 
-                  src="https://images.unsplash.com/photo-1552581234-26160f608093?w=800&q=80" 
-                  alt="Success rate" 
+                <img
+                  src="https://images.unsplash.com/photo-1552581234-26160f608093?w=800&q=80"
+                  alt="Success rate"
                   className="why-image"
                 />
               </div>
@@ -220,9 +220,9 @@ const About = () => {
             <p className="cta-text">
               Join HYRIND today and take the first step towards securing your dream job in the US.
             </p>
-            <a href="/contact" className="cta-button">
+            <Link to="/register" className="cta-button">
               Get Started
-            </a>
+            </Link>
           </div>
         </div>
       </section>

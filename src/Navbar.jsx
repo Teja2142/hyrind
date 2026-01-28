@@ -5,7 +5,8 @@ import image from "./assets/image.png";
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
+  const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
+  const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
   const [userName, setUserName] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
@@ -14,8 +15,10 @@ export default function Navbar() {
   const closeMenu = () => setOpen(false);
   const toggleProfileDropdown = () => setProfileDropdownOpen(!profileDropdownOpen);
   const closeProfileDropdown = () => setProfileDropdownOpen(false);
-  const toggleMoreDropdown = () => setMoreDropdownOpen(!moreDropdownOpen);
-  const closeMoreDropdown = () => setMoreDropdownOpen(false);
+  const toggleServicesDropdown = () => setServicesDropdownOpen(!servicesDropdownOpen);
+  const closeServicesDropdown = () => setServicesDropdownOpen(false);
+  const toggleLoginDropdown = () => setLoginDropdownOpen(!loginDropdownOpen);
+  const closeLoginDropdown = () => setLoginDropdownOpen(false);
 
   // Fetch user data when component mounts or when token changes
   useEffect(() => {
@@ -83,20 +86,23 @@ export default function Navbar() {
       if (profileDropdownOpen && !event.target.closest('.profile-container')) {
         closeProfileDropdown();
       }
-      if (moreDropdownOpen && !event.target.closest('.more-container')) {
-        closeMoreDropdown();
+      if (servicesDropdownOpen && !event.target.closest('.services-container')) {
+        closeServicesDropdown();
+      }
+      if (loginDropdownOpen && !event.target.closest('.login-container')) {
+        closeLoginDropdown();
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [profileDropdownOpen, moreDropdownOpen]);
+  }, [profileDropdownOpen, servicesDropdownOpen, loginDropdownOpen]);
 
-  // Close mobile menu when route changes
   useEffect(() => {
     closeMenu();
-    closeMoreDropdown();
+    closeServicesDropdown();
+    closeLoginDropdown();
   }, [location.pathname]);
 
   return (
@@ -156,10 +162,13 @@ export default function Navbar() {
           height: 80px;
           transition: all 0.3s ease;
         }
-
+        .navbar-logo {
+          position: absolute;
+          left: 2%;
+        }
         .navbar-logo img {
-          width: 50px;
-          height: 50px;
+          width: 70px;
+          height: 70px;
           border-radius: 50%;
           object-fit: fill;
           border: 3px solid rgba(255, 255, 255, 0.3);
@@ -175,11 +184,14 @@ export default function Navbar() {
           display: none;
           align-items: center;
           gap: 1.75rem;
+          margin-left: auto;
         }
 
         @media (min-width: 768px) {
           .navbar-desktop {
             display: flex;
+            position: absolute;
+            right: 2%;
           }
         }
 
@@ -244,11 +256,11 @@ export default function Navbar() {
           background: #f0f7ff;
         }
 
-        .profile-container, .more-container {
+        .profile-container, .services-container, .login-container {
           position: relative;
         }
 
-        .profile-button, .more-button {
+        .profile-button, .services-button, .login-button {
           display: flex;
           align-items: center;
           gap: 8px;
@@ -264,7 +276,7 @@ export default function Navbar() {
           white-space: nowrap;
         }
 
-        .profile-button:hover, .more-button:hover {
+        .profile-button:hover, .services-button:hover, .login-button:hover {
           background: rgba(255, 255, 255, 0.15);
           transform: translateY(-2px);
         }
@@ -299,7 +311,7 @@ export default function Navbar() {
           transform: rotate(180deg);
         }
 
-        .profile-dropdown, .more-dropdown {
+        .profile-dropdown, .services-dropdown, .login-dropdown {
           position: absolute;
           top: calc(100% + 15px);
           right: 0;
@@ -610,28 +622,17 @@ export default function Navbar() {
               <Link to="/about" className={`nav-link ${isActive("/about") ? "active" : ""}`}>
                 About
               </Link>
-              <Link to="/services" className={`nav-link ${isActive("/services") ? "active" : ""}`}>
-                Services
-              </Link>
-              <Link to="/how-it-works" className={`nav-link ${isActive("/how-it-works") ? "active" : ""}`}>
-                How it works?
-              </Link>
-              <Link to="/reviews" className={`nav-link ${isActive("/reviews") ? "active" : ""}`}>
-                Reviews
-              </Link>
-              <a href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/contact_us" target="_blank" className={`nav-link ${isActive("/contact") ? "active" : ""}`}>
-                Contact
-              </a>
-
-              {/* More Dropdown */}
-              <div className="more-container">
-                <button onClick={toggleMoreDropdown} className="more-button">
-                  <span>More</span>
+              {/* Services Dropdown */}
+              <div className="services-container">
+                <button onClick={toggleServicesDropdown} className="services-button">
+                  <span className={isActive("/services") || isActive("/profile-marketing") || isActive("/interview-practice") || isActive("/skills-training") ? "nav-link active" : "nav-link"}>Services</span>
                   <svg
-                    className={`dropdown-arrow ${moreDropdownOpen ? "rotate" : ""}`}
+                    className={`dropdown-arrow ${servicesDropdownOpen ? "rotate" : ""}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
                   >
                     <path
                       strokeLinecap="round"
@@ -642,49 +643,79 @@ export default function Navbar() {
                   </svg>
                 </button>
 
-                {moreDropdownOpen && (
-                  <div className="more-dropdown">
+                {servicesDropdownOpen && (
+                  <div className="services-dropdown" style={{ left: 0, right: 'auto' }}>
                     <div className="dropdown-header">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                      Additional
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                      Our Services
                     </div>
-                    <Link to="/interest" onClick={closeMoreDropdown} className="dropdown-item">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                      Interest
+                    <Link to="/services#profile-marketing" onClick={closeServicesDropdown} className="dropdown-item">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                      Profile Marketing
                     </Link>
-
-                    <div className="dropdown-header" style={{ borderTop: '1px solid #f1f5f9' }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                      Recruiters
-                    </div>
-                    <Link to="/recruiter-register" onClick={closeMoreDropdown} className="dropdown-item">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="16" y1="11" x2="22" y2="11"></line></svg>
-                      Recruiter Register
+                    <Link to="/services#interview-practice" onClick={closeServicesDropdown} className="dropdown-item">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20v-6M9 17.63l.5-.5a4 4 0 0 1 5.66 0l.5.5"></path><path d="M2 11a10 10 0 0 1 20 0"></path></svg>
+                      Interview Practice
                     </Link>
-                    <Link to="/recruiter-login" onClick={closeMoreDropdown} className="dropdown-item">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
-                      Recruiter Login
-                    </Link>
-
-                    <div className="dropdown-header" style={{ borderTop: '1px solid #f1f5f9' }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                      Internal
-                    </div>
-                    <Link to="/admin-login" onClick={closeMoreDropdown} className="dropdown-item">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                      Admin Login
+                    <Link to="/services#skills-training" onClick={closeServicesDropdown} className="dropdown-item">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3.33 3 6.67 3 10 0v-5"></path></svg>
+                      Skills Training
                     </Link>
                   </div>
                 )}
               </div>
 
+              <Link to="/how-it-works" className={`nav-link ${isActive("/how-it-works") ? "active" : ""}`}>
+                How it works?
+              </Link>
+              <Link to="/reviews" className={`nav-link ${isActive("/reviews") ? "active" : ""}`}>
+                Reviews
+              </Link>
+              <Link to="/interest" className={`nav-link ${isActive("/interest") ? "active" : ""}`}>
+                Contact Us
+              </Link>
+
               {!localStorage.getItem("accessToken") ? (
-                <button
-                  onClick={() => navigate("/register")}
-                  className="register-btn"
-                >
-                  Register Now
-                </button>
+                <div className="login-container">
+                  <button onClick={toggleLoginDropdown} className="register-btn" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>Login / Register</span>
+                    <svg
+                      className={`dropdown-arrow ${loginDropdownOpen ? "rotate" : ""}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      width="16"
+                      height="16"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+
+                  {loginDropdownOpen && (
+                    <div className="login-dropdown">
+                      <div className="dropdown-header">
+                        Portal Access
+                      </div>
+                      <Link to="/login" onClick={closeLoginDropdown} className="dropdown-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        Candidate Login / Register
+                      </Link>
+                      <Link to="/recruiter-login" onClick={closeLoginDropdown} className="dropdown-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        Recruiter Login / Register
+                      </Link>
+                      <Link to="/admin-login" onClick={closeLoginDropdown} className="dropdown-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        Admin Login
+                      </Link>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="profile-container">
                   <button onClick={toggleProfileDropdown} className="profile-button">
@@ -818,13 +849,30 @@ export default function Navbar() {
               <span>ℹ️</span>
               <span>About</span>
             </Link>
+            <div className="mobile-section-header">Services</div>
             <Link
-              to="/services"
+              to="/services#profile-marketing"
               onClick={closeMenu}
-              className={`mobile-nav-link ${isActive("/services") ? "active" : ""}`}
+              className={`mobile-nav-link ${location.hash === "#profile-marketing" ? "active" : ""}`}
             >
-              <span>⚙️</span>
-              <span>Services</span>
+              <span>🎯</span>
+              <span>Profile Marketing</span>
+            </Link>
+            <Link
+              to="/services#interview-practice"
+              onClick={closeMenu}
+              className={`mobile-nav-link ${location.hash === "#interview-practice" ? "active" : ""}`}
+            >
+              <span>🎤</span>
+              <span>Interview Practice</span>
+            </Link>
+            <Link
+              to="/services#skills-training"
+              onClick={closeMenu}
+              className={`mobile-nav-link ${location.hash === "#skills-training" ? "active" : ""}`}
+            >
+              <span>🎓</span>
+              <span>Skills Training</span>
             </Link>
             <Link
               to="/how-it-works"
@@ -843,64 +891,43 @@ export default function Navbar() {
               <span>Reviews</span>
             </Link>
             <Link
-              to="/contact"
-              onClick={closeMenu}
-              className={`mobile-nav-link ${isActive("/contact") ? "active" : ""}`}
-            >
-              <span>📧</span>
-              <span>Contact</span>
-            </Link>
-
-            <div className="mobile-section-header">Additional</div>
-            <Link
               to="/interest"
               onClick={closeMenu}
               className={`mobile-nav-link ${isActive("/interest") ? "active" : ""}`}
             >
-              <span>💡</span>
-              <span>Interest</span>
+              <span>📧</span>
+              <span>Contact Us</span>
             </Link>
 
-            <div className="mobile-section-header">For Recruiters</div>
-            <Link
-              to="/recruiter-register"
-              onClick={closeMenu}
-              className={`mobile-nav-link ${isActive("/recruiter-register") ? "active" : ""}`}
-            >
-              <span>✍️</span>
-              <span>Recruiter Register</span>
-            </Link>
-            <Link
-              to="/recruiter-login"
-              onClick={closeMenu}
-              className={`mobile-nav-link ${isActive("/recruiter-login") ? "active" : ""}`}
-            >
-              <span>🔑</span>
-              <span>Recruiter Login</span>
-            </Link>
-
-            <div className="mobile-section-header">Admin</div>
-            <Link
-              to="/admin-login"
-              onClick={closeMenu}
-              className={`mobile-nav-link ${isActive("/admin-login") ? "active" : ""}`}
-            >
-              <span>🛡️</span>
-              <span>Admin Login</span>
-            </Link>
-
-            {!localStorage.getItem("accessToken") && (
-              <button
-                onClick={() => {
-                  closeMenu();
-                  navigate("/register");
-                }}
-                className="register-btn"
-                style={{ marginTop: '1rem' }}
-              >
-                Register Now
-              </button>
-            )}
+            {!localStorage.getItem("accessToken") ? (
+              <>
+                <div className="mobile-section-header">Account</div>
+                <Link
+                  to="/login"
+                  onClick={closeMenu}
+                  className={`mobile-nav-link ${isActive("/login") ? "active" : ""}`}
+                >
+                  <span>👤</span>
+                  <span>Candidate Login / Register</span>
+                </Link>
+                <Link
+                  to="/recruiter-login"
+                  onClick={closeMenu}
+                  className={`mobile-nav-link ${isActive("/recruiter-login") ? "active" : ""}`}
+                >
+                  <span>💼</span>
+                  <span>Recruiter Login / Register</span>
+                </Link>
+                <Link
+                  to="/admin-login"
+                  onClick={closeMenu}
+                  className={`mobile-nav-link ${isActive("/admin-login") ? "active" : ""}`}
+                >
+                  <span>🛡️</span>
+                  <span>Admin Login</span>
+                </Link>
+              </>
+            ) : null}
 
             {localStorage.getItem("accessToken") && (
               <div className="mobile-profile-section">

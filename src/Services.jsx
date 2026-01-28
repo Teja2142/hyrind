@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 const Services = () => {
-  const [expandedService, setExpandedService] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
 
   const services = [
     {
       id: 1,
       title: "Profile Marketing",
+      anchor: "profile-marketing",
       description: "Strategic marketing of your profile to potential employers with recruiter assignment and role-based submissions. Our team works tirelessly to position you as the ideal candidate for your target roles.",
       expandedContent: "Our Profile Marketing service goes beyond traditional job applications. We leverage our extensive network of industry connections and proven marketing strategies to ensure your profile reaches the right decision-makers. With personalized recruiter support, your resume is carefully tailored for each opportunity, highlighting your unique strengths and experiences. Our CRM tracking system provides complete transparency, allowing you to monitor every submission and interaction. We conduct monthly strategic campaigns that position you as a top candidate in your field, significantly increasing your chances of landing interviews with premier employers.",
       icon: "🎯",
@@ -45,6 +47,7 @@ const Services = () => {
     {
       id: 2,
       title: "Interview & Screening Call Practice",
+      anchor: "interview-practice",
       description: "Comprehensive mock interviews and screening call preparation with detailed feedback. Build confidence and refine your communication skills with industry professionals who know what employers are looking for.",
       expandedContent: "Success in interviews requires more than just technical knowledge—it demands confidence, clear communication, and the ability to showcase your value effectively. Our interview practice sessions replicate real-world scenarios with experienced industry professionals who provide actionable feedback. We help you master the STAR method, handle behavioral questions with ease, and communicate your achievements compellingly. Through multiple practice sessions, you'll overcome interview anxiety, refine your body language, and develop the professional presence that hiring managers seek. Our proven approach has helped hundreds of candidates transform from nervous interviewees into confident professionals who excel in high-pressure situations.",
       icon: "🎤",
@@ -81,6 +84,7 @@ const Services = () => {
     {
       id: 3,
       title: "Skills Training",
+      anchor: "skills-training",
       description: "Role-based skills development with curated learning paths and weekly training tasks. Stay competitive in your field with targeted upskilling guided by industry experts.",
       expandedContent: "The tech landscape evolves rapidly, and staying competitive requires continuous skill development. Our Skills Training program offers customized learning paths designed specifically for your target roles and career goals. Recruiters curate high-quality resources based on current market demands and emerging trends in your field. You'll receive weekly training tasks that build practical skills and create portfolio-worthy projects. With centralized access to all materials through Google Drive and systematic progress tracking, you'll see measurable improvement in your capabilities. Our milestone-based approach ensures you're always moving forward, gaining the specific skills that employers are actively seeking in candidates.",
       icon: "🎓",
@@ -441,7 +445,7 @@ const Services = () => {
 
       <div style={styles.servicesContainer}>
         {services.map((service, index) => (
-          <div key={service.id} className="service-section" style={styles.serviceSection}>
+          <div key={service.id} id={service.anchor} className="service-section" style={styles.serviceSection}>
             <div
               className="service-header"
               style={{
@@ -459,18 +463,9 @@ const Services = () => {
                 <p style={styles.serviceSectionDescription}>
                   {service.description}
                 </p>
-                {expandedService === service.id && (
-                  <div style={styles.expandedContent}>
-                    <p style={styles.expandedText}>{service.expandedContent}</p>
-                  </div>
-                )}
-                <button
-                  className="btn-primary-custom"
-                  style={styles.learnMoreButton}
-                  onClick={() => setExpandedService(expandedService === service.id ? null : service.id)}
-                >
-                  {expandedService === service.id ? '← Show Less' : 'Explore This Service →'}
-                </button>
+                <div style={styles.expandedContent}>
+                  <p style={styles.expandedText}>{service.expandedContent}</p>
+                </div>
               </div>
               <div className="service-header-img" style={styles.serviceHeaderImage}>
                 <img

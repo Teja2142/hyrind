@@ -31,19 +31,19 @@ const SERVICES = [
     title: 'Profile Marketing',
     description: 'Targeted submissions • Recruiter-driven applications • Custom resume & LinkedIn optimization • Progress tracking',
     image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80', // marketing/analytics
-    link: '/services/profile-marketing'
+    link: '/services#profile-marketing'
   },
   {
     title: 'Interview & Screening Call Training',
     description: 'Mock calls • Voice & communication improvement • Technical prep • Detailed feedback',
     image: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80', // interview/meeting
-    link: '/services/interview-support'
+    link: '/services#interview-practice'
   },
   {
     title: 'Skills Training Program',
     description: 'Role-based skill roadmap • Google Drive resources • Trainer sessions • Real project guidance',
     image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80', // training/learning
-    link: '/services/skills-training'
+    link: '/services#skills-training'
   }
 ];
 
@@ -570,9 +570,13 @@ const Home = () => {
                 <Link to="/interest" className="btn-custom btn-primary-custom">
                   Submit Interest Form
                 </Link>
-                <a href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/contact_us" target="_blank" className="btn-custom btn-outline-custom">
+                <button
+                  onClick={() => window.open("https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/contact_us", "_blank")}
+                  className="btn-custom btn-outline-custom"
+                  style={{ background: 'transparent' }}
+                >
                   Book a Free Consultation <i className="bi bi-arrow-right-short"></i>
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -603,7 +607,7 @@ const Home = () => {
           </div>
         </section>
 
-        <section className="value-section">
+        <section id="homepage-services" className="value-section">
           <div className="container">
             <div className="section-header">
               <span className="section-tag">What We Offer</span>
@@ -662,8 +666,14 @@ const Home = () => {
             <p className="cta-subtitle">Join HYRIND and start receiving recruiter calls and real interview opportunities.</p>
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              <a href="#interest-form" className="btn-custom btn-primary-custom">Submit Interest</a>
-              <a href="#contact" className="btn-custom btn-outline-custom">Book a Call</a>
+              <Link to="/interest" className="btn-custom btn-primary-custom">Submit Interest</Link>
+              <button
+                onClick={() => alert("Calendly integration coming soon! (Ravi will provide the API)")}
+                className="btn-custom btn-outline-custom"
+                style={{ background: 'transparent' }}
+              >
+                Book a Call
+              </button>
             </div>
           </div>
         </section>

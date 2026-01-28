@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { 
-  Globe, FileText, Phone, CheckCircle, FileEdit, 
-  Briefcase, ThumbsUp, CreditCard, CheckCheck, 
+import { useNavigate, Link } from "react-router-dom";
+import {
+  Globe, FileText, Phone, CheckCircle, FileEdit,
+  Briefcase, ThumbsUp, CreditCard, CheckCheck,
   Users, Upload, GraduationCap, MessageCircle,
   ChevronLeft, ChevronRight
 } from "lucide-react";
@@ -9,94 +10,95 @@ import {
 export default function HowItWorksFlow() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeStep, setActiveStep] = useState(null);
+  const navigate = useNavigate();
 
   const steps = [
-    { 
-      label: "Explore Website", 
+    {
+      label: "Explore Website",
       icon: Globe,
       description: "Begin your journey by exploring our comprehensive website. Discover our services, success stories, and learn how we can help accelerate your career. Browse through testimonials from satisfied candidates and understand our unique approach to recruitment.",
       fullContent: "Our website is your gateway to endless opportunities. Take time to familiarize yourself with our platform, explore the various career paths available, and read success stories from candidates who have found their dream jobs through HYRIND. We provide detailed information about industries we serve, company culture, and what makes us different from traditional recruitment agencies.",
       image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=800&fit=crop"
     },
-    { 
-      label: "Submit Interest Form", 
+    {
+      label: "Submit Interest Form",
       icon: FileText,
       description: "Fill out our simple interest form with your basic details and career aspirations. This initial step helps us understand your background, skills, and what you're looking for in your next opportunity. The form takes just a few minutes to complete.",
       fullContent: "The interest form is designed to capture essential information about your professional background, skills, and career goals. We ask about your education, work experience, preferred locations, and salary expectations. This information helps our team match you with the most suitable opportunities. Rest assured, all information provided is kept confidential and used solely for recruitment purposes.",
       image: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=1200&h=800&fit=crop"
     },
-    { 
-      label: "HYRIND Calls You", 
+    {
+      label: "HYRIND Calls You",
       icon: Phone,
       description: "Our recruitment specialists will reach out to you for an initial conversation. This personalized call allows us to better understand your career goals, discuss your experience in detail, and answer any questions you may have about our process.",
       fullContent: "During this call, one of our experienced recruiters will have a detailed conversation with you about your career journey, aspirations, and expectations. We'll discuss your strengths, areas of expertise, and the types of roles that align with your goals. This is also an opportunity for you to ask questions about our process, timeline, and how we can best support your job search. The call typically lasts 20-30 minutes.",
       image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=1200&h=800&fit=crop"
     },
-    { 
-      label: "Admin Approves Registration", 
+    {
+      label: "Admin Approves Registration",
       icon: CheckCircle,
       description: "Our admin team reviews your profile and application to ensure you meet our quality standards. This verification process ensures we maintain a high-quality candidate pool and can provide the best service to both candidates and employers.",
       fullContent: "The admin approval process involves a thorough review of your credentials, experience, and alignment with our partner companies' requirements. Our team verifies your educational qualifications, employment history, and assesses your potential for success in the roles we typically place. This quality control step ensures that we maintain our reputation for providing top-tier candidates to our client companies.",
       image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200&h=800&fit=crop"
     },
-    { 
-      label: "Fill Credential & Client Intake Sheets", 
+    {
+      label: "Fill Credential & Client Intake Sheets",
       icon: FileEdit,
       description: "Complete detailed forms about your credentials, certifications, and preferences. The client intake sheet helps us understand your ideal work environment, company culture preferences, and specific requirements for your next role.",
       fullContent: "These comprehensive forms allow us to create a complete profile of your professional background and preferences. You'll provide details about your technical skills, soft skills, certifications, previous projects, and achievements. The client intake sheet captures your preferences regarding company size, industry, work culture, remote work options, and other factors that are important to you in your next position.",
       image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=800&fit=crop"
     },
-    { 
-      label: "Admin Suggests Roles", 
+    {
+      label: "Admin Suggests Roles",
       icon: Briefcase,
       description: "Based on your profile and preferences, our admin team curates a personalized list of job opportunities that match your skills and career goals. Each role is carefully selected to align with your aspirations and qualifications.",
       fullContent: "Our experienced team uses advanced matching algorithms combined with human expertise to identify roles that best fit your profile. We consider factors like your technical skills, experience level, industry preferences, location requirements, and career trajectory. You'll receive detailed job descriptions, company information, and insights about each opportunity to help you make informed decisions.",
       image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1200&h=800&fit=crop"
     },
-    { 
-      label: "Candidate Approves Roles", 
+    {
+      label: "Candidate Approves Roles",
       icon: ThumbsUp,
       description: "Review the suggested roles and approve the ones you're interested in pursuing. You have full control over which opportunities to pursue, and our team is available to discuss any questions or concerns about specific positions.",
       fullContent: "Take your time to review each suggested role carefully. Consider the job responsibilities, required qualifications, company culture, growth opportunities, and compensation packages. You can approve multiple roles or request additional options if the initial suggestions don't quite match your expectations. Our team is here to provide additional context and help you make the best decision for your career.",
       image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=800&fit=crop"
     },
-    { 
-      label: "Payment Gateway Opens", 
+    {
+      label: "Payment Gateway Opens",
       icon: CreditCard,
       description: "Access our secure payment gateway to complete your registration fee. We support multiple payment methods and ensure all transactions are processed through encrypted, trusted payment partners for your security.",
       fullContent: "Our payment process is straightforward and secure. The registration fee covers comprehensive services including resume optimization, interview preparation, personalized job matching, and ongoing support throughout your job search. We accept various payment methods including credit cards, debit cards, and online banking. All payments are processed through industry-standard secure gateways with SSL encryption.",
       image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=1200&h=800&fit=crop"
     },
-    { 
-      label: "Payment Completed → Candidate Activated", 
+    {
+      label: "Payment Completed → Candidate Activated",
       icon: CheckCheck,
       description: "Once payment is confirmed, your candidate profile is activated in our system. You now have full access to all our services and your dedicated recruiter will begin actively marketing your profile to relevant employers.",
       fullContent: "Activation means you're now officially in our active candidate pool. Your profile becomes visible to our network of partner companies, and our recruitment team begins actively promoting you for suitable positions. You'll receive access to our candidate portal where you can track your applications, schedule interviews, and communicate with your assigned recruiter.",
       image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1200&h=800&fit=crop"
     },
-    { 
-      label: "Recruiter Assigned", 
+    {
+      label: "Recruiter Assigned",
       icon: Users,
       description: "A dedicated recruiter is assigned to manage your job search personally. Your recruiter will be your main point of contact, advocate, and guide throughout the entire placement process.",
       fullContent: "Your assigned recruiter is an experienced professional who specializes in your industry or job function. They will work closely with you to understand your unique value proposition, refine your job search strategy, and represent you to potential employers. Your recruiter serves as your career coach, providing guidance on interview preparation, salary negotiation, and career decisions.",
       image: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1200&h=800&fit=crop"
     },
-    { 
-      label: "Admin Uploads Resources & Marketing Begins", 
+    {
+      label: "Admin Uploads Resources & Marketing Begins",
       icon: Upload,
       description: "Our team uploads your optimized resume and professional documents to our system. Your recruiter begins marketing your profile to relevant companies, reaching out to hiring managers, and positioning you for the best opportunities.",
       fullContent: "This phase marks the beginning of active job search activities. Our team creates multiple versions of your resume tailored to different roles and industries. Your recruiter leverages their network of hiring managers and HR professionals to introduce your profile. We also upload your profile to relevant job boards and our partner company portals, ensuring maximum visibility.",
       image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1200&h=800&fit=crop"
     },
-    { 
-      label: "Training & Screening Practice Begin", 
+    {
+      label: "Training & Screening Practice Begin",
       icon: GraduationCap,
       description: "Participate in comprehensive training sessions and mock interviews to prepare you for real interviews. We provide feedback on your responses, body language, and communication skills to boost your confidence and performance.",
       fullContent: "Our training program includes mock interviews, technical assessments, behavioral interview preparation, and communication skills development. You'll practice answering common interview questions, learn techniques for showcasing your strengths, and receive constructive feedback. We also provide industry-specific preparation materials and tips for passing various screening processes that companies use.",
       image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&h=800&fit=crop"
     },
-    { 
-      label: "Ongoing Communication in Portal", 
+    {
+      label: "Ongoing Communication in Portal",
       icon: MessageCircle,
       description: "Stay connected with your recruiter and our team through our dedicated communication portal. Receive real-time updates on job applications, interview schedules, and feedback. Access resources and track your progress throughout the journey.",
       fullContent: "Our communication portal serves as your central hub for all recruitment activities. You can message your recruiter, receive notifications about new opportunities, access interview preparation materials, and track the status of your applications. The portal also provides a resource library with articles, videos, and guides to help you succeed in your job search. Regular updates ensure you're always informed about next steps.",
@@ -106,7 +108,7 @@ export default function HowItWorksFlow() {
 
   return (
     <div className="hiw-root">
-      <button 
+      <button
         className="menu-toggle"
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label="Toggle menu"
@@ -148,8 +150,8 @@ export default function HowItWorksFlow() {
           <h1>How It Works</h1>
           <p className="subtitle">Your complete journey from interest to placement</p>
           <p className="header-description">
-            Follow our streamlined 13-step process designed to match you with your ideal career opportunity. 
-            From your initial interest to successful placement, we guide you every step of the way with 
+            Follow our streamlined 13-step process designed to match you with your ideal career opportunity.
+            From your initial interest to successful placement, we guide you every step of the way with
             personalized support, comprehensive training, and dedicated recruitment expertise.
           </p>
         </header>
@@ -176,9 +178,9 @@ export default function HowItWorksFlow() {
                       <h3>{step.label}</h3>
                     </div>
                   </div>
-                  
+
                   <p className="step-description">{step.description}</p>
-                  
+
                   <div className="step-detail">
                     <h4>Detailed Overview</h4>
                     <p>{step.fullContent}</p>
@@ -205,8 +207,8 @@ export default function HowItWorksFlow() {
         <footer className="page-footer">
           <div className="footer-content">
             <h3>Ready to Start Your Journey?</h3>
-            <p>Have questions? <a href="#contact">Contact our admissions team</a> for personalized guidance.</p>
-            <button className="cta-button">Get Started Now</button>
+            <p>Have questions? <Link to="/interest" style={{ color: 'white', fontWeight: '700' }}>Contact our admissions team</Link> for personalized guidance.</p>
+            <button className="cta-button" onClick={() => navigate('/register')}>Get Started Now</button>
           </div>
         </footer>
       </main>

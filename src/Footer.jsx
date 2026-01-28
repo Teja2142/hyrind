@@ -108,17 +108,11 @@ const Footer = () => {
             <h3 className="footer-title">Quick Links</h3>
             <p className="footer-link"><Link to="/">Home</Link></p>
             <p className="footer-link"><Link to="/about">About us</Link></p>
-            <p className="footer-link"><Link to="/services">Services</Link></p>
-            <p className="footer-link"><Link to="/howitworks">How it works</Link></p>
+            <p className="footer-link"><Link to="/#homepage-services">Services</Link></p>
+            <p className="footer-link"><Link to="/how-it-works">How it works</Link></p>
             <p className="footer-link"><Link to="/reviews">Reviews</Link></p>
             <p className="footer-link">
-              <a
-                href="https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/contact_us"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Contact us
-              </a>
+              <Link to="/interest">Contact us</Link>
             </p>
           </div>
 
@@ -148,11 +142,11 @@ const Footer = () => {
             <h3 className="footer-title">Contact</h3>
 
             <div className="contact-item">
-              <FaEnvelope /> support@hyrind.com
+              <FaEnvelope /> <a href="mailto:support@hyrind.com">support@hyrind.com</a>
             </div>
 
             <div className="contact-item">
-              <FaPhone /> 314-354-0634
+              <FaPhone /> <a href="tel:3143540634">314-354-0634</a>
             </div>
 
             <h3 className="footer-title" style={{ marginTop: "15px" }}>Social Media</h3>

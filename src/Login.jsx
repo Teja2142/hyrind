@@ -476,31 +476,6 @@ const Login = ({ onLoginSuccess }) => {
                           </button>
                         </p>
                       </div>
-                      {/* Login as Recruiter and Admin  */}
-                      <div className="text-center pt-3 border-top d-flex justify-content-around  align-items-center">
-                        <p className="text-muted mb-0">
-                          Are you a recruiter?{' '}
-                          <button
-                            type="button"
-                            onClick={() => navigate('/recruiter-login')}
-                            className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
-                            style={{ color: primaryColor }}
-                          >
-                            Login Here
-                          </button>
-                        </p>
-                        <p className="text-muted mb-0">
-                          Are you a Admin?{' '}
-                          <button
-                            type="button"
-                            onClick={() => navigate('/admin-login')}
-                            className="btn btn-link fw-semibold text-decoration-none p-0 mt-0 mb-1"
-                            style={{ color: primaryColor }}
-                          >
-                            Login Here
-                          </button>
-                        </p>
-                      </div>
                     </form>
                   ) : (
                     <form onSubmit={handleForgotPasswordSubmit}>
