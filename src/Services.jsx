@@ -515,7 +515,7 @@ const Services = () => {
           <button className="btn-primary-custom" onClick={() => navigate('/register')} style={styles.primaryButton}>
             Get Started Today
           </button>
-          <button className="btn-outline-custom" onClick={() => navigate('/how-it-works')} style={styles.outlineButton}>
+          <button className="btn-outline-custom" onClick={() => navigate('/how-it-works#step-1')} style={styles.outlineButton}>
             Learn More
           </button>
         </div>

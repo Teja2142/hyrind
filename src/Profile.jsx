@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { base_url } from "./commonAPI's.json";
 import CredentialForm from './CredentialForm';
 import ClientIntakeForm from './ClientIntakeForm';
+import RoleSuggestions from './RoleSuggestions';
+import PaymentHistory from './PaymentHistory';
 
 
 
@@ -126,6 +128,34 @@ const FileText = (props) => (
 const Key = (props) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3L15.5 7.5z" />
+  </svg>
+);
+
+const Briefcase = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+  </svg>
+);
+
+const CreditCard = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+    <line x1="1" y1="10" x2="23" y2="10"></line>
+  </svg>
+);
+
+const Eye = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const EyeOff = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+    <line x1="1" y1="1" x2="23" y2="23" />
   </svg>
 );
 // --- END: Inline SVG Icon Definitions ---
@@ -543,6 +573,11 @@ const TextInput = ({
 }) => {
   const isDate = type === 'date';
   const primaryColor = '#4F46E5';
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Determine actual input type for rendering
+  const isPassword = type === 'password';
+  const inputType = isPassword ? (showPassword ? 'text' : 'password') : (isDate ? 'month' : type);
 
   return (
     <div className="mb-3">
@@ -593,18 +628,29 @@ const TextInput = ({
           />
         ) : (
           <input
-            type={isDate ? 'month' : type}
+            type={inputType}
             id={name}
             name={name}
             value={value || ''}
             onChange={onChange}
             maxLength={maxLength}
             placeholder={placeholder}
-            className={`form-control form-control-lg ${error ? 'is-invalid border-danger' : 'border-start-0'
+            className={`form-control form-control-lg ${error ? 'is-invalid border-danger' : 'border-start-0'} ${isPassword ? 'border-end-0' : ''
               }`}
             required={required}
             readOnly={readOnly}
           />
+        )}
+
+        {isPassword && (
+          <button
+            type="button"
+            className={`btn bg-white border ${error ? 'border-danger' : 'border-start-0'}`}
+            style={{ borderColor: error ? '#dc3545' : '#ced4da', borderLeft: 'none' }}
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOff width={20} className="text-muted" /> : <Eye width={20} className="text-muted" />}
+          </button>
         )}
       </div>
       {error && <div className="invalid-feedback d-block">{error}</div>}
@@ -643,15 +689,24 @@ const ProfileField = ({ icon: Icon, label, value, isLink = false }) => {
 };
 
 // Sidebar buttons
-const SidebarButton = ({ Icon, label, onClick, variant = 'normal', isEditing }) => {
+const SidebarButton = ({ Icon, label, onClick, variant = 'normal', isEditing, disabled = false }) => {
   const className =
     variant === 'primary'
       ? 'sidebar-button sidebar-button-active'
-      : 'sidebar-button sidebar-button-inactive';
+      : disabled
+        ? 'sidebar-button sidebar-button-inactive text-muted'
+        : 'sidebar-button sidebar-button-inactive';
 
 
   return (
-    <button type="button" onClick={onClick} className={className}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={className}
+      disabled={disabled}
+      style={disabled ? { cursor: 'not-allowed', opacity: 0.6 } : {}}
+      title={disabled ? "Please complete initial payment to access this feature" : ""}
+    >
       <Icon className="sidebar-button-icon" />
       {variant === 'primary' && typeof isEditing === 'boolean'
         ? isEditing ? 'Cancel Edit' : label
@@ -661,7 +716,26 @@ const SidebarButton = ({ Icon, label, onClick, variant = 'normal', isEditing }) 
 };
 
 // AdminSidebar with full name + actions
-const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onChangePassword, onToggleEdit, isEditing, onDeleteProfile, onUpgradeProfile, isSubscribed, hasAddonPlans, showCredentialForm, showIntakeForm, showChangePasswordForm, showPaymentModal }) => {
+const AdminSidebar = ({
+  fullName,
+  onLogout,
+  onCredential,
+  onIntake,
+  onChangePassword,
+  onToggleEdit,
+  isEditing,
+  onUpgradeProfile,
+  isSubscribed,
+  hasAddonPlans,
+  showCredentialForm,
+  showIntakeForm,
+  showChangePasswordForm,
+  showPaymentModal,
+  onRoleSuggestions,
+  onPaymentHistory,
+  showRoleSuggestions,
+  showPaymentHistory
+}) => {
 
   const displayName = fullName && fullName.trim().length > 0 ? fullName : 'Candidate Profile';
 
@@ -678,7 +752,7 @@ const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onChangePass
       </div>
 
       <nav className="sidebar-nav">
-        {/* Update Profile toggle */}
+        {/* 1. Update Profile (Edit) */}
         <SidebarButton
           Icon={Edit}
           label="Update Profile"
@@ -686,14 +760,24 @@ const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onChangePass
           variant={isEditing ? 'primary' : 'normal'}
           isEditing={isEditing}
         />
-        {/* client intake sheet */}
+
+        {/* 2. Client Intake Sheet */}
         <SidebarButton
           Icon={FileText}
           label="Client Intake Sheet"
           onClick={onIntake}
           variant={showIntakeForm ? 'primary' : 'normal'}
         />
-        {/* Upgrade Profile - Show for non-subscribers OR Add Services for subscribers with addon plans */}
+
+        {/* 3. Role Suggestions */}
+        <SidebarButton
+          Icon={Briefcase}
+          label="Role Suggestions"
+          onClick={onRoleSuggestions}
+          variant={showRoleSuggestions ? 'primary' : 'normal'}
+        />
+
+        {/* 4. Upgrade Profile */}
         {!isSubscribed ? (
           <SidebarButton
             Icon={Upgrade}
@@ -710,33 +794,32 @@ const AdminSidebar = ({ fullName, onLogout, onCredential, onIntake, onChangePass
           />
         ) : null}
 
-        {/* onCredential sheet */}
+        {/* 5. Credential Sheet (Enabled only after payment) */}
+        {isSubscribed && (
+          <SidebarButton
+            Icon={Target}
+            label="Credential Sheet"
+            onClick={onCredential}
+            variant={showCredentialForm ? 'primary' : 'normal'}
+          />
+        )}
+        {/* 6. Payment History */}
         <SidebarButton
-          Icon={Target}
-          label="Credential Sheet"
-          onClick={onCredential}
-          variant={showCredentialForm ? 'primary' : 'normal'}
+          Icon={CreditCard}
+          label="Payment History"
+          onClick={onPaymentHistory}
+          variant={showPaymentHistory ? 'primary' : 'normal'}
         />
 
-
-        {/* Change Password */}
+        {/* 7. Forgot Password (Change Password) */}
         <SidebarButton
           Icon={Key}
-          label="Change Password"
+          label="Forgot Password"
           onClick={onChangePassword}
           variant={showChangePasswordForm ? 'primary' : 'normal'}
         />
 
-
-
-        {/* Delete Profile */}
-        {/* <SidebarButton
-          Icon={Delete}
-          label="Delete Profile"
-          onClick={onDeleteProfile}
-          variant="normal"
-        /> */}
-        {/* Logout */}
+        {/* 8. Logout */}
         <SidebarButton
           Icon={LogOut}
           label="Logout"
@@ -1095,6 +1178,8 @@ const Profile = () => {
   const [showCredentialForm, setShowCredentialForm] = useState(false);
   const [showIntakeForm, setShowIntakeForm] = useState(false);
   const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
+  const [showRoleSuggestions, setShowRoleSuggestions] = useState(false);
+  const [showPaymentHistory, setShowPaymentHistory] = useState(false);
 
 
 
@@ -1376,6 +1461,9 @@ const Profile = () => {
     setShowIntakeForm(false);
     setShowPaymentModal(false);
     setIsEditing(false);
+    setShowRoleSuggestions(false);
+    setShowPaymentHistory(false);
+    setShowChangePasswordForm(false);
   };
 
   const handleIntake = () => {
@@ -1383,9 +1471,40 @@ const Profile = () => {
     setShowCredentialForm(false);
     setShowPaymentModal(false);
     setIsEditing(false);
+    setShowRoleSuggestions(false);
+    setShowPaymentHistory(false);
+    setShowChangePasswordForm(false);
   };
 
+  const handleRoleSuggestions = () => {
+    setShowRoleSuggestions(!showRoleSuggestions);
+    setShowIntakeForm(false);
+    setShowCredentialForm(false);
+    setShowPaymentModal(false);
+    setIsEditing(false);
+    setShowPaymentHistory(false);
+    setShowChangePasswordForm(false);
+  };
 
+  const handlePaymentHistory = () => {
+    setShowPaymentHistory(!showPaymentHistory);
+    setShowRoleSuggestions(false);
+    setShowIntakeForm(false);
+    setShowCredentialForm(false);
+    setShowPaymentModal(false);
+    setIsEditing(false);
+    setShowChangePasswordForm(false);
+  };
+
+  const handleChangePassword = () => {
+    setShowChangePasswordForm(!showChangePasswordForm);
+    setShowCredentialForm(false);
+    setShowIntakeForm(false);
+    setIsEditing(false);
+    setShowPaymentModal(false);
+    setShowRoleSuggestions(false);
+    setShowPaymentHistory(false);
+  };
 
   const handleEditChange = (e) => {
     const { name, value, type, checked, files } = e.target;
@@ -1409,6 +1528,9 @@ const Profile = () => {
     setShowPaymentModal(false);
     setShowCredentialForm(false);
     setShowIntakeForm(false);
+    setShowRoleSuggestions(false);
+    setShowPaymentHistory(false);
+    setShowChangePasswordForm(false);
 
     if (!isEditing && profileData) {
       setFormData({
@@ -1633,6 +1755,9 @@ const Profile = () => {
     setShowCredentialForm(false);
     setShowIntakeForm(false);
     setIsEditing(false);
+    setShowRoleSuggestions(false);
+    setShowPaymentHistory(false);
+    setShowChangePasswordForm(false);
   };
 
 
@@ -2161,14 +2286,10 @@ const Profile = () => {
             onLogout={handleLogout}
             onCredential={handleCredential}
             onIntake={handleIntake}
-            onChangePassword={() => {
-              setShowChangePasswordForm(true);
-              setShowCredentialForm(false);
-              setShowIntakeForm(false);
-              setIsEditing(false);
-              setShowPaymentModal(false);
-            }}
+            onChangePassword={handleChangePassword}
             onToggleEdit={handleToggleEdit}
+            onRoleSuggestions={handleRoleSuggestions}
+            onPaymentHistory={handlePaymentHistory}
             isEditing={isEditing}
             onDeleteProfile={handleDeleteProfile}
             onUpgradeProfile={handleUpgradeProfile}
@@ -2177,6 +2298,8 @@ const Profile = () => {
             showCredentialForm={showCredentialForm}
             showIntakeForm={showIntakeForm}
             showChangePasswordForm={showChangePasswordForm}
+            showRoleSuggestions={showRoleSuggestions}
+            showPaymentHistory={showPaymentHistory}
             showPaymentModal={showPaymentModal}
           />
         </div>
@@ -2210,6 +2333,20 @@ const Profile = () => {
                   onClose={() => setShowIntakeForm(false)}
                   inline={true}
                 />
+              </div>
+            )}
+
+            {/* Role Suggestions */}
+            {showRoleSuggestions && (
+              <div className="mb-4">
+                <RoleSuggestions />
+              </div>
+            )}
+
+            {/* Payment History */}
+            {showPaymentHistory && (
+              <div className="mb-4">
+                <PaymentHistory />
               </div>
             )}
 
@@ -2505,7 +2642,7 @@ const Profile = () => {
                 </div>
               </div>
             )}
-            <div hidden={showPaymentModal || showCredentialForm || showIntakeForm || showChangePasswordForm} className="p-4">
+            <div hidden={showPaymentModal || showCredentialForm || showIntakeForm || showChangePasswordForm || showRoleSuggestions || showPaymentHistory} className="p-4">
 
               {/* Profile summary */}
               <div className="text-center mb-4">
