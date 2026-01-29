@@ -33,6 +33,9 @@ const Trash = () => (
     </svg>
 );
 
+// (removed an invalid top-level hook and unused ALL_FIELDS)
+
+
 const ClientIntakeForm = ({ isOpen, onClose, inline = false }) => {
     const BASE_URL = `${base_url.endsWith('/') ? base_url.slice(0, -1) : base_url}/api/`;
     const [step, setStep] = useState(() => {
@@ -145,6 +148,50 @@ const ClientIntakeForm = ({ isOpen, onClose, inline = false }) => {
             setErrors({ ...errors, [name]: '' });
         }
     };
+
+    // Compute overall progress based on filled required fields across all steps
+    const progress = React.useMemo(() => {
+        let total = 0;
+        let filled = 0;
+
+        // Fields required across steps 1-3,5-6
+        const required = [
+            'firstName','lastName','dob','phone','email','currentAddress','mailingAddress',
+            'visaStatus','firstEntryUS','totalYearsUS',
+            'skilledIn','currentlyLearning','experiencedTools',
+            'highestDegree','fieldOfStudy','universityName','country','gradMonthYear',
+            'passportFile','govIdFile','visaFile','workAuthFile','resumeFile','desiredJobRoles','desiredYOE'
+        ];
+
+        required.forEach(key => {
+            total += 1;
+            const val = formData[key];
+            if (val !== null && val !== undefined) {
+                if (typeof val === 'string') {
+                    if (val.trim() !== '') filled += 1;
+                } else if (typeof File !== 'undefined' && val instanceof File) {
+                    filled += 1;
+                } else if (Array.isArray(val)) {
+                    if (val.length > 0) filled += 1;
+                } else if (val) {
+                    filled += 1;
+                }
+            }
+        });
+
+        // Work experience: if user has work experience, each experience requires jobTitle & companyName
+        if (formData.hasWorkExperience === 'Yes') {
+            const exps = formData.workExperiences || [];
+            exps.forEach(exp => {
+                total += 2; // jobTitle + companyName
+                if (exp.jobTitle && exp.jobTitle.trim() !== '') filled += 1;
+                if (exp.companyName && exp.companyName.trim() !== '') filled += 1;
+            });
+        }
+
+        const percent = total === 0 ? 0 : Math.round((filled / total) * 100);
+        return { percent, filled, total };
+    }, [formData]);
 
     const handleWorkExperienceChange = (index, e) => {
         const { name, value } = e.target;
@@ -719,15 +766,15 @@ const ClientIntakeForm = ({ isOpen, onClose, inline = false }) => {
                         <div
                             className="progress-bar"
                             role="progressbar"
-                            style={{ width: `${(step / 6) * 100}%`, backgroundColor: '#4F46E5' }}
-                            aria-valuenow={(step / 6) * 100}
+                            style={{ width: `${progress.percent}%`, backgroundColor: '#4F46E5' }}
+                            aria-valuenow={progress.percent}
                             aria-valuemin="0"
                             aria-valuemax="100"
                         ></div>
                     </div>
                     <div className="d-flex justify-content-between mt-1">
                         <span className="small text-muted">Step {step} of 6</span>
-                        <span className="small text-muted">{Math.round((step / 6) * 100)}% Complete</span>
+                        <span className="small text-muted">{progress.percent}% Complete</span>
                     </div>
                 </div>
 
