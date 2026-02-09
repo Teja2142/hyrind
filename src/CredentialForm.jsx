@@ -82,6 +82,54 @@ const CredentialForm = ({ isOpen, onClose, inline = false }) => {
         }
     };
 
+    // Compute overall progress based on filled required fields across all steps
+    const progress = React.useMemo(() => {
+        let total = 0;
+        let filled = 0;
+
+        const required = [
+            'fullName','email','personalEmail','phoneNumber','location',
+            'bachelorsGradDate','mastersGradDate','firstEntryUS',
+            'optStartDate','optOfferLetterSubmitted',
+            'preferredRoles','preferredLocations',
+            'linkedinId','linkedinPassword',
+            'indeedId','indeedPassword',
+            'diceId','dicePassword',
+            'monsterId','monsterPassword',
+            'ziprecruiterId','ziprecruiterPassword',
+            'otherPlatforms'
+        ];
+
+        required.forEach(key => {
+            total += 1;
+            const val = formData[key];
+            if (val !== null && val !== undefined) {
+                if (typeof val === 'string') {
+                    if (val.trim() !== '') filled += 1;
+                } else if (typeof File !== 'undefined' && val instanceof File) {
+                    filled += 1;
+                } else if (typeof val === 'boolean') {
+                    // checkbox counts as filled when true
+                    if (val) filled += 1;
+                } else if (Array.isArray(val)) {
+                    if (val.length > 0) filled += 1;
+                } else if (val) {
+                    filled += 1;
+                }
+            }
+        });
+
+        // If optOfferLetterSubmitted is 'Yes', require offerLetter file
+        if (formData.optOfferLetterSubmitted === 'Yes') {
+            total += 1;
+            const v = formData.offerLetter;
+            if (v && (typeof File === 'undefined' || v instanceof File)) filled += 1;
+        }
+
+        const percent = total === 0 ? 0 : Math.round((filled / total) * 100);
+        return { percent, filled, total };
+    }, [formData]);
+
     const validateStep = (currentStep) => {
         const newErrors = {};
         if (currentStep === 1) {
@@ -442,15 +490,15 @@ const CredentialForm = ({ isOpen, onClose, inline = false }) => {
                         <div
                             className="progress-bar"
                             role="progressbar"
-                            style={{ width: `${(step / 6) * 100}%`, backgroundColor: '#4F46E5' }}
-                            aria-valuenow={(step / 6) * 100}
+                            style={{ width: `${progress.percent}%`, backgroundColor: '#4F46E5' }}
+                            aria-valuenow={progress.percent}
                             aria-valuemin="0"
                             aria-valuemax="100"
                         ></div>
                     </div>
                     <div className="d-flex justify-content-between mt-1">
                         <span className="small text-muted">Step {step} of 6</span>
-                        <span className="small text-muted">{Math.round((step / 6) * 100)}% Complete</span>
+                        <span className="small text-muted">{progress.percent}% Complete</span>
                     </div>
                 </div>
 
