@@ -7,21 +7,21 @@ const VALUE_PROPS = [
     iconClass: 'bi bi-people-fill',
     title: 'Dedicated Recruiter Assigned to You',
     description:
-      'A recruiter markets your profile daily, submits applications, and optimizes your resume based on real job descriptions.',
+      'A dedicated recruiter is assigned to manage your entire journey—from profile positioning to daily job submissions. Your recruiter actively markets your profile, optimizes resumes based on recruiter feedback, and continuously improves results based on response trends.',
     image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&q=80' // recruiter/teamwork
   },
   {
     iconClass: 'bi bi-card-checklist',
     title: 'Role-Based Resume & Skills Roadmap',
     description:
-      'Your resume, intake sheet, and skill roadmap are built around your exact target roles rather than generic templates.',
+      'Your resume and skill roadmap are built around your exact target roles, not generic templates. Based on your intake sheet and industry goals, we create role-specific resumes, align them with job descriptions, and design a skill roadmap supported by curated learning resources to strengthen your profile continuously.',
     image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80' // resume/checklist
   },
   {
     iconClass: 'bi bi-mic-fill',
     title: 'Interview & Screening Call Support',
     description:
-      'Mock screening calls, communication improvement, and behavioral and technical prep until you are fully client-ready.',
+      'We prepare you to represent yourself with confidence and clarity. Through mock screening calls, communication coaching, and behavioral and technical preparation, we help you present your experience effectively and professionally. Our goal is to ensure you are fully client-ready—confident, articulate, and well-prepared at every stage.',
     image: 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=800&q=80' // mic/interview
   },
 ];
@@ -48,11 +48,11 @@ const SERVICES = [
 ];
 
 const PROCESS_STEPS = [
-  { step: 1, title: 'Submit Interest Form', detail: 'Submit initial interest and upload your basic details.' },
-  { step: 2, title: 'Call With HYRIND Team', detail: 'We explain pricing, process, timelines, and expectations.' },
-  { step: 3, title: 'Admin Approval & Portal Access', detail: 'Once approved, your portal access gets activated.' },
-  { step: 4, title: 'Intake Sheets & Role Selection', detail: 'Complete documents and approve job role targeting.' },
-  { step: 5, title: 'Pay Initial Fee & Marketing Begins', detail: 'Recruiter assigned → Resume finalized → Daily submissions start.' },
+  { step: 1, title: 'Explore HYRIND & Submit Interest', detail: 'Submit initial interest and upload your basic details.' },
+  { step: 2, title: 'Intro Call with HYRIND Team', detail: 'We explain process, timelines, and expectations.' },
+  { step: 3, title: 'Approval & Role Alignment', detail: 'Once approved, we align on your target roles.' },
+  { step: 4, title: 'Profile Setup & Preparation', detail: 'Complete documents and begin prep sessions.' },
+  { step: 5, title: 'Marketing, Training & Interview Support', detail: 'Daily submissions start with ongoing training.' },
 ];
 
 
@@ -328,103 +328,186 @@ const Home = () => {
         
         .process-section {
           background: #ffffff;
-          padding: 5rem 2rem;
-          border-top: 2px solid #e2e8f0;
-          border-bottom: 2px solid #e2e8f0;
-        }
-        
-        .step-container {
-          display: flex;
-          align-items: flex-start;
-          gap: 1.5rem;
-          margin-bottom: 2rem;
-          transition: all 0.3s ease;
-        }
-        
-        .step-container:hover {
-          transform: translateX(10px);
-        }
-        
-        .step-circle {
-          width: 80px;
-          height: 80px;
-          min-width: 80px;
-          background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-          border-radius: 15px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 2rem;
-          font-weight: 800;
-          color: white;
-          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-          transition: all 0.4s ease;
+          padding: 8rem 2rem;
           position: relative;
+          overflow: hidden;
         }
         
-        .step-circle::after {
+        .process-section::before {
           content: '';
           position: absolute;
           top: 0;
           left: 0;
           right: 0;
-          bottom: 0;
-          border-radius: 15px;
-          border: 3px solid rgba(59, 130, 246, 0.5);
-          transform: scale(1);
-          opacity: 0;
-          transition: all 0.4s ease;
+          height: 100px;
+          background: linear-gradient(to bottom, #f8fafc, transparent);
         }
         
-        .step-container:hover .step-circle {
-          transform: scale(1.1) rotate(10deg);
-          box-shadow: 0 15px 40px rgba(59, 130, 246, 0.6);
+        .roadmap-container {
+          max-width: 1200px;
+          margin: 4rem auto 0;
+          position: relative;
         }
         
-        .step-container:hover .step-circle::after {
-          transform: scale(1.3);
-          opacity: 1;
+        /* Desktop Style */
+        .roadmap-wrapper {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          position: relative;
+          z-index: 2;
         }
         
-        .step-content {
+        .roadmap-path-svg {
+          position: absolute;
+          top: 45px;
+          left: 0;
+          width: 100%;
+          height: 100px;
+          z-index: 1;
+          pointer-events: none;
+        }
+        
+        .step-node {
           flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 0 10px;
+          position: relative;
+          transition: all 0.3s ease;
         }
         
-        .step-title {
-          font-size: 1.25rem;
+        .step-node:nth-child(even) {
+          margin-top: 40px;
+        }
+        
+        .step-icon-wrap {
+          width: 80px;
+          height: 80px;
+          background: #ffffff;
+          border: 3px solid #3b82f6;
+          border-radius: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.5rem;
+          font-weight: 800;
+          color: #1e40af;
+          margin-bottom: 1.5rem;
+          box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
+          transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+          position: relative;
+          z-index: 3;
+        }
+        
+        .step-node:hover .step-icon-wrap {
+          transform: translateY(-10px) rotate(8deg);
+          background: #1e40af;
+          color: #ffffff;
+          border-color: #ffd700;
+          box-shadow: 0 20px 40px rgba(30, 64, 175, 0.3);
+        }
+        
+        .step-number-tag {
+          position: absolute;
+          top: -10px;
+          right: -10px;
+          background: #ffd700;
+          color: #1e40af;
+          font-size: 0.75rem;
+          font-weight: 900;
+          padding: 4px 8px;
+          border-radius: 8px;
+          box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .step-info {
+          padding: 0 10px;
+        }
+        
+        .step-label {
+          font-size: 1.1rem;
           font-weight: 700;
           color: #1e40af;
           margin-bottom: 0.5rem;
-          transition: all 0.3s ease;
+          line-height: 1.3;
         }
         
-        .step-container:hover .step-title {
-          color: #3b82f6;
-          transform: translateX(5px);
+        .step-summary {
+          font-size: 0.9rem;
+          color: #64748b;
+          line-height: 1.5;
         }
         
-        .step-detail {
-          color: #475569;
-          line-height: 1.6;
-          transition: all 0.3s ease;
+        @media (max-width: 992px) {
+          .roadmap-wrapper {
+            flex-direction: column;
+            gap: 3rem;
+            align-items: flex-start;
+          }
+          
+          .roadmap-path-svg {
+            display: none;
+          }
+          
+          .roadmap-container::before {
+            content: '';
+            position: absolute;
+            left: 39px;
+            top: 20px;
+            bottom: 20px;
+            width: 2px;
+            background: dashed #3b82f6;
+            opacity: 0.3;
+          }
+          
+          .step-node {
+            flex-direction: row;
+            text-align: left;
+            align-items: center;
+            gap: 2rem;
+            width: 100%;
+            padding: 0;
+          }
+          
+          .step-node:nth-child(even) {
+            margin-top: 0;
+          }
+          
+          .step-icon-wrap {
+            margin-bottom: 0;
+            width: 80px;
+            height: 80px;
+            min-width: 80px;
+          }
+          
+          .step-label {
+            font-size: 1.25rem;
+          }
         }
         
-        .step-container:hover .step-detail {
-          color: #1e293b;
-        }
-        
-        .arrow-connector {
-          font-size: 3rem;
-          color: #3b82f6;
-          opacity: 0.5;
-          transition: all 0.3s ease;
-          text-align: center;
-          margin: 1rem 0;
-        }
-        
-        .step-container:hover + div .arrow-connector {
-          opacity: 1;
-          transform: scale(1.2);
+        @media (max-width: 576px) {
+          .step-node {
+            gap: 1.25rem;
+          }
+          
+          .step-icon-wrap {
+            width: 60px;
+            height: 60px;
+            min-width: 60px;
+            border-radius: 16px;
+            font-size: 1.25rem;
+          }
+          
+          .roadmap-container::before {
+            left: 29px;
+          }
+          
+          .step-label {
+            font-size: 1.1rem;
+          }
         }
         
         .cta-section {
@@ -575,7 +658,7 @@ const Home = () => {
                   Submit Interest Form
                 </Link>
                 <button
-                  onClick={() => window.open("https://merchant.razorpay.com/policy/Rn2giKHxuBBdz0/contact_us", "_blank")}
+                  onClick={() => window.open("https://cal.com/hyrind/15min?layout=mobile", "_blank")}
                   className="btn-custom btn-outline-custom"
                   style={{ background: 'transparent' }}
                 >
@@ -592,6 +675,9 @@ const Home = () => {
             <div className="section-header">
               <span className="section-tag">Why HYRIND</span>
               <h2 className="section-title">Why Candidates Trust HYRIND</h2>
+              <p style={{ color: '#475569', fontSize: '1.1rem', marginTop: '1rem', fontStyle: 'italic', maxWidth: '800px', margin: '1rem auto 0' }}>
+                "We believe in doing the right thing, in the right way, at the right time - to deliver the right results."
+              </p>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
@@ -635,31 +721,39 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Process Timeline */}
         <section id="process" className="process-section">
-          <div className="container">
+          <div className="container" style={{ maxWidth: '1400px' }}>
             <div className="section-header">
               <span className="section-tag">Our Workflow</span>
               <h2 className="section-title">Simple Steps to Career Launch</h2>
             </div>
 
-            <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-              {PROCESS_STEPS.map((step, index) => (
-                <div key={index}>
-                  <div className="step-container">
-                    <div className="step-circle">{step.step}</div>
-                    <div className="step-content">
-                      <h4 className="step-title">{step.title}</h4>
-                      <p className="step-detail">{step.detail}</p>
+            <div className="roadmap-container">
+              {/* Desktop Path SVG */}
+              <svg className="roadmap-path-svg" viewBox="0 0 1200 100" fill="none" preserveAspectRatio="none">
+                <path d="M0 50 Q 300 0, 600 50 T 1200 50" stroke="#3b82f6" strokeWidth="2" strokeDasharray="8 8" opacity="0.4" />
+              </svg>
+
+              <div className="roadmap-wrapper">
+                {PROCESS_STEPS.map((step, index) => (
+                  <div key={index} className="step-node">
+                    <div className="step-icon-wrap">
+                      <span className="step-number-tag">STEP 0{step.step}</span>
+                      <i className={
+                        index === 0 ? "bi bi-search" :
+                          index === 1 ? "bi bi-telephone" :
+                            index === 2 ? "bi bi-check-circle" :
+                              index === 3 ? "bi bi-person-badge" :
+                                "bi bi-rocket-takeoff"
+                      }></i>
+                    </div>
+                    <div className="step-info">
+                      <h4 className="step-label">{step.title}</h4>
+                      <p className="step-summary">{step.detail}</p>
                     </div>
                   </div>
-                  {index < PROCESS_STEPS.length - 1 && (
-                    <div className="arrow-connector">
-                      <i className="bi bi-arrow-down"></i>
-                    </div>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -672,7 +766,7 @@ const Home = () => {
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
               <Link to="/interest" className="btn-custom btn-primary-custom">Submit Interest</Link>
               <button
-                onClick={() => alert("Calendly integration coming soon! (Ravi will provide the API)")}
+                onClick={() => window.open("https://cal.com/hyrind/15min?layout=mobile", "_blank")}
                 className="btn-custom btn-outline-custom"
                 style={{ background: 'transparent' }}
               >
