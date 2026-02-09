@@ -552,18 +552,22 @@ const Home = () => {
         <section className="hero-section">
           <div className="container hero-content">
             <div>
-              <h1 className="hero-title">
-                Focus on Skills. <span style={{ color: '#ffd700' }}>Let Us Handle the Rest.</span>
+              <h1 className="hero-title" style={{ textAlign: 'center' }}>
+                <span style={{ display: 'block', fontWeight: '800' }}>Focus on Skills</span>
+                <span style={{ display: 'block', color: '#ffd700', fontWeight: '600' }}>Let Us Handle the Rest</span>
               </h1>
-              <p className="hero-subtitle" style={{ maxWidth: '850px', margin: '0 auto 1.5rem' }}>
-                We Market Your Profile. You Focus on Your Career.
+              <p className="hero-subtitle" style={{ maxWidth: '850px', margin: '0 auto 1.5rem', textAlign: 'center' }}>
+                We Market Your Profile. You Focus on Your Career Growth.
               </p>
-              <p className="hero-subtitle" style={{ maxWidth: '850px', margin: '0 auto 2.5rem' }}>
-                At HYRIND, we help talented candidates land full-time opportunities without the stress of self-marketing.
-                Our recruiter-led platform manages resume building, job submissions, recruiter connections, screening-call
-                preparation, and complete job search support.
-                Supporting F1 / OPT / STEM OPT, MS Students & Early-Career Professionals through expert profile marketing,
-                role-based training, and real interview preparation.
+              <p className="hero-subtitle" style={{ maxWidth: '850px', margin: '0 auto 2.5rem', textAlign: 'center' }}>
+                At HYRIND, we help candidates land full-time opportunities in the United States without the
+                stress of self-marketing. Our recruiter-led platform manages profile marketing, resume
+                optimization, job submissions, recruiter outreach, screening call preparation, and end-to-end job
+                search support.
+                <br /><br />
+                We support students, early-career professionals, and experienced candidates across the U.S.
+                by combining expert profile marketing, role-based skills training, and real-time interview
+                evaluation ensuring every candidate is positioned for the right opportunity at the right time.
               </p>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem' }}>
