@@ -424,6 +424,8 @@ export default function Navbar() {
         }
 
         .mobile-controls {
+          position: absolute;
+          right: 2%;
           display: flex;
           align-items: center;
           gap: 12px;
