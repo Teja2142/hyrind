@@ -622,7 +622,7 @@ export default function Navbar() {
                 Home
               </Link>
               <Link to="/about" className={`nav-link ${isActive("/about") ? "active" : ""}`}>
-                About
+                About Us
               </Link>
               {/* Services Dropdown */}
               <div className="services-container">
@@ -668,7 +668,7 @@ export default function Navbar() {
               </div>
 
               <Link to="/how-it-works" className={`nav-link ${isActive("/how-it-works") ? "active" : ""}`}>
-                How it works?
+                How it works
               </Link>
               <Link to="/reviews" className={`nav-link ${isActive("/reviews") ? "active" : ""}`}>
                 Reviews
@@ -849,7 +849,7 @@ export default function Navbar() {
               className={`mobile-nav-link ${isActive("/about") ? "active" : ""}`}
             >
               <span>ℹ️</span>
-              <span>About</span>
+              <span>About Us</span>
             </Link>
             <div className="mobile-section-header">Services</div>
             <Link
@@ -882,7 +882,7 @@ export default function Navbar() {
               className={`mobile-nav-link ${isActive("/how-it-works") ? "active" : ""}`}
             >
               <span>🔧</span>
-              <span>How it works?</span>
+              <span>How it works</span>
             </Link>
             <Link
               to="/reviews"

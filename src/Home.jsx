@@ -712,9 +712,9 @@ const Home = () => {
                   <p className="value-desc">
                     {service.description}
                   </p>
-                  <a href={service.link} className="btn-custom btn-primary-custom" style={{ marginTop: '1rem', display: 'block' }}>
+                  <Link to={service.link} className="btn-custom btn-primary-custom" style={{ marginTop: '1rem', display: 'block', textAlign: 'center' }}>
                     Learn More →
-                  </a>
+                  </Link>
                 </div>
               ))}
             </div>

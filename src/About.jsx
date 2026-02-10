@@ -13,10 +13,12 @@ const About = () => {
         <div className="hero-overlay"></div>
         <div className="container">
           <div className="hero-content">
-            <h1 className="hero-title">Who We Are</h1>
+            <h1 className="hero-title">About Us</h1>
             <p className="hero-description">
-              HYRIND is a talent marketing and job support platform created to help
-              international students bridge the gap between education and employment.
+              HYRIND is a talent marketing and job support platform built to bridge the gap between skills
+              and employment. While our core audience includes international students and early-career
+              professionals, we support any job seeker looking to market their profile effectively and secure
+              full-time opportunities in the U.S.
             </p>
           </div>
         </div>
@@ -35,28 +37,43 @@ const About = () => {
                   className="serve-image"
                 />
               </div>
-              <h3>F1 / OPT / STEM OPT Students</h3>
+              <h3>International Students (F1 / OPT / STEM OPT)</h3>
             </div>
             <div className="serve-card">
               <div className="serve-image-wrapper">
                 <img
                   src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80"
-                  alt="Graduates celebrating"
+                  alt="Graduates"
                   className="serve-image"
                 />
               </div>
-              <h3>Master's Graduates</h3>
+              <h3>Graduates</h3>
             </div>
             <div className="serve-card">
               <div className="serve-image-wrapper">
                 <img
                   src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80"
-                  alt="Young professionals"
+                  alt="Early & mid-career professionals"
                   className="serve-image"
                 />
               </div>
-              <h3>Early Career Professionals</h3>
+              <h3>Early & Mid-Career Professionals</h3>
             </div>
+            <div className="serve-card">
+              <div className="serve-image-wrapper">
+                <img
+                  src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80"
+                  alt="Job seekers"
+                  className="serve-image"
+                />
+              </div>
+              <h3>Job Seekers Seeking Structured Job Support</h3>
+            </div>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '40px' }}>
+            <p style={{ fontSize: '1.25rem', color: '#1976d2', fontWeight: '600', fontStyle: 'italic' }}>
+              “It doesn’t matter who you are - if you’re serious about your career, we’re here to support you.”
+            </p>
           </div>
         </div>
       </section>
@@ -72,8 +89,9 @@ const About = () => {
         <div className="container">
           <h2 className="section-title">Our Mission</h2>
           <p className="mission-text">
-            To empower job seekers with the tools, support, and representation they
-            need to get interview calls and secure opportunities.
+            Our mission is to empower job seekers with the tools, support, and representation they need to
+            secure interviews and meaningful career opportunities - so they can focus on building skills
+            while we focus on marketing their profile.
           </p>
         </div>
       </section>
@@ -90,7 +108,7 @@ const About = () => {
                 </svg>
               </div>
               <h3 className="approach-title">Recruiter-Driven Support</h3>
-              <p className="approach-text">Expert guidance from experienced recruiters who understand the market</p>
+              <p className="approach-text">Expert guidance from our recurring team who actively market your profile.</p>
             </div>
 
             <div className="approach-card">
@@ -99,8 +117,8 @@ const About = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
               </div>
-              <h3 className="approach-title">Personalized Skill Roadmaps</h3>
-              <p className="approach-text">Customized development plans tailored to your career goals</p>
+              <h3 className="approach-title">Personalized Candidate Roadmap</h3>
+              <p className="approach-text">Your career journey mapped out with role-based goals and clear timelines.</p>
             </div>
 
             <div className="approach-card">
@@ -109,8 +127,8 @@ const About = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
-              <h3 className="approach-title">Hands-On Training</h3>
-              <p className="approach-text">Practical sessions to prepare you for real-world interviews</p>
+              <h3 className="approach-title">Hands-On Interview & Skills Training</h3>
+              <p className="approach-text">Intensive mock calls and role-specific training sessions to make you client-ready.</p>
             </div>
 
             <div className="approach-card">
@@ -119,8 +137,18 @@ const About = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="approach-title">Transparent Process</h3>
-              <p className="approach-text">Clear communication at every step of your journey</p>
+              <h3 className="approach-title">End-to-End Job Process Support</h3>
+              <p className="approach-text">From profile setup to final job offer, we handle the logistics of your search.</p>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px', marginTop: '30px' }}>
+            <div className="approach-card" style={{ padding: '20px' }}>
+              <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>Resume optimization for every application</h4>
+              <p style={{ color: '#666' }}>We tailor your resume to the specific job description for maximum impact.</p>
+            </div>
+            <div className="approach-card" style={{ padding: '20px' }}>
+              <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>Role-based submissions only</h4>
+              <p style={{ color: '#666' }}>Quality over quantity. We only submit you for roles that align with your background.</p>
             </div>
           </div>
         </div>
@@ -141,7 +169,7 @@ const About = () => {
               </div>
               <div className="why-number">1</div>
               <h3 className="why-title">Expert Profile Validation</h3>
-              <p className="why-text">Admin-approved candidate profiles ensure quality and credibility for employers</p>
+              <p className="why-text">Rigorous screening and validation of your professional history to build hiring trust.</p>
             </div>
 
             <div className="why-card">
@@ -153,8 +181,8 @@ const About = () => {
                 />
               </div>
               <div className="why-number">2</div>
-              <h3 className="why-title">Professional Resume Building</h3>
-              <p className="why-text">Customized resumes designed to showcase your strengths and stand out</p>
+              <h3 className="why-title">Customized Resume Building Per Job</h3>
+              <p className="why-text">Strategic resume adjustments for every single submission to ensure high response rates.</p>
             </div>
 
             <div className="why-card">
@@ -166,21 +194,21 @@ const About = () => {
                 />
               </div>
               <div className="why-number">3</div>
-              <h3 className="why-title">Monthly Marketing Campaigns</h3>
-              <p className="why-text">Continuous profile promotion to our network of recruiters and employers</p>
+              <h3 className="why-title">Monthly Profile Marketing Campaigns</h3>
+              <p className="why-text">Active, subscription-based promotion of your profile to top tier recruiters and companies.</p>
             </div>
 
             <div className="why-card">
               <div className="why-image-wrapper">
                 <img
                   src="https://images.unsplash.com/photo-1553028826-f4804a6dba3b?w=800&q=80"
-                  alt="Dedicated career mentoring"
+                  alt="Dedicated mentoring"
                   className="why-image"
                 />
               </div>
               <div className="why-number">4</div>
-              <h3 className="why-title">Dedicated Career Support</h3>
-              <p className="why-text">One-on-one guidance throughout your entire job search journey</p>
+              <h3 className="why-title">Dedicated One-on-One Career Support</h3>
+              <p className="why-text">Personalized attention from career experts throughout your entire engagement.</p>
             </div>
 
             <div className="why-card">
@@ -192,21 +220,8 @@ const About = () => {
                 />
               </div>
               <div className="why-number">5</div>
-              <h3 className="why-title">Industry Connections</h3>
-              <p className="why-text">Access to our established network of hiring managers and companies</p>
-            </div>
-
-            <div className="why-card">
-              <div className="why-image-wrapper">
-                <img
-                  src="https://images.unsplash.com/photo-1552581234-26160f608093?w=800&q=80"
-                  alt="Success rate"
-                  className="why-image"
-                />
-              </div>
-              <div className="why-number">6</div>
-              <h3 className="why-title">Proven Success Rate</h3>
-              <p className="why-text">Track record of helping international students secure meaningful employment</p>
+              <h3 className="why-title">Industry Connections & Proven Results</h3>
+              <p className="why-text">Access to an extensive network of hirers with a documented track record of success.</p>
             </div>
           </div>
         </div>
@@ -220,9 +235,14 @@ const About = () => {
             <p className="cta-text">
               Join HYRIND today and take the first step towards securing your dream job in the US.
             </p>
-            <Link to="/register" className="cta-button">
-              Get Started
-            </Link>
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+              <Link to="/register" className="cta-button">
+                Get Started
+              </Link>
+              <Link to="/interest" className="cta-button" style={{ background: 'transparent', border: '2px solid white', color: 'white' }}>
+                Interest Form
+              </Link>
+            </div>
           </div>
         </div>
       </section>

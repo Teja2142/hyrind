@@ -438,8 +438,24 @@ const Services = () => {
             Our Career Services
           </h1>
           <p className="hero-subtitle fade-in-up" style={styles.heroSubtitle}>
-            Comprehensive solutions designed specifically for F-1 OPT holders to accelerate your career journey
+            Strategic career solutions that combine profile marketing, preparation, and recruiter support to help you move forward with confidence.
           </p>
+          <div className="fade-in-up" style={{
+            marginTop: '32px',
+            color: '#e0e7ff',
+            fontSize: '1.1rem',
+            lineHeight: '1.8',
+            maxWidth: '1000px',
+            margin: '32px auto 0',
+            textAlign: 'center'
+          }}>
+            <p>
+              At HYRIND, we don’t believe job searching should be stressful, confusing, or isolating. Our services are designed to support job seekers at every stage by combining recruiter-led profile marketing, interview preparation, and role-based skill development into a single, structured journey.
+            </p>
+            <p style={{ marginTop: '20px' }}>
+              While many of our candidates are international students and early-career professionals, our services are built to support any job seeker in the United States who wants their profile marketed professionally and prepared correctly for real hiring processes.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -509,7 +525,7 @@ const Services = () => {
           Ready to Start Your Career Journey?
         </h2>
         <p style={styles.ctaSubtitle}>
-          Join hundreds of Master's students who have successfully transitioned to their dream careers through our services.
+          Join hundreds of students, early-career professionals, and experienced candidates who have successfully transitioned to their dream careers through our services.
         </p>
         <div className="button-group" style={styles.buttonGroup}>
           <button className="btn-primary-custom" onClick={() => navigate('/register')} style={styles.primaryButton}>

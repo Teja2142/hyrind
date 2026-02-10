@@ -107,7 +107,7 @@ const Footer = () => {
           <div className="footer-column">
             <h3 className="footer-title">Quick Links</h3>
             <p className="footer-link"><Link to="/">Home</Link></p>
-            <p className="footer-link"><Link to="/about">About us</Link></p>
+            <p className="footer-link"><Link to="/about">About Us</Link></p>
             <p className="footer-link"><Link to="/#homepage-services">Services</Link></p>
             <p className="footer-link"><Link to="/how-it-works">How it works</Link></p>
             <p className="footer-link"><Link to="/reviews">Reviews</Link></p>
@@ -116,25 +116,27 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Solutions */}
+          {/* Our Solutions */}
           <div className="footer-column">
-            <h3 className="footer-title">Solutions</h3>
-            <p className="footer-link">OPT Hiring Automation</p>
-            <p className="footer-link">Digital Document Workflow</p>
-            <p className="footer-link">Compliance Tracking</p>
-            <p className="footer-link">Employee Management</p>
-            <p className="footer-link">Secure Data Handling</p>
+            <h3 className="footer-title">Our Solutions</h3>
+            <p className="footer-link">End-to-End Job Application Support</p>
+            <p className="footer-link">Resume Optimization for Each Application</p>
+            <p className="footer-link">Recruiter-Led Profile Marketing</p>
+            <p className="footer-link">Candidate-Centric Support & Guidance</p>
+            <p className="footer-link">Secure Data Handling & Privacy Protection</p>
           </div>
 
           {/* QR Code */}
           <div className="footer-column">
             <h3 className="footer-title">Scan & Connect</h3>
-            <img
-              src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://hyrind.com"
-              alt="QR Code"
-              className="qr-box"
-            />
-            <p style={{ marginTop: "10px", fontSize: "14px" }}>Scan me!</p>
+            <Link to="/scan-and-connect">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.origin}/scan-and-connect`}
+                alt="QR Code"
+                className="qr-box"
+              />
+            </Link>
+            <p style={{ marginTop: "10px", fontSize: "14px" }}>Stay updated with job tips!</p>
           </div>
 
           {/* Contact Section */}
