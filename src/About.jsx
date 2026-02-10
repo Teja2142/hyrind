@@ -79,20 +79,37 @@ const About = () => {
       </section>
 
       {/* Our Mission */}
-      <section className="mission-section">
-        <img
-          src="https://images.unsplash.com/photo-1522071901873-411886a10004?w=1920&q=80"
-          alt="Team working together"
-          className="mission-bg-image"
-        />
-        <div className="mission-overlay"></div>
+      <section className="mission-section-v2">
         <div className="container">
-          <h2 className="section-title">Our Mission</h2>
-          <p className="mission-text">
-            Our mission is to empower job seekers with the tools, support, and representation they need to
-            secure interviews and meaningful career opportunities - so they can focus on building skills
-            while we focus on marketing their profile.
-          </p>
+          <div className="mission-grid-v2">
+            <div className="mission-content-v2">
+              <span className="mission-badge-v2">Purpose Driven</span>
+              <h2 className="mission-title-v2">Our Mission</h2>
+              <div className="mission-text-wrapper-v2">
+                <i className="quote-icon-v2">“</i>
+                <p className="mission-text-v2">
+                  Our mission is to empower job seekers with the <strong>tools, support, and representation</strong> they need to
+                  secure interviews and meaningful career opportunities - so they can focus on <strong>building skills</strong> while we focus on <strong>marketing their profile.</strong>
+                </p>
+              </div>
+            </div>
+            <div className="mission-visual-v2">
+              <div className="image-stack-v2">
+                <img
+                  src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80"
+                  alt="Vision and Mission"
+                  className="main-image-v2"
+                />
+                <div className="stat-card-v2">
+                  <span className="stat-icon-v2">🎯</span>
+                  <div className="stat-info-v2">
+                    <span className="stat-label-v2">Our Strategy</span>
+                    <span className="stat-value-v2">Focused Growth</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -453,83 +470,161 @@ const About = () => {
           color: #0d47a1;
         }
 
-        /* Mission Section */
-        .mission-section {
-          padding: 100px 0;
+        /* Mission Section V2 */
+        .mission-section-v2 {
+          padding: 120px 0;
+          background: #ffffff;
           position: relative;
           overflow: hidden;
-          min-height: 500px;
-          display: flex;
+        }
+
+        .mission-grid-v2 {
+          display: grid;
+          grid-template-columns: 1.2fr 1fr;
+          gap: 60px;
           align-items: center;
         }
 
-        .mission-bg-image {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          z-index: 0;
+        .mission-badge-v2 {
+          display: inline-block;
+          padding: 8px 20px;
+          background: #e3f2fd;
+          color: #1976d2;
+          border-radius: 50px;
+          font-size: 0.9rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-bottom: 20px;
         }
 
-        .mission-overlay {
+        .mission-title-v2 {
+          font-size: 3rem;
+          font-weight: 800;
+          color: #0d47a1;
+          margin-bottom: 30px;
+          position: relative;
+        }
+
+        .mission-text-wrapper-v2 {
+          position: relative;
+          padding-left: 40px;
+        }
+
+        .quote-icon-v2 {
           position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.5) 100%);
+          left: -10px;
+          top: -20px;
+          font-size: 8rem;
+          color: #1976d2;
+          opacity: 0.1;
+          font-family: serif;
+          font-style: normal;
+          line-height: 1;
+        }
+
+        .mission-text-v2 {
+          font-size: 1.4rem;
+          line-height: 1.6;
+          color: #374151;
+          margin-bottom: 24px;
+        }
+
+        .mission-text-v2 strong {
+          color: #1976d2;
+          font-weight: 700;
+        }
+
+        .mission-text-v2.secondary {
+          font-size: 1.1rem;
+          color: #6b7280;
+          border-left: 4px solid #1976d2;
+          padding-left: 20px;
+        }
+
+        .mission-visual-v2 {
+          position: relative;
+        }
+
+        .image-stack-v2 {
+          position: relative;
           z-index: 1;
         }
 
-        .mission-section .container {
-          position: relative;
-          z-index: 2;
+        .main-image-v2 {
+          width: 100%;
+          border-radius: 30px;
+          box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+          transition: transform 0.5s ease;
         }
 
-        .mission-section::before {
-          content: '';
+        .image-stack-v2:hover .main-image-v2 {
+          transform: translateY(-10px);
+        }
+
+        .stat-card-v2 {
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background: linear-gradient(90deg, transparent, #2196f3, transparent);
-          z-index: 2;
+          bottom: -30px;
+          left: -30px;
+          background: #ffffff;
+          padding: 20px 30px;
+          border-radius: 20px;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          border: 1px solid #f1f5f9;
+          animation: floatStat 3s ease-in-out infinite;
         }
 
-        .mission-text {
-          font-size: 1.3rem;
-          line-height: 1.8;
-          color: #555555;
-          text-align: center;
-          max-width: 900px;
-          margin: 0 auto;
-          padding: 30px;
-          background: linear-gradient(135deg, #f5f9ff 0%, #e3f2fd 100%);
-          border-radius: 16px;
-          border: 2px solid #bbdefb;
-          position: relative;
-          animation: floatIn 1s ease-out;
-          box-shadow: 0 8px 24px rgba(33, 150, 243, 0.15);
-          transition: all 0.4s ease;
+        @keyframes floatStat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
         }
 
-        .mission-text:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 12px 32px rgba(33, 150, 243, 0.25);
-          border-color: #2196f3;
+        .stat-icon-v2 {
+          font-size: 2rem;
         }
 
-        @keyframes floatIn {
-          from {
-            opacity: 0;
-            transform: translateY(30px) scale(0.95);
+        .stat-info-v2 {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .stat-label-v2 {
+          font-size: 0.8rem;
+          color: #64748b;
+          text-transform: uppercase;
+          font-weight: 600;
+        }
+
+        .stat-value-v2 {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #0d47a1;
+        }
+
+        @media (max-width: 991px) {
+          .mission-grid-v2 {
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: 40px;
           }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
+          .mission-text-wrapper-v2 {
+            padding-left: 0;
+          }
+          .mission-text-v2.secondary {
+            border-left: none;
+            padding-left: 0;
+          }
+          .stat-card-v2 {
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -20px;
+          }
+          @keyframes floatStat {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
           }
         }
 

@@ -1,769 +1,448 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Target,
+  Mic,
+  GraduationCap,
+  Sparkles,
+  ArrowRight,
+  CheckCircle2,
+  TrendingUp,
+  BrainCircuit,
+  Rocket
+} from 'lucide-react';
 
 const Services = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const services = [
     {
       id: 1,
-      title: "Profile Marketing",
       anchor: "profile-marketing",
-      description: "Strategic marketing of your profile to potential employers with recruiter assignment and role-based submissions. Our team works tirelessly to position you as the ideal candidate for your target roles.",
-      expandedContent: "Our Profile Marketing service goes beyond traditional job applications. We leverage our extensive network of industry connections and proven marketing strategies to ensure your profile reaches the right decision-makers. With personalized recruiter support, your resume is carefully tailored for each opportunity, highlighting your unique strengths and experiences. Our CRM tracking system provides complete transparency, allowing you to monitor every submission and interaction. We conduct monthly strategic campaigns that position you as a top candidate in your field, significantly increasing your chances of landing interviews with premier employers.",
-      icon: "🎯",
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop",
+      title: "Recruiter-Led Profile Marketing",
+      badge: "Most Popular",
+      icon: <Target className="service-icon-svg" />,
+      description: "Strategic marketing of your profile to potential employers with dedicated recruiter assignment and role-based submissions.",
+      longDesc: "Our Profile Marketing service goes beyond traditional job applications. We leverage our extensive network of industry connections and proven marketing strategies to ensure your profile reaches the right decision-makers. With personalized recruiter support, your resume is carefully tailored for each opportunity, highlighting your unique strengths and experiences.",
       features: [
-        {
-          title: "Dedicated Recruiter Assignment",
-          desc: "Get paired with an experienced recruiter who understands your career goals",
-          image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=400&fit=crop"
-        },
-        {
-          title: "Resume Optimization",
-          desc: "Tailored resume refinement for each role submission to maximize impact",
-          image: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=600&h=400&fit=crop"
-        },
-        {
-          title: "Role-Based Submissions",
-          desc: "Strategic job applications aligned with your skills and experience",
-          image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=400&fit=crop"
-        },
-        {
-          title: "Monthly Marketing Campaigns",
-          desc: "Regular outreach to hiring managers and decision-makers in your field",
-          image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop"
-        },
-        {
-          title: "CRM Integration Tracking",
-          desc: "Real-time visibility into all your applications and employer interactions",
-          image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop"
-        }
+        "Dedicated Recruiter Assignment",
+        "Strategic Resume Optimization",
+        "Role-Based Direct Submissions",
+        "Monthly Marketing Campaigns",
+        "Real-time CRM Progress Tracking"
       ],
-      link: "/profile-marketing"
+      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
+      accent: "#2563eb"
     },
     {
       id: 2,
-      title: "Interview & Screening Call Practice",
       anchor: "interview-practice",
-      description: "Comprehensive mock interviews and screening call preparation with detailed feedback. Build confidence and refine your communication skills with industry professionals who know what employers are looking for.",
-      expandedContent: "Success in interviews requires more than just technical knowledge—it demands confidence, clear communication, and the ability to showcase your value effectively. Our interview practice sessions replicate real-world scenarios with experienced industry professionals who provide actionable feedback. We help you master the STAR method, handle behavioral questions with ease, and communicate your achievements compellingly. Through multiple practice sessions, you'll overcome interview anxiety, refine your body language, and develop the professional presence that hiring managers seek. Our proven approach has helped hundreds of candidates transform from nervous interviewees into confident professionals who excel in high-pressure situations.",
-      icon: "🎤",
-      image: "https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=800&h=600&fit=crop",
+      title: "Interview & Screening Practice",
+      badge: "High Impact",
+      icon: <Mic className="service-icon-svg" />,
+      description: "Comprehensive mock interviews and screening call preparation with detailed real-time feedback from industry professionals.",
+      longDesc: "Success in interviews requires more than just technical knowledge—it demands confidence and clear communication. Our sessions replicate real-world scenarios with experienced professionals who provide actionable feedback. We help you master the STAR method and handle behavioral questions with ease.",
       features: [
-        {
-          title: "Mock Client Call Sessions",
-          desc: "Realistic interview simulations with experienced professionals",
-          image: "https://images.unsplash.com/photo-1560439514-4e9645039924?w=600&h=400&fit=crop"
-        },
-        {
-          title: "Real-Time Feedback Process",
-          desc: "Immediate constructive feedback on your performance and areas to improve",
-          image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&h=400&fit=crop"
-        },
-        {
-          title: "Communication Improvement",
-          desc: "Enhance your articulation, body language, and professional presence",
-          image: "https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=600&h=400&fit=crop"
-        },
-        {
-          title: "Interview Technique Refinement",
-          desc: "Master the STAR method, behavioral questions, and technical assessments",
-          image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=600&h=400&fit=crop"
-        },
-        {
-          title: "Confidence Building",
-          desc: "Overcome interview anxiety with proven strategies and practice",
-          image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=400&fit=crop"
-        }
+        "Mock Client Call Simulations",
+        "Real-Time Constructive Feedback",
+        "Communication & Presence Coaching",
+        "STAR Method & Behavioral Training",
+        "Confidence & Anxiety Management"
       ],
-      link: "/interview-practice"
+      image: "https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=800&q=80",
+      accent: "#0d47a1"
     },
     {
       id: 3,
-      title: "Skills Training",
       anchor: "skills-training",
-      description: "Role-based skills development with curated learning paths and weekly training tasks. Stay competitive in your field with targeted upskilling guided by industry experts.",
-      expandedContent: "The tech landscape evolves rapidly, and staying competitive requires continuous skill development. Our Skills Training program offers customized learning paths designed specifically for your target roles and career goals. Recruiters curate high-quality resources based on current market demands and emerging trends in your field. You'll receive weekly training tasks that build practical skills and create portfolio-worthy projects. With centralized access to all materials through Google Drive and systematic progress tracking, you'll see measurable improvement in your capabilities. Our milestone-based approach ensures you're always moving forward, gaining the specific skills that employers are actively seeking in candidates.",
-      icon: "🎓",
-      image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&h=600&fit=crop",
+      title: "Role-Based Skills Training",
+      badge: "Strategic",
+      icon: <GraduationCap className="service-icon-svg" />,
+      description: "Development with curated learning paths and weekly training tasks designed to meet specific job market demands.",
+      longDesc: "The tech landscape evolves rapidly. Our Skills Training program offers customized learning paths designed specifically for your target roles and career goals. You'll receive weekly training tasks that build practical skills and create portfolio-worthy projects verified by experts.",
       features: [
-        {
-          title: "Role-Specific Skill Roadmaps",
-          desc: "Customized learning paths designed for your target job requirements",
-          image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&h=400&fit=crop"
-        },
-        {
-          title: "Recruiter-Uploaded Resources",
-          desc: "Access curated materials selected by recruiters based on market demands",
-          image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=400&fit=crop"
-        },
-        {
-          title: "Google Drive Material Access",
-          desc: "Centralized repository of training materials, guides, and reference docs",
-          image: "https://images.unsplash.com/photo-1544396821-4dd40b938ad3?w=600&h=400&fit=crop"
-        },
-        {
-          title: "Weekly Training Tasks",
-          desc: "Structured assignments to build practical skills and portfolio projects",
-          image: "https://images.unsplash.com/photo-1517842645767-c639042777db?w=600&h=400&fit=crop"
-        },
-        {
-          title: "Progress Tracking & Milestones",
-          desc: "Monitor your skill development journey with clear benchmarks and goals",
-          image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop"
-        }
+        "Role-Specific Skill Roadmaps",
+        "Curated Recruiter Resources",
+        "Weekly Practical Training Tasks",
+        "Portfolio Project Guidance",
+        "Milestone Progress Tracking"
       ],
-      link: "/skills-training"
+      image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80",
+      accent: "#3b82f6"
     }
   ];
 
   return (
-    <div style={styles.container}>
+    <div className="services-page-v2">
       <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+        .services-page-v2 {
+          background-color: #fcfdfe;
+          color: #1e293b;
+          font-family: 'Outfit', sans-serif;
+          overflow-x: hidden;
         }
 
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            max-height: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            max-height: 500px;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-
-        @keyframes slideInLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes scaleIn {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-
-        @keyframes shimmer {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.8;
-          }
-        }
-
-        .fade-in-up {
-          animation: fadeInUp 0.6s ease-out;
-        }
-
-        .service-section {
-          opacity: 0;
-          animation: fadeInUp 0.8s ease-out forwards;
-        }
-
-        .expanded-content {
-          animation: slideDown 0.5s ease-out forwards;
-          overflow: hidden;
-        }
-
-        .service-section:nth-child(1) { animation-delay: 0.2s; }
-        .service-section:nth-child(2) { animation-delay: 0.3s; }
-        .service-section:nth-child(3) { animation-delay: 0.4s; }
-
-        .service-header-img {
-          transition: all 0.5s ease;
+        /* Hero */
+        .services-hero-v2 {
+          background: radial-gradient(circle at top right, #1e40af, #0d47a1);
+          color: white;
+          padding: 160px 24px 100px;
+          text-align: center;
+          clip-path: ellipse(150% 100% at 50% 0%);
           position: relative;
-          overflow: hidden;
         }
 
-        .service-header-img::before {
+        .services-hero-v2::before {
           content: '';
           position: absolute;
-          top: 0;
-          left: 0;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: url('https://www.transparenttextures.com/patterns/cubes.png');
+          opacity: 0.1;
+          pointer-events: none;
+        }
+
+        .hero-content-v2 {
+          max-width: 900px;
+          margin: 0 auto;
+          position: relative;
+          z-index: 10;
+        }
+
+        .hero-title-v2 {
+          font-size: clamp(3rem, 8vw, 4.5rem);
+          font-weight: 800;
+          margin-bottom: 24px;
+          letter-spacing: -0.04em;
+          line-height: 1.1;
+        }
+
+        .hero-subtitle-v2 {
+          font-size: 1.25rem;
+          opacity: 0.9;
+          font-weight: 300;
+          max-width: 700px;
+          margin: 0 auto;
+          line-height: 1.6;
+        }
+
+        /* Intro Section */
+        .services-intro-v2 {
+          padding: 100px 24px;
+          text-align: center;
+          background: white;
+        }
+
+        .intro-container-v2 {
+          max-width: 800px;
+          margin: 0 auto;
+        }
+
+        .intro-text-v2 {
+          font-size: 1.25rem;
+          line-height: 1.8;
+          color: #475569;
+          font-weight: 400;
+        }
+
+        /* Services Grid */
+        .services-main-grid-v2 {
+          padding: 80px 24px;
+          background: #f8fafc;
+        }
+
+        .services-container-v2 {
+          max-width: 1200px;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+          gap: 120px;
+        }
+
+        .service-row-v2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 80px;
+          align-items: center;
+        }
+
+        .service-row-v2:nth-child(even) {
+          direction: rtl;
+        }
+
+        .service-row-v2:nth-child(even) .service-content-v2 {
+          direction: ltr;
+        }
+
+        .service-content-v2 {
+          position: relative;
+        }
+
+        .service-meta-v2 {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          margin-bottom: 20px;
+        }
+
+        .service-badge-v2 {
+          background: #eff6ff;
+          color: #2563eb;
+          padding: 6px 16px;
+          border-radius: 50px;
+          font-size: 0.85rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .service-title-v2 {
+          font-size: 2.75rem;
+          font-weight: 800;
+          color: #0f172a;
+          margin-bottom: 24px;
+          line-height: 1.2;
+        }
+
+        .service-desc-v2 {
+          font-size: 1.15rem;
+          line-height: 1.7;
+          color: #475569;
+          margin-bottom: 30px;
+        }
+
+        .feature-list-v2 {
+          list-style: none;
+          padding: 0;
+          margin-bottom: 40px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .feature-item-v2 {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 1.1rem;
+          color: #1e293b;
+          font-weight: 500;
+        }
+
+        .check-icon-v2 {
+          color: #2563eb;
+          flex-shrink: 0;
+        }
+
+        .service-visual-v2 {
+          position: relative;
+        }
+
+        .image-wrapper-v2 {
+          border-radius: 40px;
+          overflow: hidden;
+          box-shadow: 0 40px 80px rgba(13, 71, 161, 0.15);
+          aspect-ratio: 4/3;
+        }
+
+        .service-img-v2 {
           width: 100%;
           height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-          transform: translateX(-100%);
-          z-index: 1;
+          object-fit: cover;
+          transition: transform 0.8s ease;
         }
 
-        .service-header-img:hover::before {
-          animation: shimmer 1s ease-in-out;
-        }
-
-        .service-header-img:hover img {
+        .service-visual-v2:hover .service-img-v2 {
           transform: scale(1.1);
         }
 
-        .feature-card {
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          opacity: 0;
-          animation: scaleIn 0.5s ease-out forwards;
+        .floating-icon-v2 {
+          position: absolute;
+          top: -30px;
+          left: -30px;
+          width: 80px;
+          height: 80px;
+          background: white;
+          border-radius: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          color: #2563eb;
+          z-index: 5;
+          animation: floatAnimation 4s ease-in-out infinite;
+        }
+
+        @keyframes floatAnimation {
+          0%, 100% { transform: translateY(0) rotate(0); }
+          50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        /* Final CTA */
+        .services-cta-v2 {
+          margin: 100px 24px;
+          background: linear-gradient(135deg, #0d47a1 0%, #1e40af 100%);
+          padding: 120px 48px;
+          border-radius: 60px;
+          text-align: center;
+          color: white;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .cta-inner-v2 {
+          max-width: 800px;
+          margin: 0 auto;
+          position: relative;
+          z-index: 10;
+        }
+
+        .cta-title-v2 {
+          font-size: 3.5rem;
+          font-weight: 800;
+          margin-bottom: 24px;
+        }
+
+        .btn-premium-v2 {
+          background: white;
+          color: #0d47a1;
+          padding: 20px 50px;
+          border-radius: 20px;
+          font-weight: 800;
+          font-size: 1.15rem;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+          border: none;
           cursor: pointer;
         }
 
-        .feature-card:nth-child(1) { animation-delay: 0.1s; }
-        .feature-card:nth-child(2) { animation-delay: 0.2s; }
-        .feature-card:nth-child(3) { animation-delay: 0.3s; }
-        .feature-card:nth-child(4) { animation-delay: 0.4s; }
-        .feature-card:nth-child(5) { animation-delay: 0.5s; }
-
-        .feature-card:hover {
-          transform: translateY(-10px) rotate(1deg);
-          box-shadow: 0 20px 40px rgba(37, 99, 235, 0.25);
+        .btn-premium-v2:hover {
+          transform: translateY(-5px) scale(1.02);
+          box-shadow: 0 30px 60px rgba(0,0,0,0.25);
         }
 
-        .feature-card:hover img {
-          transform: scale(1.08);
-          filter: brightness(1.15);
-        }
-
-        .feature-card:hover .feature-number {
-          transform: scale(1.2) rotate(360deg);
-          box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
-        }
-
-        .feature-card:hover .feature-title {
-          color: #2563eb;
-        }
-
-        .feature-card img {
-          transition: all 0.4s ease;
-        }
-
-        .feature-number {
-          transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        .feature-title {
-          transition: color 0.3s ease;
-        }
-
-        .btn-primary-custom {
-          transition: all 0.3s ease;
-          position: relative;
-          overflow: hidden;
-          z-index: 1;
-        }
-
-        .btn-primary-custom::before {
-          content: '';
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 0;
-          height: 0;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.3);
-          transform: translate(-50%, -50%);
-          transition: width 0.6s, height 0.6s;
-          z-index: -1;
-        }
-
-        .btn-primary-custom:hover::before {
-          width: 400px;
-          height: 400px;
-        }
-
-        .btn-primary-custom:hover {
-          transform: translateY(-3px) scale(1.02);
-          box-shadow: 0 12px 30px rgba(37, 99, 235, 0.5);
-        }
-
-        .btn-primary-custom:active {
-          transform: translateY(-1px) scale(0.98);
-        }
-
-        .btn-outline-custom {
-          transition: all 0.3s ease;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .btn-outline-custom::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.15), transparent);
-          transform: translateX(-100%);
-        }
-
-        .btn-outline-custom:hover::before {
-          animation: shimmer 0.8s ease-in-out;
-        }
-
-        .btn-outline-custom:hover {
-          transform: translateY(-3px) scale(1.02);
-          background: rgba(37, 99, 235, 0.1);
-          border-color: #2563eb;
-          box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
-        }
-
-        .btn-outline-custom:active {
-          transform: translateY(-1px) scale(0.98);
-        }
-
-        .icon-wrapper-large {
-          animation: float 3s ease-in-out infinite;
-          transition: all 0.4s ease;
-          display: inline-block;
-        }
-
-        .service-header-content:hover .icon-wrapper-large {
-          transform: scale(1.15) rotate(10deg);
-          animation: none;
-        }
-
-        .cta-section-animated {
-          animation: pulse 3s ease-in-out infinite;
-        }
-
-        @media (max-width: 768px) {
-          .hero-title {
-            font-size: 2rem !important;
+        @media (max-width: 991px) {
+          .service-row-v2 {
+            grid-template-columns: 1fr;
+            gap: 60px;
+            text-align: center;
           }
-          
-          .hero-subtitle {
-            font-size: 1rem !important;
+          .service-row-v2:nth-child(even) {
+            direction: ltr;
           }
-
-          .service-header {
-            flex-direction: column !important;
+          .service-meta-v2 {
+            justify-content: center;
           }
-
-          .service-section-title {
-            font-size: 1.8rem !important;
+          .feature-item-v2 {
+            justify-content: center;
           }
-
-          .feature-card {
-            width: 100% !important;
-            max-width: 100% !important;
+          .floating-icon-v2 {
+            left: 50%;
+            transform: translateX(-50%);
+            top: -40px;
           }
-
-          .services-container {
-            padding: 40px 20px !important;
+          @keyframes floatAnimation {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-15px); }
           }
-
-          .service-section {
-            padding: 40px 20px !important;
-            margin-bottom: 30px !important;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .hero-title {
-            font-size: 1.5rem !important;
-          }
-
-          .cta-title {
-            font-size: 1.8rem !important;
-          }
-
-          .button-group {
-            flex-direction: column !important;
-          }
-
-          .services-container {
-            padding: 30px 15px !important;
-          }
-
-          .service-section {
-            padding: 30px 15px !important;
+          .cta-title-v2 {
+            font-size: 2.5rem;
           }
         }
       `}</style>
 
-      <div style={styles.heroSection}>
-        <div style={styles.heroContent}>
-          <h1 className="hero-title fade-in-up" style={styles.heroTitle}>
-            Our Career Services
-          </h1>
-          <p className="hero-subtitle fade-in-up" style={styles.heroSubtitle}>
+      {/* Hero */}
+      <section className="services-hero-v2">
+        <div className="hero-content-v2">
+          <h1 className="hero-title-v2">Our Career Services</h1>
+          <p className="hero-subtitle-v2">
             Strategic career solutions that combine profile marketing, preparation, and recruiter support to help you move forward with confidence.
           </p>
-          <div className="fade-in-up" style={{
-            marginTop: '32px',
-            color: '#e0e7ff',
-            fontSize: '1.1rem',
-            lineHeight: '1.8',
-            maxWidth: '1000px',
-            margin: '32px auto 0',
-            textAlign: 'center'
-          }}>
-            <p>
-              At HYRIND, we don’t believe job searching should be stressful, confusing, or isolating. Our services are designed to support job seekers at every stage by combining recruiter-led profile marketing, interview preparation, and role-based skill development into a single, structured journey.
-            </p>
-            <p style={{ marginTop: '20px' }}>
-              While many of our candidates are international students and early-career professionals, our services are built to support any job seeker in the United States who wants their profile marketed professionally and prepared correctly for real hiring processes.
-            </p>
-          </div>
         </div>
-      </div>
+      </section>
 
-      <div style={styles.servicesContainer}>
-        {services.map((service, index) => (
-          <div key={service.id} id={service.anchor} className="service-section" style={styles.serviceSection}>
-            <div
-              className="service-header"
-              style={{
-                ...styles.serviceHeader,
-                flexDirection: index % 2 === 0 ? 'row' : 'row-reverse'
-              }}
+      {/* Intro */}
+      <section className="services-intro-v2">
+        <div className="intro-container-v2">
+          <p className="intro-text-v2" style={{ marginBottom: '24px' }}>
+            At HYRIND, we don’t believe job searching should be stressful, confusing, or isolating. Our services are designed to support job seekers at every stage by combining recruiter-led profile marketing, interview preparation, and role-based skill development into a single, structured journey.
+          </p>
+          <p className="intro-text-v2">
+            While many of our candidates are international students and early-career professionals, our services are built to support any job seeker in the United States who wants their profile marketed professionally and prepared correctly for real hiring processes.
+          </p>
+          <div style={{ height: '5px', width: '80px', background: 'linear-gradient(90deg, #2563eb, #0d47a1)', margin: '40px auto 0', borderRadius: '10px' }}></div>
+        </div>
+      </section>
+
+      {/* Main Services */}
+      <section className="services-main-grid-v2">
+        <div className="services-container-v2">
+          {services.map((service, index) => (
+            <div key={service.id} id={service.anchor} className="service-row-v2">
+              <div className="service-content-v2">
+                <div className="service-meta-v2">
+                  <span className="service-badge-v2">{service.badge}</span>
+                </div>
+                <h2 className="service-title-v2">{service.title}</h2>
+                <p className="service-desc-v2">{service.longDesc}</p>
+                <ul className="feature-list-v2">
+                  {service.features.map((feature, fIndex) => (
+                    <li key={fIndex} className="feature-item-v2">
+                      <CheckCircle2 className="check-icon-v2" size={22} />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <button className="btn-premium-v2" onClick={() => navigate('/register')}>
+                  Get Started Today <ArrowRight size={20} />
+                </button>
+              </div>
+
+              <div className="service-visual-v2">
+                <div className="floating-icon-v2">
+                  {React.cloneElement(service.icon, { size: 36 })}
+                </div>
+                <div className="image-wrapper-v2">
+                  <img src={service.image} alt={service.title} className="service-img-v2" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="services-cta-v2">
+        <div className="cta-inner-v2">
+          <h2 className="cta-title-v2">Ready to Secure Your Next Role?</h2>
+          <p style={{ fontSize: '1.25rem', marginBottom: '40px', opacity: 0.9 }}>
+            Join the elite community of HYRIND candidates who are currently receiving real interview opportunities and recruiter callbacks.
+          </p>
+          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button className="btn-premium-v2" onClick={() => navigate('/register')}>
+              Register Now <Rocket size={22} />
+            </button>
+            <button
+              className="btn-premium-v2"
+              style={{ background: 'transparent', color: 'white', border: '2px solid white' }}
+              onClick={() => navigate('/interest')}
             >
-              <div className="service-header-content" style={styles.serviceHeaderContent}>
-                <div className="icon-wrapper-large" style={styles.iconWrapperLarge}>
-                  {service.icon}
-                </div>
-                <h2 className="service-section-title" style={styles.serviceSectionTitle}>
-                  {service.title}
-                </h2>
-                <p style={styles.serviceSectionDescription}>
-                  {service.description}
-                </p>
-                <div style={styles.expandedContent}>
-                  <p style={styles.expandedText}>{service.expandedContent}</p>
-                </div>
-              </div>
-              <div className="service-header-img" style={styles.serviceHeaderImage}>
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  style={styles.headerImg}
-                />
-              </div>
-            </div>
-
-            <div className="features-grid" style={styles.featuresGrid}>
-              {service.features.map((feature, idx) => (
-                <div key={idx} className="feature-card" style={styles.featureCard}>
-                  <div style={styles.featureImageWrapper}>
-                    <img
-                      src={feature.image}
-                      alt={feature.title}
-                      style={styles.featureImage}
-                    />
-                  </div>
-                  <div style={styles.featureContent}>
-                    <h4 className="feature-title" style={styles.featureTitle}>
-                      {feature.title}
-                    </h4>
-                    <p style={styles.featureDescription}>
-                      {feature.desc}
-                    </p>
-                  </div>
-                  <div className="feature-number" style={styles.featureNumber}>
-                    {idx + 1}
-                  </div>
-                </div>
-              ))}
-            </div>
+              Submit Interest <Sparkles size={22} />
+            </button>
           </div>
-        ))}
-      </div>
-
-      <div style={styles.ctaSection}>
-        <h2 className="cta-title" style={styles.ctaTitle}>
-          Ready to Start Your Career Journey?
-        </h2>
-        <p style={styles.ctaSubtitle}>
-          Join hundreds of students, early-career professionals, and experienced candidates who have successfully transitioned to their dream careers through our services.
-        </p>
-        <div className="button-group" style={styles.buttonGroup}>
-          <button className="btn-primary-custom" onClick={() => navigate('/register')} style={styles.primaryButton}>
-            Get Started Today
-          </button>
-          <button className="btn-outline-custom" onClick={() => navigate('/how-it-works#step-1')} style={styles.outlineButton}>
-            Learn More
-          </button>
         </div>
-      </div>
+      </section>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    width: '100%',
-    minHeight: '100vh',
-    background: '#ffffff',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-  },
-  heroSection: {
-    padding: '100px 20px 80px',
-    textAlign: 'center',
-    background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.7) 0%, rgba(29, 78, 216, 0.7) 100%), url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&h=1080&fit=crop")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundAttachment: 'fixed',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  heroContent: {
-    maxWidth: '900px',
-    margin: '0 auto',
-    zIndex: 1,
-    position: 'relative',
-  },
-  heroTitle: {
-    fontSize: '3.5rem',
-    fontWeight: '800',
-    marginBottom: '24px',
-    color: '#ffffff',
-    lineHeight: '1.2',
-  },
-  heroSubtitle: {
-    fontSize: '1.25rem',
-    color: '#e0e7ff',
-    marginBottom: '0',
-    lineHeight: '1.6',
-  },
-  servicesContainer: {
-    background: '#f8fafc',
-    padding: '80px 40px',
-  },
-  serviceSection: {
-    maxWidth: '1400px',
-    margin: '0 auto 0',
-    padding: '60px 40px',
-    background: '#ffffff',
-    borderRadius: '24px',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.08)',
-    marginBottom: '40px',
-    border: '2px solid #e0e7ff',
-  },
-  serviceHeader: {
-    display: 'flex',
-    gap: '60px',
-    alignItems: 'center',
-    marginBottom: '60px',
-    flexWrap: 'wrap',
-  },
-  serviceHeaderContent: {
-    flex: '1',
-    minWidth: '300px',
-  },
-  iconWrapperLarge: {
-    fontSize: '5rem',
-    marginBottom: '24px',
-  },
-  serviceSectionTitle: {
-    fontSize: '2.5rem',
-    fontWeight: '800',
-    marginBottom: '20px',
-    color: '#1e293b',
-    lineHeight: '1.2',
-  },
-  serviceSectionDescription: {
-    fontSize: '1.1rem',
-    color: '#475569',
-    lineHeight: '1.8',
-    marginBottom: '32px',
-  },
-  learnMoreButton: {
-    padding: '16px 32px',
-    fontSize: '1rem',
-    fontWeight: '600',
-    border: 'none',
-    borderRadius: '12px',
-    background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-    color: '#ffffff',
-    cursor: 'pointer',
-    marginTop: '16px',
-  },
-  expandedContent: {
-    marginTop: '24px',
-    marginBottom: '8px',
-  },
-  expandedText: {
-    fontSize: '1.05rem',
-    color: '#334155',
-    lineHeight: '1.8',
-    padding: '20px',
-    background: '#f1f5f9',
-    borderRadius: '12px',
-    borderLeft: '4px solid #2563eb',
-    margin: 0,
-  },
-  serviceHeaderImage: {
-    flex: '1',
-    minWidth: '300px',
-    borderRadius: '20px',
-    overflow: 'hidden',
-    boxShadow: '0 20px 60px rgba(37, 99, 235, 0.2)',
-  },
-  headerImg: {
-    width: '100%',
-    height: '400px',
-    objectFit: 'cover',
-    display: 'block',
-    transition: 'transform 0.5s ease',
-  },
-  featuresGrid: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '30px',
-    justifyContent: 'center',
-    maxWidth: '1200px',
-    margin: '0 auto',
-  },
-  featureCard: {
-    background: '#ffffff',
-    borderRadius: '16px',
-    overflow: 'hidden',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-    position: 'relative',
-    width: 'calc(33.333% - 20px)',
-    minWidth: '280px',
-    maxWidth: '350px',
-  },
-  featureImageWrapper: {
-    width: '100%',
-    height: '200px',
-    overflow: 'hidden',
-  },
-  featureImage: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    display: 'block',
-  },
-  featureContent: {
-    padding: '24px',
-  },
-  featureTitle: {
-    fontSize: '1.2rem',
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: '12px',
-    lineHeight: '1.3',
-  },
-  featureDescription: {
-    fontSize: '0.95rem',
-    color: '#64748b',
-    lineHeight: '1.6',
-    margin: 0,
-  },
-  featureNumber: {
-    position: 'absolute',
-    top: '16px',
-    right: '16px',
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-    color: '#ffffff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.2rem',
-    fontWeight: '700',
-    boxShadow: '0 4px 15px rgba(37, 99, 235, 0.4)',
-  },
-  ctaSection: {
-    padding: '80px 20px',
-    textAlign: 'center',
-    background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-  },
-  ctaTitle: {
-    fontSize: '2.5rem',
-    fontWeight: '700',
-    marginBottom: '24px',
-    color: '#ffffff',
-  },
-  ctaSubtitle: {
-    fontSize: '1.2rem',
-    color: '#e0e7ff',
-    marginBottom: '40px',
-    maxWidth: '700px',
-    margin: '0 auto 40px',
-    lineHeight: '1.6',
-  },
-  buttonGroup: {
-    display: 'flex',
-    gap: '16px',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-  },
-  primaryButton: {
-    padding: '16px 40px',
-    fontSize: '1.1rem',
-    fontWeight: '600',
-    border: 'none',
-    borderRadius: '12px',
-    background: '#ffffff',
-    color: '#2563eb',
-    cursor: 'pointer',
-    boxShadow: '0 4px 15px rgba(255, 255, 255, 0.3)',
-  },
-  outlineButton: {
-    padding: '16px 40px',
-    fontSize: '1.1rem',
-    fontWeight: '600',
-    border: '2px solid #ffffff',
-    borderRadius: '12px',
-    background: 'transparent',
-    color: '#ffffff',
-    cursor: 'pointer',
-  },
 };
 
 export default Services;

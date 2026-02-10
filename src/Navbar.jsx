@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import image from "./assets/image.png";
+import { base_url } from "./commonAPI's.json";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -32,11 +33,11 @@ export default function Navbar() {
 
           // Determine API endpoint based on profile type
           if (profileType === "Candidate") {
-            apiUrl = "http://127.0.0.1:8000/api/users/me/";
+            apiUrl = `${base_url}/api/users/me/`;
           } else if (profileType === "Recruiter") {
-            apiUrl = "http://127.0.0.1:8000/api/recruiters/me/";
+            apiUrl = `${base_url}/api/recruiters/me/`;
           } else if (profileType === "Admin") {
-            apiUrl = "http://127.0.0.1:8000/api/admin/me/";
+            apiUrl = `${base_url}/api/admin/me/`;
           }
 
           if (apiUrl) {
@@ -626,7 +627,7 @@ export default function Navbar() {
               </Link>
               {/* Services Dropdown */}
               <div className="services-container">
-                <button onClick={toggleServicesDropdown} className="services-button">
+                <button onClick={() => { toggleServicesDropdown(); navigate("/services") }} className="services-button">
                   <span className={isActive("/services") || isActive("/profile-marketing") || isActive("/interview-practice") || isActive("/skills-training") ? "nav-link active" : "nav-link"}>Services</span>
                   <svg
                     className={`dropdown-arrow ${servicesDropdownOpen ? "rotate" : ""}`}

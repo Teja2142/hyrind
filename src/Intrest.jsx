@@ -191,7 +191,7 @@ const TextInput = ({
         )}
       </label>
 
-      <div className={`input-group ${name ==='phone'?'flex-nowrap':''}`}>
+      <div className={`input-group ${name === 'phone' ? 'flex-nowrap' : ''}`}>
         {Icon && (
           <span className="input-group-text bg-white border-end-0">
             <Icon className="h-5 w-5 text-primary opacity-75" />
@@ -212,45 +212,44 @@ const TextInput = ({
           />
         ) : name === 'phone' ? (
           <>
-          <div className="row w-100">
-            {/* Country code select */}
-            <div className="col-4">
-              <select
-              className="form-select form-select-lg border-start-0 border-end-0 w-100"
-              aria-label="Country Code"
-              name='countryCode'
-              value={countryCode} // default to +1
-              defaultValue="+1" // set default if you like (e.g., USA)
-            >
-              {countryCodes.map((country) => (
-                <option key={country.code} value={country.code}>
-                   ({country.code})
-                </option>
-              ))}
-            </select>
-            </div>
+            <div className="row w-100">
+              {/* Country code select */}
+              <div className="col-4">
+                <select
+                  className="form-select form-select-lg border-start-0 border-end-0 w-100"
+                  aria-label="Country Code"
+                  name='countryCode'
+                  value={countryCode} // default to +1
+                  defaultValue="+1" // set default if you like (e.g., USA)
+                >
+                  {countryCodes.map((country) => (
+                    <option key={country.code} value={country.code}>
+                      ({country.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Phone number input */}
-         <div className="col-8">
-             <input
-              type={isDate ? 'text' : type}
-              id={name}
-              name={name}
-              value={value}
-              onChange={onChange}
-              maxLength={maxLength}
-              placeholder={isDate ? 'MM/YYYY' : placeholder}
-              onFocus={isDate ? (e) => (e.target.type = 'month') : undefined}
-              onBlur={isDate ? (e) => (e.target.type = 'text') : undefined}
-              className={`form-control form-control-lg col-9 ${
-                error ? 'is-invalid border-danger' : 'border-start-0'
-              }`}
-              required={required}
-              inputMode="numeric"
-              min={isDate ? '1950-01' : undefined}
-              max={isDate ? '2050-12' : undefined}
-            />
-         </div>
+              {/* Phone number input */}
+              <div className="col-8">
+                <input
+                  type={isDate ? 'text' : type}
+                  id={name}
+                  name={name}
+                  value={value}
+                  onChange={onChange}
+                  maxLength={maxLength}
+                  placeholder={isDate ? 'MM/YYYY' : placeholder}
+                  onFocus={isDate ? (e) => (e.target.type = 'month') : undefined}
+                  onBlur={isDate ? (e) => (e.target.type = 'text') : undefined}
+                  className={`form-control form-control-lg col-9 ${error ? 'is-invalid border-danger' : 'border-start-0'
+                    }`}
+                  required={required}
+                  inputMode="numeric"
+                  min={isDate ? '1950-01' : undefined}
+                  max={isDate ? '2050-12' : undefined}
+                />
+              </div>
             </div>
           </>
         ) : (
@@ -264,9 +263,8 @@ const TextInput = ({
             placeholder={isDate ? 'MM/YYYY' : placeholder}
             onFocus={isDate ? (e) => (e.target.type = 'month') : undefined}
             onBlur={isDate ? (e) => (e.target.type = 'text') : undefined}
-            className={`form-control form-control-lg ${
-              error ? 'is-invalid border-danger' : 'border-start-0'
-            }`}
+            className={`form-control form-control-lg ${error ? 'is-invalid border-danger' : 'border-start-0'
+              }`}
             required={required}
             inputMode={name === 'phone' ? 'numeric' : 'text'}
             min={isDate ? '1950-01' : undefined}
@@ -274,7 +272,7 @@ const TextInput = ({
           />
         )}
 
-        
+
       </div>
       {error && <div className="invalid-feedback d-block">{error}</div>}
     </div>
@@ -313,7 +311,7 @@ const Interest = () => {
     consentToTerms: false,
     linkedinUrl: '',
     additionalNotes: '',
-    countryCode:'+1',
+    countryCode: '+1',
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -513,12 +511,12 @@ const Interest = () => {
       opt_end_date: formData.visaStatus === 'F1-OPT' ? formData.optEndDate : null,
       resume_file_name: formData.resumeFile ? formData.resumeFile.name : null, // optional
       referral_source: formData.referralSource,
-      referral_friend_name: 
-        formData.referralSource === 'Friend' 
-          ? formData.referralFriendName 
+      referral_friend_name:
+        formData.referralSource === 'Friend'
+          ? formData.referralFriendName
           : formData.referralSource === 'Other'
-          ? formData.referralOther
-          : null,
+            ? formData.referralOther
+            : null,
       consent_to_terms: formData.consentToTerms,
       linkedin_url: formData.linkedinUrl,
       additional_notes: formData.additionalNotes,
@@ -538,7 +536,7 @@ const Interest = () => {
       if (response.ok) {
         const result = await response.json();
         setIsSubmitting(false);
-        setSubmissionMessage(result.message || 'Thank you for your interest! We will get back to you.');
+        setSubmissionMessage(result.message || 'Thank you for your interest! We have sent you a confirmation email and will get back to you soon.');
         console.log('Interest API Success:', result);
         // Optionally reset:
         // setFormData(initialFormState);
@@ -595,13 +593,12 @@ const Interest = () => {
                 {/* Submission Message */}
                 {submissionMessage && (
                   <div
-                    className={`alert ${
-                      isSubmitting
+                    className={`alert ${isSubmitting
                         ? 'alert-info'
                         : errors && Object.keys(errors).length > 0
-                        ? 'alert-danger'
-                        : 'alert-success'
-                    } text-center mb-4`}
+                          ? 'alert-danger'
+                          : 'alert-success'
+                      } text-center mb-4`}
                   >
                     {submissionMessage}
                   </div>
@@ -794,11 +791,10 @@ const Interest = () => {
                           <span className="text-muted">(Optional)</span>
                         </label>
                         <div
-                          className={`border rounded-3 p-3 ${
-                            errors.resumeFile
+                          className={`border rounded-3 p-3 ${errors.resumeFile
                               ? 'border-danger bg-danger bg-opacity-10'
                               : 'border-secondary border-opacity-25'
-                          }`}
+                            }`}
                         >
                           <div className="d-flex align-items-center">
                             <div
@@ -845,9 +841,8 @@ const Interest = () => {
                           name="referralSource"
                           value={formData.referralSource}
                           onChange={handleChange}
-                          className={`form-select form-select-lg ${
-                            errors.referralSource ? 'is-invalid' : ''
-                          }`}
+                          className={`form-select form-select-lg ${errors.referralSource ? 'is-invalid' : ''
+                            }`}
                           required
                         >
                           {referralOptions.map((source) => (
@@ -936,9 +931,8 @@ const Interest = () => {
                         type="checkbox"
                         checked={formData.consentToTerms}
                         onChange={handleChange}
-                        className={`form-check-input ${
-                          errors.consentToTerms ? 'is-invalid' : ''
-                        }`}
+                        className={`form-check-input ${errors.consentToTerms ? 'is-invalid' : ''
+                          }`}
                         style={{
                           borderColor: primaryColor,
                           color: primaryColor,

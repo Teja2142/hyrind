@@ -119,11 +119,11 @@ const Footer = () => {
           {/* Our Solutions */}
           <div className="footer-column">
             <h3 className="footer-title">Our Solutions</h3>
-            <p className="footer-link">End-to-End Job Application Support</p>
-            <p className="footer-link">Resume Optimization for Each Application</p>
+            <p className="footer-link">End-to-End Job Search Support</p>
             <p className="footer-link">Recruiter-Led Profile Marketing</p>
-            <p className="footer-link">Candidate-Centric Support & Guidance</p>
-            <p className="footer-link">Secure Data Handling & Privacy Protection</p>
+            <p className="footer-link">Resume Optimization for Every Application</p>
+            <p className="footer-link">Interview & Screening Preparation</p>
+            <p className="footer-link">Secure Candidate Data Handling</p>
           </div>
 
           {/* QR Code */}
