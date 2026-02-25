@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Users, Briefcase, CheckCircle, XCircle, UserPlus, Zap, Loader, AlertTriangle, RefreshCw, LogOut, CreditCard, Layers, DollarSign, List, Download, ChevronLeft, ChevronRight, FileText, Clock, UserCheck, CheckCircle2, Ban } from 'lucide-react';
 import { base_url } from "./commonAPI's.json";
+import CandidateDetails from './CandidateDetails';
 
 
 // --- HELPER FUNCTIONS ---
@@ -406,7 +407,7 @@ const MetricCard = ({ title, value, bg, text, Icon, onClick, isActive }) => (
   </div>
 );
 
-const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, recruiters, isLoading, error, refetchData, activatingCandidateId, deactivatingCandidateId }) => {
+const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, recruiters, isLoading, error, refetchData, activatingCandidateId, deactivatingCandidateId, onViewDetails }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -621,6 +622,7 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
             recruiters={recruiters}
             isActivating={activatingCandidateId === candidate.id}
             isDeactivating={deactivatingCandidateId === candidate.id}
+            onViewDetails={onViewDetails}
           />
         ))}
         {filteredCandidates.length > 0 && totalPages > 1 && (
@@ -647,7 +649,7 @@ const CandidatesView = ({ candidates, updateCandidateStatus, openAssignModal, re
   );
 };
 
-const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters, isActivating, isDeactivating }) => {
+const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters, isActivating, isDeactivating, onViewDetails }) => {
   const isActive = candidate.active !== false; // Default to true if not specified
   const isApproved = candidate.status === "approved";
   const isReadyToAssign = candidate.status === "ready_to_assign";
@@ -698,7 +700,12 @@ const CandidateCard = ({ candidate, updateStatus, openAssignModal, recruiters, i
         <div className="row align-items-start">
           <div className="col-md-8 mb-3 mb-md-0">
             <div className="d-flex align-items-center mb-2 flex-wrap gap-2">
-              <h5 className="mb-0 fw-bold text-dark me-2">{candidate.email || 'No Email'}</h5>
+              <button
+                onClick={() => onViewDetails(candidate.profile_id)}
+                className="btn btn-link p-0 text-decoration-none"
+              >
+                <h5 className="mb-0 fw-bold" style={{ color: '#4F46E5', cursor: 'pointer' }}>{candidate.email || 'No Email'}</h5>
+              </button>
               {candidate.status && (
                 <span
                   className="badge px-3 py-1 fw-semibold text-uppercase"
@@ -1768,6 +1775,7 @@ export default function Admin() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedRecruiter, setSelectedRecruiter] = useState(null);
   const [selectedCandidate, setSelectedCandidate] = useState(null); // Candidate to assign
+  const [selectedCandidateId, setSelectedCandidateId] = useState(null); // Candidate to view
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -2370,6 +2378,10 @@ export default function Admin() {
                 refetchData={fetchUsers}
                 activatingCandidateId={activatingCandidateId}
                 deactivatingCandidateId={deactivatingCandidateId}
+                onViewDetails={(id) => {
+                  setSelectedCandidateId(id);
+                  setActiveView('candidate-details');
+                }}
               />
             )}
             {activeView === 'recruiters' && (
@@ -2405,6 +2417,15 @@ export default function Admin() {
                 isLoading={isSubsLoading}
                 error={subsError}
                 refetchData={fetchSubscriptionsData}
+              />
+            )}
+            {activeView === 'candidate-details' && selectedCandidateId && (
+              <CandidateDetails
+                candidateId={selectedCandidateId}
+                onBack={() => {
+                  setActiveView('candidates');
+                  setSelectedCandidateId(null);
+                }}
               />
             )}
           </div>
