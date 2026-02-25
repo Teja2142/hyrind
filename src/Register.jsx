@@ -506,9 +506,12 @@ const Register = () => {
       if (response.ok) {
         const result = await response.json();
         setIsSubmitting(false);
-        setSubmissionMessage(`Registration successful! ${result.message || 'Check your email for confirmation.'}`);
-        console.log("API Success:", result);
-        resetForm();
+        setSubmissionMessage(`${result.message || 'Registration successfully ! Check your email for confirmation.'}`);
+        console.log(`API Success: of url ${REGISTER_API_URL}`, result);
+        setTimeout(() => {
+          resetForm();
+        }, 2000);
+
         // Optionally clear the form or redirect
         // setFormData(initialFormState); 
 

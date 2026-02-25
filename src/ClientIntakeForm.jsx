@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { base_url } from "./commonAPI's.json";
 
 const ChevronLeft = () => (
@@ -36,8 +36,9 @@ const Trash = () => (
 // (removed an invalid top-level hook and unused ALL_FIELDS)
 
 
-const ClientIntakeForm = ({ isOpen, onClose, inline = false }) => {
+const ClientIntakeForm = ({ isOpen, onClose, id, inline = false }) => {
     const BASE_URL = `${base_url.endsWith('/') ? base_url.slice(0, -1) : base_url}/api/`;
+    const isfetchClientIntake = useRef(false)
     const [step, setStep] = useState(() => {
         const saved = localStorage.getItem('intake_form_step');
         return saved ? parseInt(saved) : 1;
@@ -108,7 +109,33 @@ const ClientIntakeForm = ({ isOpen, onClose, inline = false }) => {
             linkedinProfile: ''
         };
     });
+    React.useEffect(() => {
+        if (id) {
+            if (isfetchClientIntake.current) {
+                return;
+            }
+            isfetchClientIntake.current = true
+            fetchClientIntake(id);
+        }
+    }, [id]);
 
+    const fetchClientIntake = async (profileId) => {
+        try {
+            const accessToken = localStorage.getItem('accessToken');
+            const response = await fetch(`${BASE_URL}users/client-intake/${profileId}/`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch profile');
+            }
+            const data = await response.json();
+            setFormData(data);
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+        }
+    };
     // Save progress automatically
     React.useEffect(() => {
         const dataToSave = { ...formData };
@@ -156,11 +183,11 @@ const ClientIntakeForm = ({ isOpen, onClose, inline = false }) => {
 
         // Fields required across steps 1-3,5-6
         const required = [
-            'firstName','lastName','dob','phone','email','currentAddress','mailingAddress',
-            'visaStatus','firstEntryUS','totalYearsUS',
-            'skilledIn','currentlyLearning','experiencedTools',
-            'highestDegree','fieldOfStudy','universityName','country','gradMonthYear',
-            'passportFile','govIdFile','visaFile','workAuthFile','resumeFile','desiredJobRoles','desiredYOE'
+            'firstName', 'lastName', 'dob', 'phone', 'email', 'currentAddress', 'mailingAddress',
+            'visaStatus', 'firstEntryUS', 'totalYearsUS',
+            'skilledIn', 'currentlyLearning', 'experiencedTools',
+            'highestDegree', 'fieldOfStudy', 'universityName', 'country', 'gradMonthYear',
+            'passportFile', 'govIdFile', 'visaFile', 'workAuthFile', 'resumeFile', 'desiredJobRoles', 'desiredYOE'
         ];
 
         required.forEach(key => {

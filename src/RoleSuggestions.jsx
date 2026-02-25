@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Target, Clock, Briefcase, FileText } from 'lucide-react';
 import { base_url } from "./commonAPI's.json";
 
@@ -7,6 +7,7 @@ const RoleSuggestions = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const primaryColor = '#4F46E5';
+    const isfetchRoles = useRef(false);
 
     useEffect(() => {
         const fetchRoles = async () => {
@@ -14,7 +15,7 @@ const RoleSuggestions = () => {
             if (!token) return;
 
             try {
-                const response = await fetch(`${base_url}/api/users/client-intake/suggested-roles/`, {
+                const response = await fetch(`${base_url}/api/jobs/suggestions/`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -23,20 +24,23 @@ const RoleSuggestions = () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    setRoles(data || []);
+                    // Fix: Extract suggestions array from response object
+                    setRoles(Array.isArray(data.suggestions) ? data.suggestions : []);
                 } else {
                     // If 404 or other error, we assume no roles yet
                     setRoles([]);
                 }
             } catch (err) {
                 console.error('Error fetching suggested roles:', err);
-                setError('Failed to load roles');
+                setError('Failed to load suggested roles. Please try again later.');
             } finally {
                 setLoading(false);
             }
         };
-
-        fetchRoles();
+        if (!isfetchRoles.current) {
+            fetchRoles();
+            isfetchRoles.current = true;
+        }
     }, []);
 
     if (loading) {
@@ -50,7 +54,23 @@ const RoleSuggestions = () => {
         );
     }
 
-    if (roles.length === 0) {
+    if (error) {
+        return (
+            <div className="p-5 text-center bg-white rounded-4 shadow-sm border border-danger-subtle">
+                <h4 className="text-danger mb-3">Unable to load suggestions</h4>
+                <p className="text-muted mb-4">{error}</p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="btn btn-primary rounded-pill px-4"
+                    style={{ backgroundColor: primaryColor, border: 'none' }}
+                >
+                    Retry
+                </button>
+            </div>
+        );
+    }
+
+    if (!Array.isArray(roles) || roles.length === 0) {
         return (
             <div className="p-5 text-center bg-white rounded-4 shadow-sm">
                 <div className="mb-4 d-inline-flex p-3 rounded-circle" style={{ backgroundColor: primaryColor + '1A' }}>

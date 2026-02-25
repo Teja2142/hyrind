@@ -814,7 +814,7 @@ const AdminSidebar = ({
         {/* 7. Forgot Password (Change Password) */}
         <SidebarButton
           Icon={Key}
-          label="Forgot Password"
+          label="Change Password"
           onClick={onChangePassword}
           variant={showChangePasswordForm ? 'primary' : 'normal'}
         />
@@ -2330,6 +2330,7 @@ const Profile = () => {
               <div className="p-4 bg-white rounded-3 shadow-sm mb-4">
                 <ClientIntakeForm
                   isOpen={true}
+                  id={profileId}
                   onClose={() => setShowIntakeForm(false)}
                   inline={true}
                 />
