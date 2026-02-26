@@ -4,7 +4,8 @@ import { base_url } from "./commonAPI's.json";
 import {
     User, Mail, Phone, GraduationCap, Link as LinkIcon, GitBranch,
     FileText, Calendar, Briefcase, CheckCircle, XCircle, Clock,
-    AlertTriangle, Loader, ChevronLeft, Download, ShieldCheck, Target
+    AlertTriangle, Loader, ChevronLeft, Download, ShieldCheck, Target,
+    Trash2, Plus, ArrowRight, MessageSquare, BadgeInfo
 } from 'lucide-react';
 
 const CandidateDetails = ({ candidateId, onBack }) => {
@@ -14,13 +15,21 @@ const CandidateDetails = ({ candidateId, onBack }) => {
     const [candidate, setCandidate] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [suggestions, setSuggestions] = useState([]);
+    const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+    const [newSuggestion, setNewSuggestion] = useState({
+        role_title: '',
+        role_category: '',
+        admin_notes: ''
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         const fetchCandidateDetails = async () => {
             try {
                 setLoading(true);
                 const token = localStorage.getItem('accessToken');
-                const response = await fetch(`${base_url}/api/users/clients/profiles/${id}/`, {
+                const response = await fetch(`${base_url}api/users/profiles/${id}/`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -44,6 +53,88 @@ const CandidateDetails = ({ candidateId, onBack }) => {
             fetchCandidateDetails();
         }
     }, [id]);
+
+    useEffect(() => {
+        if (candidate?.user?.id) {
+            fetchSuggestions();
+        }
+    }, [candidate]);
+
+    const fetchSuggestions = async () => {
+        try {
+            setSuggestionsLoading(true);
+            const token = localStorage.getItem('accessToken');
+            const response = await fetch(`${base_url}api/jobs/suggestions/?user_id=${candidate.user.id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setSuggestions(data.suggestions || []);
+            }
+        } catch (err) {
+            console.error('Error fetching suggestions:', err);
+        } finally {
+            setSuggestionsLoading(false);
+        }
+    };
+
+    const handleAddSuggestion = async (e) => {
+        e.preventDefault();
+        if (!newSuggestion.role_title) return;
+
+        try {
+            setIsSubmitting(true);
+            const token = localStorage.getItem('accessToken');
+            const response = await fetch(`${base_url}api/jobs/suggestions/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user: candidate.user.id,
+                    ...newSuggestion
+                })
+            });
+
+            if (response.ok) {
+                setNewSuggestion({ role_title: '', role_category: '', admin_notes: '' });
+                fetchSuggestions();
+            } else {
+                const errData = await response.json();
+                alert(errData.message || 'Failed to add suggestion');
+            }
+        } catch (err) {
+            console.error('Error adding suggestion:', err);
+            alert('An error occurred');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDeleteSuggestion = async (sId) => {
+        if (!window.confirm('Are you sure you want to remove this suggestion?')) return;
+
+        try {
+            const token = localStorage.getItem('accessToken');
+            const response = await fetch(`${base_url}api/jobs/suggestions/${sId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                fetchSuggestions();
+            }
+        } catch (err) {
+            console.error('Error deleting suggestion:', err);
+        }
+    };
 
     if (loading) {
         return (
@@ -172,7 +263,7 @@ const CandidateDetails = ({ candidateId, onBack }) => {
                         </div>
 
                         {/* Recruiter & Assignment Info */}
-                        <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                             <div className="card-body p-4">
                                 <h5 className="fw-bold border-bottom pb-2 mb-4 d-flex align-items-center gap-2">
                                     <Briefcase className="text-indigo-600" size={24} /> Assignment & Status Details
@@ -215,6 +306,135 @@ const CandidateDetails = ({ candidateId, onBack }) => {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Role Suggestions Section */}
+                        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                            <div className="card-header bg-white border-bottom-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                                <h5 className="fw-bold mb-0 d-flex align-items-center gap-2">
+                                    <Target className="text-primary" size={24} /> Role Suggestions
+                                </h5>
+                                <span className="badge bg-light text-primary border rounded-pill px-3 py-1">
+                                    {suggestions.length} Suggested
+                                </span>
+                            </div>
+
+                            <div className="card-body p-4">
+                                {/* Suggestion Form */}
+                                <div className="p-4 rounded-4 mb-4" style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                                    <h6 className="fw-bold mb-3 d-flex align-items-center gap-2">
+                                        <Plus size={18} className="text-primary" /> Suggest a New Role
+                                    </h6>
+                                    <form onSubmit={handleAddSuggestion} className="row g-3">
+                                        <div className="col-md-5">
+                                            <label className="form-label small fw-bold text-muted">ROLE TITLE</label>
+                                            <input
+                                                type="text"
+                                                className="form-control border-0 shadow-sm rounded-3 px-3 py-2"
+                                                placeholder="e.g. Senior Frontend Engineer"
+                                                value={newSuggestion.role_title}
+                                                onChange={(e) => setNewSuggestion({ ...newSuggestion, role_title: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="col-md-4">
+                                            <label className="form-label small fw-bold text-muted">CATEGORY</label>
+                                            <input
+                                                type="text"
+                                                className="form-control border-0 shadow-sm rounded-3 px-3 py-2"
+                                                placeholder="e.g. Engineering"
+                                                value={newSuggestion.role_category}
+                                                onChange={(e) => setNewSuggestion({ ...newSuggestion, role_category: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="col-md-3 d-flex align-items-end">
+                                            <button
+                                                type="submit"
+                                                disabled={isSubmitting || !newSuggestion.role_title}
+                                                className="btn btn-primary w-100 rounded-3 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                                                style={{ backgroundColor: primaryColor, border: 'none' }}
+                                            >
+                                                {isSubmitting ? <Loader className="animate-spin" size={18} /> : <Plus size={18} />}
+                                                Suggest
+                                            </button>
+                                        </div>
+                                        <div className="col-12">
+                                            <label className="form-label small fw-bold text-muted">ADMIN NOTES (EXPLAIN WHY THIS ROLE)</label>
+                                            <textarea
+                                                className="form-control border-0 shadow-sm rounded-3 px-3 py-2"
+                                                rows="2"
+                                                placeholder="This candidate has strong React skills matching the job description..."
+                                                value={newSuggestion.admin_notes}
+                                                onChange={(e) => setNewSuggestion({ ...newSuggestion, admin_notes: e.target.value })}
+                                            ></textarea>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                {/* Existing Suggestions List */}
+                                {suggestionsLoading ? (
+                                    <div className="text-center p-4">
+                                        <Loader className="animate-spin text-primary" size={24} />
+                                    </div>
+                                ) : suggestions.length > 0 ? (
+                                    <div className="row g-3">
+                                        {suggestions.map((s) => (
+                                            <div key={s.id} className="col-12">
+                                                <div className="d-flex align-items-start justify-content-between p-3 rounded-4 border bg-white hover-shadow-sm transition-all">
+                                                    <div className="d-flex gap-3">
+                                                        <div className="bg-light p-3 rounded-3 text-primary d-flex align-items-center justify-content-center" style={{ height: 'fit-content' }}>
+                                                            <Briefcase size={22} />
+                                                        </div>
+                                                        <div>
+                                                            <div className="d-flex align-items-center gap-2 mb-1">
+                                                                <h6 className="fw-bold text-dark mb-0">{s.role_title}</h6>
+                                                                {s.role_category && (
+                                                                    <span className="badge rounded-pill bg-light text-muted border small px-2 py-1">
+                                                                        {s.role_category}
+                                                                    </span>
+                                                                )}
+                                                                {s.is_selected ? (
+                                                                    <span className="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
+                                                                        User Selected
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 small">
+                                                                        Pending User
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            {s.admin_notes && (
+                                                                <p className="small text-muted mb-2 italic">"{s.admin_notes}"</p>
+                                                            )}
+                                                            <div className="d-flex align-items-center gap-3 text-muted small">
+                                                                <span className="d-flex align-items-center gap-1">
+                                                                    <Calendar size={12} /> {new Date(s.created_at).toLocaleDateString()}
+                                                                </span>
+                                                                <span className="d-flex align-items-center gap-1">
+                                                                    <User size={12} /> Suggestion ID: {s.id.substring(0, 8)}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleDeleteSuggestion(s.id)}
+                                                        className="btn btn-outline-danger border-0 rounded-circle p-2 hover-bg-danger transition-all"
+                                                        title="Delete Suggestion"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center p-5 bg-light rounded-4 border border-2 border-dashed">
+                                        <BadgeInfo size={40} className="text-muted mb-2 opacity-50" />
+                                        <p className="text-muted mb-0 fw-semibold">No suggestions yet</p>
+                                        <p className="text-muted small">Propose roles to this candidate using the form above.</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -313,12 +533,20 @@ const CandidateDetails = ({ candidateId, onBack }) => {
         .animate-spin {
           animation: spin 1s linear infinite;
         }
+        .hover-shadow-sm:hover {
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+          transform: translateY(-2px);
+        }
+        .hover-bg-danger:hover {
+          background-color: #FEE2E2 !important;
+          color: #EF4444 !important;
+        }
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
       `}</style>
-        </div>
+        </div >
     );
 };
 

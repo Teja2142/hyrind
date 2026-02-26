@@ -122,7 +122,7 @@ const ClientIntakeForm = ({ isOpen, onClose, id, inline = false }) => {
     const fetchClientIntake = async (profileId) => {
         try {
             const accessToken = localStorage.getItem('accessToken');
-            const response = await fetch(`${BASE_URL}users/client-intake/${profileId}/`, {
+            const response = await fetch(`${BASE_URL}users/me/client-intake`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -131,7 +131,93 @@ const ClientIntakeForm = ({ isOpen, onClose, id, inline = false }) => {
                 throw new Error('Failed to fetch profile');
             }
             const data = await response.json();
-            setFormData(data);
+
+            // Map the API response (snake_case) to the form state (camelCase)
+            const mappedData = {
+                firstName: data.first_name || '',
+                lastName: data.last_name || '',
+                dob: data.date_of_birth || '',
+                phone: data.phone_number || '',
+                email: data.email || '',
+                marketingEmail: data.marketing_email || '',
+                marketingPhone: data.marketing_contact_number || '',
+                currentAddress: data.current_address || '',
+                mailingAddress: data.mailing_address || '',
+
+                visaStatus: data.visa_status || '',
+                firstEntryUS: data.first_entry_us || '',
+                totalYearsUS: data.total_years_in_us || '',
+
+                skilledIn: data.skilled_in || '',
+                currentlyLearning: data.currently_learning || '',
+                experiencedTools: data.experienced_with || '',
+                selfTaughtTools: data.learning_tools || '',
+                nonTechnicalSkills: data.non_technical_skills || '',
+
+                highestDegree: data.highest_degree || '',
+                fieldOfStudy: data.highest_field_of_study || '',
+                universityName: data.highest_university || '',
+                country: data.highest_country || '',
+                gradMonthYear: data.highest_graduation_date || '',
+
+                bachelorsField: data.bachelors_field_of_study || '',
+                bachelorsUniversity: data.bachelors_university || '',
+                bachelorsCountry: data.bachelors_country || '',
+                bachelorsGradDate: data.bachelors_graduation_date || '',
+
+                passportFile: data.passport_file || null,
+                govIdFile: data.government_id_file || null,
+                visaFile: data.visa_file || null,
+                workAuthFile: data.work_authorization_file || null,
+                resumeFile: data.resume_file || null,
+
+                desiredJobRoles: data.desired_job_role || '',
+                desiredYOE: data.desired_years_experience || '',
+                linkedinProfile: data.linkedin_profile || ''
+            };
+
+            // Map work experiences (job_1_..., job_2_..., job_3_...)
+            const workExperiences = [];
+            for (let i = 1; i <= 3; i++) {
+                const title = data[`job_${i}_title`];
+                if (title) {
+                    workExperiences.push({
+                        jobTitle: title,
+                        companyName: data[`job_${i}_company`] || '',
+                        companyAddress: data[`job_${i}_address`] || '',
+                        startDate: data[`job_${i}_start_date`] || '',
+                        endDate: data[`job_${i}_end_date`] || '',
+                        jobType: data[`job_${i}_type`] || 'Full-time',
+                        responsibilities: data[`job_${i}_responsibilities`] || ''
+                    });
+                }
+            }
+            if (workExperiences.length === 0) {
+                workExperiences.push({ jobTitle: '', companyName: '', companyAddress: '', startDate: '', endDate: '', jobType: 'Full-time', responsibilities: '' });
+                mappedData.hasWorkExperience = 'No';
+            } else {
+                mappedData.hasWorkExperience = 'Yes';
+            }
+            mappedData.workExperiences = workExperiences;
+
+            // Map certifications
+            const certifications = [];
+            if (data.certification_name) {
+                certifications.push({
+                    name: data.certification_name,
+                    organization: data.issuing_organization || '',
+                    date: data.issued_date || ''
+                });
+            }
+            if (certifications.length === 0) {
+                certifications.push({ name: '', organization: '', date: '' });
+                mappedData.hasCertifications = 'No';
+            } else {
+                mappedData.hasCertifications = 'Yes';
+            }
+            mappedData.certifications = certifications;
+
+            setFormData(mappedData);
         } catch (error) {
             console.error('Error fetching profile:', error);
         }
@@ -355,8 +441,9 @@ const ClientIntakeForm = ({ isOpen, onClose, id, inline = false }) => {
                 lastName: 'last_name',
                 dob: 'date_of_birth',
                 phone: 'phone_number',
+                email: 'email',
                 marketingEmail: 'marketing_email',
-                marketingPhone: 'marketing_phone',
+                marketingPhone: 'marketing_contact_number',
                 currentAddress: 'current_address',
                 mailingAddress: 'mailing_address',
                 visaStatus: 'visa_status',
@@ -365,28 +452,24 @@ const ClientIntakeForm = ({ isOpen, onClose, id, inline = false }) => {
                 skilledIn: 'skilled_in',
                 currentlyLearning: 'currently_learning',
                 experiencedTools: 'experienced_with',
-                selfTaughtTools: 'self_taught_tools',
+                selfTaughtTools: 'learning_tools',
                 nonTechnicalSkills: 'non_technical_skills',
-                hasWorkExperience: 'has_work_experience',
-                workExperiences: 'work_experiences',
                 highestDegree: 'highest_degree',
-                fieldOfStudy: 'field_of_study',
-                universityName: 'university_name',
-                country: 'country',
-                gradMonthYear: 'grad_month_year',
-                bachelorsField: 'bachelors_field',
+                fieldOfStudy: 'highest_field_of_study',
+                universityName: 'highest_university',
+                country: 'highest_country',
+                gradMonthYear: 'highest_graduation_date',
+                bachelorsField: 'bachelors_field_of_study',
                 bachelorsUniversity: 'bachelors_university',
                 bachelorsCountry: 'bachelors_country',
-                bachelorsGradDate: 'bachelors_grad_date',
-                hasCertifications: 'has_certifications',
-                certifications: 'certifications',
+                bachelorsGradDate: 'bachelors_graduation_date',
                 passportFile: 'passport_file',
-                govIdFile: 'gov_id_file',
+                govIdFile: 'government_id_file',
                 visaFile: 'visa_file',
-                workAuthFile: 'work_auth_file',
+                workAuthFile: 'work_authorization_file',
                 resumeFile: 'resume_file',
-                desiredJobRoles: 'desired_job_roles',
-                desiredYOE: 'desired_yoe',
+                desiredJobRoles: 'desired_job_role',
+                desiredYOE: 'desired_years_experience',
                 linkedinProfile: 'linkedin_profile'
             };
 
@@ -394,32 +477,45 @@ const ClientIntakeForm = ({ isOpen, onClose, id, inline = false }) => {
                 const apiKey = keyMapping[key] || key;
                 const value = formData[key];
 
-                if (key.includes('File') && value) {
-                    data.append(apiKey, value);
+                if (key.includes('File')) {
+                    // Only append if it's a new File object. 
+                    // If it's a string (URL from GET), don't append it as it might cause issues or the server doesn't expect it back.
+                    if (value instanceof File) {
+                        data.append(apiKey, value);
+                    }
                 } else if (key === 'workExperiences' && value) {
-                    const mappedExperiences = value.map(exp => ({
-                        job_title: exp.jobTitle,
-                        company_name: exp.companyName,
-                        company_address: exp.companyAddress,
-                        start_date: exp.startDate,
-                        end_date: exp.endDate,
-                        job_type: exp.jobType,
-                        responsibilities: exp.responsibilities
-                    }));
-                    data.append(apiKey, JSON.stringify(mappedExperiences));
+                    // Map to flat fields: job_1_title, job_2_title, etc.
+                    value.forEach((exp, index) => {
+                        const i = index + 1;
+                        if (i <= 3) {
+                            if (exp.jobTitle) data.append(`job_${i}_title`, exp.jobTitle);
+                            if (exp.companyName) data.append(`job_${i}_company`, exp.companyName);
+                            if (exp.companyAddress) data.append(`job_${i}_address`, exp.companyAddress);
+                            if (exp.startDate) data.append(`job_${i}_start_date`, exp.startDate);
+                            if (exp.endDate) data.append(`job_${i}_end_date`, exp.endDate);
+                            if (exp.jobType) data.append(`job_${i}_type`, exp.jobType);
+                            if (exp.responsibilities) data.append(`job_${i}_responsibilities`, exp.responsibilities);
+                        }
+                    });
                 } else if (key === 'certifications' && value) {
-                    data.append(apiKey, JSON.stringify(value));
-                } else if (value !== null && value !== undefined) {
+                    // Map to certification_name, issuing_organization, issued_date
+                    if (value.length > 0) {
+                        const cert = value[0];
+                        if (cert.name) data.append('certification_name', cert.name);
+                        if (cert.organization) data.append('issuing_organization', cert.organization);
+                        if (cert.date) data.append('issued_date', cert.date);
+                    }
+                } else if (key !== 'hasWorkExperience' && key !== 'hasCertifications' && value !== null && value !== undefined) {
                     data.append(apiKey, value);
                 }
             });
 
-            const response = await fetch(BASE_URL + 'users/client-intake/', {
-                method: 'POST',
+            // Use PUT or PATCH if we already have an ID or if we are updating "me"
+            const response = await fetch(BASE_URL + 'users/me/client-intake/', {
+                method: 'PUT', // Assuming PUT for update since fetchClientIntake works on /me/
                 body: data,
                 headers: {
-                    accept: "application/json",
-                    Authorization: `Bearer ${accessToken}`,
+                    'Authorization': `Bearer ${accessToken}`,
                 },
             });
 
@@ -431,7 +527,6 @@ const ClientIntakeForm = ({ isOpen, onClose, id, inline = false }) => {
             } else {
                 const errData = await response.json();
                 console.error('Submission failed errors:', errData);
-                // Extract a human-readable error message
                 let errorMsg = errData.detail || 'Unknown error';
                 if (!errData.detail && typeof errData === 'object') {
                     const firstKey = Object.keys(errData)[0];
@@ -447,6 +542,7 @@ const ClientIntakeForm = ({ isOpen, onClose, id, inline = false }) => {
             setIsSubmitting(false);
         }
     };
+
 
     const renderStep = () => {
         switch (step) {

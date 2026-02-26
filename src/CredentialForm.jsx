@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { base_url } from "./commonAPI's.json";
 const ChevronLeft = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -19,7 +19,9 @@ const Check = () => (
 );
 
 const CredentialForm = ({ isOpen, onClose, inline = false }) => {
-    const BASE_URL = `${base_url}/api`;
+    const BASE_URL = `${base_url.endsWith('/') ? base_url.slice(0, -1) : base_url}/api/`;
+    const isfetchCredentialSheet = useRef(false);
+
 
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
@@ -50,6 +52,63 @@ const CredentialForm = ({ isOpen, onClose, inline = false }) => {
         otherPlatforms: '',
         showInConfirmation: false
     });
+
+    React.useEffect(() => {
+        if (isOpen) {
+            if (isfetchCredentialSheet.current) {
+                return;
+            }
+            isfetchCredentialSheet.current = true;
+            fetchCredentialSheet();
+        }
+    }, [isOpen]);
+
+    const fetchCredentialSheet = async () => {
+        try {
+            const accessToken = localStorage.getItem('accessToken');
+            const response = await fetch(`${BASE_URL}users/me/credential-sheet/`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch credentials');
+            }
+            const data = await response.json();
+
+            // Map API response (snake_case) to form state (camelCase)
+            setFormData({
+                timestamp: data.timestamp || new Date().toLocaleString(),
+                fullName: data.full_name || '',
+                email: data.email || '',
+                personalEmail: data.personal_email || '',
+                phoneNumber: data.phone_number || '',
+                location: data.location || '',
+                bachelorsGradDate: data.bachelor_graduation_date || '',
+                mastersGradDate: data.master_graduation_date || '',
+                firstEntryUS: data.first_entry_us || '',
+                optStartDate: data.opt_start_date || '',
+                optOfferLetterSubmitted: data.opt_offer_letter_submitted || 'No',
+                offerLetter: data.offer_letter || null,
+                preferredRoles: data.preferred_job_roles || '',
+                preferredLocations: data.preferred_locations || '',
+                linkedinId: data.linkedin_id || '',
+                linkedinPassword: data.linkedin_password || '',
+                indeedId: data.indeed_id || '',
+                indeedPassword: data.indeed_password || '',
+                diceId: data.dice_id || '',
+                dicePassword: data.dice_password || '',
+                monsterId: data.monster_id || '',
+                monsterPassword: data.monster_password || '',
+                ziprecruiterId: data.ziprecruiter_id || '',
+                ziprecruiterPassword: data.ziprecruiter_password || '',
+                otherPlatforms: data.other_platforms || '',
+                showInConfirmation: data.show_in_confirmation === true || data.show_in_confirmation === 'true'
+            });
+        } catch (error) {
+            console.error('Error fetching credentials:', error);
+        }
+    };
 
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,15 +147,15 @@ const CredentialForm = ({ isOpen, onClose, inline = false }) => {
         let filled = 0;
 
         const required = [
-            'fullName','email','personalEmail','phoneNumber','location',
-            'bachelorsGradDate','mastersGradDate','firstEntryUS',
-            'optStartDate','optOfferLetterSubmitted',
-            'preferredRoles','preferredLocations',
-            'linkedinId','linkedinPassword',
-            'indeedId','indeedPassword',
-            'diceId','dicePassword',
-            'monsterId','monsterPassword',
-            'ziprecruiterId','ziprecruiterPassword',
+            'fullName', 'email', 'personalEmail', 'phoneNumber', 'location',
+            'bachelorsGradDate', 'mastersGradDate', 'firstEntryUS',
+            'optStartDate', 'optOfferLetterSubmitted',
+            'preferredRoles', 'preferredLocations',
+            'linkedinId', 'linkedinPassword',
+            'indeedId', 'indeedPassword',
+            'diceId', 'dicePassword',
+            'monsterId', 'monsterPassword',
+            'ziprecruiterId', 'ziprecruiterPassword',
             'otherPlatforms'
         ];
 
@@ -222,8 +281,10 @@ const CredentialForm = ({ isOpen, onClose, inline = false }) => {
                 const apiKey = keyMapping[key] || key;
                 const value = formData[key];
 
-                if (key === 'offerLetter' && value) {
-                    data.append(apiKey, value);
+                if (key === 'offerLetter') {
+                    if (value instanceof File) {
+                        data.append(apiKey, value);
+                    }
                 } else if (typeof value === 'boolean') {
                     data.append(apiKey, value ? 'true' : 'false');
                 } else if (value !== null && value !== undefined) {
@@ -231,12 +292,11 @@ const CredentialForm = ({ isOpen, onClose, inline = false }) => {
                 }
             });
 
-            const url = `${BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL}/users/credential-sheet/`;
+            const url = `${BASE_URL}users/me/credential-sheet/`;
             const response = await fetch(url, {
-                method: 'POST',
+                method: 'PUT', // Use PUT for update
                 body: data,
                 headers: {
-                    accept: "application/json",
                     Authorization: `Bearer ${storedToken}`,
                 },
             });
