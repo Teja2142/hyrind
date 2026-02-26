@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { base_url } from "./commonAPI's.json";
 import {
-    User, Mail, Phone, GraduationCap, Link as LinkIcon, GitBranch,
-    FileText, Calendar, Briefcase, CheckCircle, XCircle, Clock,
-    AlertTriangle, Loader, ChevronLeft, Download, ShieldCheck, Target,
-    Trash2, Plus, ArrowRight, MessageSquare, BadgeInfo
+    CheckCircle, XCircle, Clock, AlertTriangle, Loader, ChevronLeft, Download,
+    ShieldCheck, Target, Trash2, Plus, ArrowRight, MessageSquare, BadgeInfo,
+    AlertCircle, Info, X, User, Mail, Phone, GraduationCap, Link as LinkIcon,
+    GitBranch, FileText, Calendar, Briefcase
 } from 'lucide-react';
 
 const CandidateDetails = ({ candidateId, onBack }) => {
@@ -23,6 +23,13 @@ const CandidateDetails = ({ candidateId, onBack }) => {
         admin_notes: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Messaging states
+    const [submissionMessage, setSubmissionMessage] = useState('');
+    const [toastType, setToastType] = useState('success'); // 'success', 'error', 'info'
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalData, setModalData] = useState({ title: '', message: '', type: 'success', onConfirm: null });
+    const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
     useEffect(() => {
         const fetchCandidateDetails = async () => {
@@ -60,11 +67,32 @@ const CandidateDetails = ({ candidateId, onBack }) => {
         }
     }, [candidate]);
 
+    // Auto-dismiss toast message
+    useEffect(() => {
+        if (submissionMessage) {
+            const timer = setTimeout(() => {
+                setSubmissionMessage('');
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [submissionMessage]);
+
+    const showToast = (message, type = 'success') => {
+        setSubmissionMessage(message);
+        setToastType(type);
+    };
+
+    const showPopoutModal = (title, message, type = 'success', onConfirm = null) => {
+        setModalData({ title, message, type, onConfirm });
+        setIsModalOpen(true);
+    };
+
     const fetchSuggestions = async () => {
         try {
             setSuggestionsLoading(true);
             const token = localStorage.getItem('accessToken');
-            const response = await fetch(`${base_url}api/jobs/suggestions/?user_id=${candidate.user.id}`, {
+            // Using the profile-specific endpoint for role suggestions
+            const response = await fetch(`${base_url}api/users/profiles/${id}/role-suggestions/`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -88,52 +116,129 @@ const CandidateDetails = ({ candidateId, onBack }) => {
         try {
             setIsSubmitting(true);
             const token = localStorage.getItem('accessToken');
-            const response = await fetch(`${base_url}api/jobs/suggestions/`, {
+            // Adjusted payload to match server requirement: user_id and role_titles (array)
+            const response = await fetch(`${base_url}api/jobs/suggestions/bulk_create/`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    user: candidate.user.id,
-                    ...newSuggestion
+                    user_id: candidate.user.id,
+                    role_titles: [newSuggestion.role_title],
+                    role_category: newSuggestion.role_category,
+                    admin_notes: newSuggestion.admin_notes
                 })
             });
 
             if (response.ok) {
                 setNewSuggestion({ role_title: '', role_category: '', admin_notes: '' });
                 fetchSuggestions();
+                showPopoutModal('Suggestion Added', 'The job role suggestion has been successfully submitted for the candidate.', 'success');
             } else {
                 const errData = await response.json();
-                alert(errData.message || 'Failed to add suggestion');
+                showToast(errData.message || 'Failed to add suggestion', 'error');
             }
         } catch (err) {
             console.error('Error adding suggestion:', err);
-            alert('An error occurred');
+            showToast('Unable to add suggestion. Please check your connection.', 'error');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleDeleteSuggestion = async (sId) => {
-        if (!window.confirm('Are you sure you want to remove this suggestion?')) return;
+    const handleDeleteSuggestion = async (sId, skipConfirm = false) => {
+        if (!skipConfirm) {
+            setPendingDeleteId(sId);
+            showPopoutModal(
+                'Are you sure?',
+                'Are you sure you want to remove this role suggestion? This action cannot be undone.',
+                'warning',
+                () => handleDeleteSuggestion(sId, true)
+            );
+            return;
+        }
 
         try {
             const token = localStorage.getItem('accessToken');
             const response = await fetch(`${base_url}api/jobs/suggestions/${sId}/`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': 'Bearer ' + token,
                     'Content-Type': 'application/json'
                 }
             });
 
             if (response.ok) {
                 fetchSuggestions();
+                showToast('Suggestion removed successfully.', 'info');
+                setIsModalOpen(false); // Close confirmation modal
+            } else {
+                showToast('Failed to remove suggestion.', 'error');
             }
         } catch (err) {
             console.error('Error deleting suggestion:', err);
+            showToast('An error occurred while deleting the suggestion.', 'error');
+        } finally {
+            setPendingDeleteId(null);
         }
+    };
+
+    // Sub-component: Modal for Success & Confirmations
+    const StatusModal = ({ isOpen, onClose, title, message, type, onConfirm }) => {
+        if (!isOpen) return null;
+
+        return (
+            <div className="custom-modal-overlay" onClick={onClose}>
+                <div className="custom-modal-container" onClick={e => e.stopPropagation()}>
+                    <div className="custom-modal-content text-center py-5 px-5">
+                        <button className="modal-close-btn" onClick={onClose}>
+                            <X size={20} />
+                        </button>
+
+                        <div className={`mb-4 d-inline-flex p-3 rounded-circle bg-opacity-10 ${type === 'success' ? 'bg-success text-success' : type === 'warning' ? 'bg-danger text-danger' : 'bg-primary text-primary'}`}>
+                            {type === 'success' ? <CheckCircle size={56} /> : type === 'warning' ? <AlertCircle size={56} /> : <Info size={56} />}
+                        </div>
+
+                        <h3 className="fw-bold mb-3 text-dark">{title}</h3>
+                        <p className="text-muted mb-5 fs-5">{message}</p>
+
+                        <div className="d-flex flex-column gap-2">
+                            {onConfirm ? (
+                                <div className="row g-2">
+                                    <div className="col-6">
+                                        <button
+                                            onClick={onClose}
+                                            className="btn btn-light rounded-pill px-4 py-3 fw-bold w-100"
+                                            style={{ border: '1px solid #e2e8f0', color: '#64748b' }}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                    <div className="col-6">
+                                        <button
+                                            onClick={onConfirm}
+                                            className="btn btn-danger rounded-pill px-4 py-3 fw-bold w-100 shadow-sm"
+                                            style={{ backgroundColor: '#EF4444', border: 'none' }}
+                                        >
+                                            Confirm
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={onClose}
+                                    className="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow-lg w-100"
+                                    style={{ backgroundColor: '#4F46E5', border: 'none', fontSize: '1.1rem' }}
+                                >
+                                    Got it, Thanks!
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     if (loading) {
@@ -187,7 +292,34 @@ const CandidateDetails = ({ candidateId, onBack }) => {
     const statusStyle = getStatusStyle(candidate.status);
 
     return (
-        <div className="bg-light p-3 rounded-4">
+        <div className="bg-light p-3 rounded-4 position-relative">
+            {/* Toast Notification Area */}
+            {submissionMessage && (
+                <div
+                    className={`alert ${toastType === 'success' ? 'alert-success' : toastType === 'error' ? 'alert-danger' : 'alert-info'} custom-toast-alert shadow-lg d-flex align-items-center justify-content-between animate-toast-in`}
+                    style={{ position: 'fixed', top: '24px', right: '24px', zIndex: 11000, minWidth: '320px', borderRadius: '16px', border: 'none' }}
+                    role="alert"
+                >
+                    <div className="d-flex align-items-center gap-3">
+                        <div className={`p-2 rounded-circle ${toastType === 'success' ? 'bg-success text-white' : toastType === 'error' ? 'bg-danger text-white' : 'bg-info text-white'}`}>
+                            {toastType === 'success' ? <CheckCircle size={18} /> : toastType === 'error' ? <AlertCircle size={18} /> : <Info size={18} />}
+                        </div>
+                        <span className="fw-semibold">{submissionMessage}</span>
+                    </div>
+                    <button type="button" className="btn-close ms-3" onClick={() => setSubmissionMessage('')}></button>
+                </div>
+            )}
+
+            {/* Success Action Modal */}
+            <StatusModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title={modalData.title}
+                message={modalData.message}
+                type={modalData.type}
+                onConfirm={modalData.onConfirm}
+            />
+
             <div className="container">
                 <div className="mb-4">
                     <button
@@ -545,7 +677,77 @@ const CandidateDetails = ({ candidateId, onBack }) => {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
-      `}</style>
+
+         /* Advanced Toast UI */
+         .custom-toast-alert {
+             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+             border-left: 4px solid rgba(0,0,0,0.1) !important;
+         }
+
+         .animate-toast-in {
+             animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+         }
+
+         @keyframes toastSlideIn {
+             from { opacity: 0; transform: translateX(40px) scale(0.9); }
+             to { opacity: 1; transform: translateX(0) scale(1); }
+         }
+
+         /* Premium Overlays */
+         .custom-modal-overlay {
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             background: rgba(15, 23, 42, 0.85);
+             backdrop-filter: blur(10px);
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             z-index: 1060;
+             padding: 24px;
+         }
+
+         .custom-modal-container {
+             background: white;
+             width: 100%;
+             max-width: 480px;
+             border-radius: 28px;
+             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+             position: relative;
+             animation: modalPopIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+         }
+
+         .modal-close-btn {
+             position: absolute;
+             top: 24px;
+             right: 24px;
+             background: #f8fafc;
+             border: 1px solid #e2e8f0;
+             color: #64748b;
+             cursor: pointer;
+             width: 40px;
+             height: 40px;
+             border-radius: 50%;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+         }
+
+         .modal-close-btn:hover {
+             background: #ef4444;
+             color: white;
+             transform: rotate(180deg);
+             border-color: #ef4444;
+         }
+
+         @keyframes modalPopIn {
+             from { opacity: 0; transform: translateY(40px) scale(0.9); }
+             to { opacity: 1; transform: translateY(0) scale(1); }
+         }
+       `}</style>
         </div >
     );
 };
