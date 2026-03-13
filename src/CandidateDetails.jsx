@@ -92,7 +92,7 @@ const CandidateDetails = ({ candidateId, onBack }) => {
             setSuggestionsLoading(true);
             const token = localStorage.getItem('accessToken');
             // Using the profile-specific endpoint for role suggestions
-            const response = await fetch(`${base_url}api/users/profiles/${id}/role-suggestions/`, {
+            const response = await fetch(`${base_url}/api/users/profiles/${id}/role-suggestions/`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -117,7 +117,7 @@ const CandidateDetails = ({ candidateId, onBack }) => {
             setIsSubmitting(true);
             const token = localStorage.getItem('accessToken');
             // Adjusted payload to match server requirement: user_id and role_titles (array)
-            const response = await fetch(`${base_url}api/jobs/suggestions/bulk_create/`, {
+            const response = await fetch(`${base_url}/api/jobs/suggestions/bulk_create/`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -161,7 +161,7 @@ const CandidateDetails = ({ candidateId, onBack }) => {
 
         try {
             const token = localStorage.getItem('accessToken');
-            const response = await fetch(`${base_url}api/jobs/suggestions/${sId}/`, {
+            const response = await fetch(`${base_url}/api/jobs/suggestions/${sId}/`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': 'Bearer ' + token,
