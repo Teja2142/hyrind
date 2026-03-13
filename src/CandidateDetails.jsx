@@ -36,7 +36,7 @@ const CandidateDetails = ({ candidateId, onBack }) => {
             try {
                 setLoading(true);
                 const token = localStorage.getItem('accessToken');
-                const response = await fetch(`${base_url}api/users/profiles/${id}/`, {
+                const response = await fetch(`${base_url}/api/users/profiles/${id}/`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
